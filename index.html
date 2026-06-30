@@ -362,9 +362,20 @@
         </div>
 
         <div id="spectrum3" class="spectrum-block hidden">
+          <label class="toggle">
+            <input type="checkbox" id="fourthSpectrum">
+            <span data-i18n="fourthSpectrum">Add a fourth spectrum below</span>
+          </label>
           <div class="field">
             <label for="data3" data-i18n="dataLabel3">Data 3 (m/z, intensity)</label>
             <textarea id="data3" spellcheck="false"></textarea>
+          </div>
+        </div>
+
+        <div id="spectrum4" class="spectrum-block hidden">
+          <div class="field">
+            <label for="data4" data-i18n="dataLabel4">Data 4 (m/z, intensity)</label>
+            <textarea id="data4" spellcheck="false"></textarea>
           </div>
         </div>
 
@@ -401,6 +412,10 @@
           <div class="field">
             <label for="peakColor3" data-i18n="peakColor3">Peak color (3rd)</label>
             <input id="peakColor3" type="color" value="#2c8f63">
+          </div>
+          <div class="field">
+            <label for="peakColor4" data-i18n="peakColor4">Peak color (4th)</label>
+            <input id="peakColor4" type="color" value="#8a5cc2">
           </div>
           <div class="field">
             <label for="backgroundColor" data-i18n="backgroundColor">Background color</label>
@@ -567,9 +582,11 @@
         tabExport: "Export",
         secondSpectrum: "Add a second spectrum below",
         thirdSpectrum: "Add a third spectrum below",
+        fourthSpectrum: "Add a fourth spectrum below",
         dataLabel: "Data (m/z, intensity)",
         dataLabel2: "Data 2 (m/z, intensity)",
         dataLabel3: "Data 3 (m/z, intensity)",
+        dataLabel4: "Data 4 (m/z, intensity)",
         loadExample: "Load example",
         clear: "Clear",
         loadFile: "Load file (.csv/.txt)",
@@ -579,6 +596,7 @@
         peakColor: "Peak color",
         peakColor2: "Peak color (2nd)",
         peakColor3: "Peak color (3rd)",
+        peakColor4: "Peak color (4th)",
         backgroundColor: "Background color",
         textColor: "Text color",
         gridColor: "Grid color",
@@ -621,9 +639,11 @@
         tabExport: "Exportar",
         secondSpectrum: "Adicionar um segundo espectro abaixo",
         thirdSpectrum: "Adicionar um terceiro espectro abaixo",
+        fourthSpectrum: "Adicionar um quarto espectro abaixo",
         dataLabel: "Dados (m/z, intensidade)",
         dataLabel2: "Dados 2 (m/z, intensidade)",
         dataLabel3: "Dados 3 (m/z, intensidade)",
+        dataLabel4: "Dados 4 (m/z, intensidade)",
         loadExample: "Carregar exemplo",
         clear: "Limpar",
         loadFile: "Carregar arquivo (.csv/.txt)",
@@ -633,6 +653,7 @@
         peakColor: "Cor dos picos",
         peakColor2: "Cor dos picos (2º)",
         peakColor3: "Cor dos picos (3º)",
+        peakColor4: "Cor dos picos (4º)",
         backgroundColor: "Cor de fundo",
         textColor: "Cor do texto",
         gridColor: "Cor da grade",
@@ -724,6 +745,9 @@
       }
       if ($("secondSpectrum").checked && $("thirdSpectrum").checked) {
         entries.push({ text: $("data3").value, color: $("peakColor3").value, name: "Spectrum 3" });
+      }
+      if ($("secondSpectrum").checked && $("thirdSpectrum").checked && $("fourthSpectrum").checked) {
+        entries.push({ text: $("data4").value, color: $("peakColor4").value, name: "Spectrum 4" });
       }
       return entries.map(entry => ({ ...entry, ...parseSpectrum(entry.text) })).filter(entry => entry.peaks.length);
     }
@@ -897,6 +921,7 @@
     function syncSpectrumVisibility() {
       $("spectrum2").classList.toggle("hidden", !$("secondSpectrum").checked);
       $("spectrum3").classList.toggle("hidden", !$("secondSpectrum").checked || !$("thirdSpectrum").checked);
+      $("spectrum4").classList.toggle("hidden", !$("secondSpectrum").checked || !$("thirdSpectrum").checked || !$("fourthSpectrum").checked);
     }
 
     function downloadPng() {
@@ -925,6 +950,10 @@
       syncSpectrumVisibility();
       renderPlot();
     });
+    $("fourthSpectrum").addEventListener("change", () => {
+      syncSpectrumVisibility();
+      renderPlot();
+    });
     $("loadExample").addEventListener("click", () => {
       $("data1").value = exampleData;
       renderPlot();
@@ -933,6 +962,7 @@
       $("data1").value = "";
       $("data2").value = "";
       $("data3").value = "";
+      $("data4").value = "";
       renderPlot();
     });
     $("chooseFile").addEventListener("click", () => $("fileInput").click());
@@ -940,7 +970,9 @@
       const file = event.target.files[0];
       if (!file) return;
       file.text().then(text => {
-        const target = $("secondSpectrum").checked ? ($("thirdSpectrum").checked ? $("data3") : $("data2")) : $("data1");
+        const target = $("secondSpectrum").checked
+          ? ($("thirdSpectrum").checked ? ($("fourthSpectrum").checked ? $("data4") : $("data3")) : $("data2"))
+          : $("data1");
         target.value = text;
         $("status").textContent = t("fileLoaded");
       });
@@ -974,6 +1006,13 @@
 359.7 52
 393.5 100
 421.4 24`;
+    $("data4").value = `231.0 9
+248.6 27
+276.2 44
+305.8 58
+338.4 100
+376.9 72
+409.2 31`;
     updateLanguage("en");
   </script>
 </body>
