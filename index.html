@@ -1,0 +1,980 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mass Spectrum Generator</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root {
+      --page: #eef4fb;
+      --panel: #ffffff;
+      --ink: #1d2530;
+      --muted: #66717f;
+      --line: #dde4ee;
+      --accent: #245fc6;
+      --accent-soft: #eaf1ff;
+      --danger: #b84545;
+      --shadow: 0 18px 45px rgba(28, 49, 82, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+      padding: 30px clamp(18px, 4vw, 54px) 26px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    h1 {
+      color: #213f93;
+      font-size: clamp(30px, 3vw, 42px);
+      margin: 0 0 12px;
+      line-height: 1.05;
+    }
+
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 20px;
+    }
+
+    .language {
+      display: flex;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 4px;
+      background: #f8fafd;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      color: var(--ink);
+      padding: 0 16px;
+      cursor: pointer;
+      transition: border-color 160ms ease, background 160ms ease, color 160ms ease, transform 160ms ease;
+    }
+
+    button:hover {
+      border-color: #aab8ca;
+      transform: translateY(-1px);
+    }
+
+    button.primary,
+    .language button.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    button.secondary {
+      background: var(--accent-soft);
+      border-color: #bdd0f6;
+      color: #164397;
+    }
+
+    button.danger {
+      color: var(--danger);
+    }
+
+    main {
+      padding: 34px clamp(18px, 4vw, 54px);
+      display: grid;
+      grid-template-columns: minmax(360px, 570px) minmax(540px, 1fr);
+      gap: 38px;
+      align-items: start;
+    }
+
+    .controls,
+    .plot-wrap {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .tab {
+      border: 0;
+      border-radius: 0;
+      min-height: 64px;
+      font-weight: 700;
+      color: var(--muted);
+      background: #ffffff;
+      border-bottom: 3px solid transparent;
+    }
+
+    .tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      background: #fbfdff;
+    }
+
+    .panel {
+      display: none;
+      padding: 26px 28px;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .field {
+      margin-bottom: 18px;
+    }
+
+    .field label,
+    .label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    textarea,
+    input[type="text"],
+    input[type="number"],
+    input[type="color"],
+    select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: #fbfcfe;
+      min-height: 44px;
+      padding: 10px 12px;
+      outline: none;
+    }
+
+    textarea:focus,
+    input:focus,
+    select:focus {
+      border-color: #8aa7df;
+      box-shadow: 0 0 0 3px rgba(36, 95, 198, 0.12);
+    }
+
+    textarea {
+      min-height: 360px;
+      resize: vertical;
+      line-height: 1.55;
+      font-family: "Courier New", monospace;
+      font-size: 18px;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .toggle {
+      min-height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 18px;
+      background: #fbfcfe;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle input {
+      width: 24px;
+      height: 24px;
+      accent-color: var(--accent);
+    }
+
+    .spectrum-block {
+      border-top: 1px solid var(--line);
+      padding-top: 18px;
+      margin-top: 18px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 0 28px 26px;
+    }
+
+    .file-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .plot-wrap {
+      min-height: 680px;
+      padding: 20px;
+    }
+
+    #plot {
+      width: 100%;
+      height: 640px;
+    }
+
+    .status {
+      border-top: 1px solid var(--line);
+      padding: 14px 28px 22px;
+      color: var(--muted);
+      min-height: 52px;
+    }
+
+    footer {
+      color: var(--muted);
+      padding: 0 clamp(18px, 4vw, 54px) 28px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 1050px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      .plot-wrap {
+        min-height: 520px;
+      }
+
+      #plot {
+        height: 500px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      header {
+        display: block;
+      }
+
+      .language {
+        margin-top: 18px;
+        width: max-content;
+      }
+
+      main {
+        padding-top: 18px;
+      }
+
+      .tabs {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .field-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .panel,
+      .actions,
+      .status {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      textarea {
+        min-height: 280px;
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1 data-i18n="title">Mass Spectrum Generator</h1>
+      <p data-i18n="subtitle">Enter a list of m/z and intensity values to generate the spectrum</p>
+    </div>
+    <div class="language" role="group" aria-label="Language">
+      <button type="button" id="ptBtn">PT</button>
+      <button type="button" id="enBtn" class="active">EN</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="controls" aria-label="Controls">
+      <nav class="tabs" aria-label="Settings tabs">
+        <button type="button" class="tab active" data-tab="data" data-i18n="tabData">Data</button>
+        <button type="button" class="tab" data-tab="style" data-i18n="tabStyle">Style</button>
+        <button type="button" class="tab" data-tab="axes" data-i18n="tabAxes">Axes &amp; peaks</button>
+        <button type="button" class="tab" data-tab="export" data-i18n="tabExport">Export</button>
+      </nav>
+
+      <div class="panel active" id="panel-data">
+        <label class="toggle">
+          <input type="checkbox" id="secondSpectrum">
+          <span data-i18n="secondSpectrum">Add a second spectrum below</span>
+        </label>
+
+        <div class="field">
+          <label for="data1" data-i18n="dataLabel">Data (m/z, intensity)</label>
+          <textarea id="data1" spellcheck="false"></textarea>
+        </div>
+
+        <div id="spectrum2" class="spectrum-block hidden">
+          <label class="toggle">
+            <input type="checkbox" id="thirdSpectrum">
+            <span data-i18n="thirdSpectrum">Add a third spectrum below</span>
+          </label>
+          <div class="field">
+            <label for="data2" data-i18n="dataLabel2">Data 2 (m/z, intensity)</label>
+            <textarea id="data2" spellcheck="false"></textarea>
+          </div>
+        </div>
+
+        <div id="spectrum3" class="spectrum-block hidden">
+          <div class="field">
+            <label for="data3" data-i18n="dataLabel3">Data 3 (m/z, intensity)</label>
+            <textarea id="data3" spellcheck="false"></textarea>
+          </div>
+        </div>
+
+        <div class="file-line">
+          <button type="button" id="loadExample" data-i18n="loadExample">Load example</button>
+          <button type="button" id="clearData" data-i18n="clear">Clear</button>
+          <button type="button" id="chooseFile" data-i18n="loadFile">Load file (.csv/.txt)</button>
+          <input type="file" id="fileInput" class="hidden" accept=".csv,.txt,text/csv,text/plain">
+        </div>
+      </div>
+
+      <div class="panel" id="panel-style">
+        <div class="field">
+          <label for="chartTitle" data-i18n="chartTitle">Chart title</label>
+          <input id="chartTitle" type="text" value="Mass Spectrum">
+        </div>
+        <div class="field-grid">
+          <div class="field">
+            <label for="xLabel" data-i18n="xLabel">X label</label>
+            <input id="xLabel" type="text" value="<i>m/z</i>">
+          </div>
+          <div class="field">
+            <label for="yLabel" data-i18n="yLabel">Y label</label>
+            <input id="yLabel" type="text" value="Relative intensity (%)">
+          </div>
+          <div class="field">
+            <label for="peakColor1" data-i18n="peakColor">Peak color</label>
+            <input id="peakColor1" type="color" value="#1f4e8b">
+          </div>
+          <div class="field">
+            <label for="peakColor2" data-i18n="peakColor2">Peak color (2nd)</label>
+            <input id="peakColor2" type="color" value="#c94e4e">
+          </div>
+          <div class="field">
+            <label for="peakColor3" data-i18n="peakColor3">Peak color (3rd)</label>
+            <input id="peakColor3" type="color" value="#2c8f63">
+          </div>
+          <div class="field">
+            <label for="backgroundColor" data-i18n="backgroundColor">Background color</label>
+            <input id="backgroundColor" type="color" value="#ffffff">
+          </div>
+          <div class="field">
+            <label for="textColor" data-i18n="textColor">Text color</label>
+            <input id="textColor" type="color" value="#1c2430">
+          </div>
+          <div class="field">
+            <label for="gridColor" data-i18n="gridColor">Grid color</label>
+            <input id="gridColor" type="color" value="#eceff3">
+          </div>
+          <div class="field">
+            <label for="fontFamily" data-i18n="font">Font</label>
+            <select id="fontFamily">
+              <option>Arial</option>
+              <option>Helvetica</option>
+              <option>Times New Roman</option>
+              <option>Georgia</option>
+              <option>Courier New</option>
+              <option>Trebuchet MS</option>
+              <option>Verdana</option>
+              <option>Tahoma</option>
+              <option>Comic Sans MS</option>
+              <option>Lucida Console</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="fontSize" data-i18n="fontSize">Font size (px)</label>
+            <input id="fontSize" type="number" min="8" max="40" value="14">
+          </div>
+          <div class="field">
+            <label for="yOffset" data-i18n="yOffset">Y label offset (px)</label>
+            <input id="yOffset" type="number" min="0" max="120" value="20">
+          </div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="showGrid" checked>
+          <span data-i18n="showGrid">Show grid</span>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" id="closeBox">
+          <span data-i18n="closeBox">Close plot box</span>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" id="showDots" checked>
+          <span data-i18n="showDots">Show dot at peak tip</span>
+        </label>
+      </div>
+
+      <div class="panel" id="panel-axes">
+        <label class="toggle">
+          <input type="checkbox" id="normalize" checked>
+          <span data-i18n="normalize">Normalize to base peak (100%)</span>
+        </label>
+        <div class="field-grid">
+          <div class="field">
+            <label for="yScale" data-i18n="yScale">Y scale (%)</label>
+            <input id="yScale" type="number" min="1" value="100">
+          </div>
+          <div class="field">
+            <label for="decimals" data-i18n="decimals">m/z decimal places</label>
+            <input id="decimals" type="number" min="0" max="6" value="1">
+          </div>
+          <div class="field">
+            <label for="minMz" data-i18n="minMz">Min m/z (auto if empty)</label>
+            <input id="minMz" type="number" step="any">
+          </div>
+          <div class="field">
+            <label for="maxMz" data-i18n="maxMz">Max m/z (auto if empty)</label>
+            <input id="maxMz" type="number" step="any">
+          </div>
+          <div class="field">
+            <label for="threshold" data-i18n="threshold">Label threshold (%)</label>
+            <input id="threshold" type="number" min="0" max="100" value="10">
+          </div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="lockY" checked>
+          <span data-i18n="lockY">Lock Y scales of all spectra</span>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" id="labelPeaks" checked>
+          <span data-i18n="labelPeaks">Label main peaks</span>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" id="clickMz">
+          <span data-i18n="clickMz">Show m/z when clicking a peak</span>
+        </label>
+        <button type="button" id="clearSelection" data-i18n="clearSelection">Clear peak selection</button>
+      </div>
+
+      <div class="panel" id="panel-export">
+        <div class="field-grid">
+          <div class="field">
+            <label for="exportWidth" data-i18n="width">Width (px)</label>
+            <input id="exportWidth" type="number" min="300" value="1200">
+          </div>
+          <div class="field">
+            <label for="exportHeight" data-i18n="height">Height (px)</label>
+            <input id="exportHeight" type="number" min="250" value="700">
+          </div>
+          <div class="field">
+            <label for="exportScale" data-i18n="scale">Scale (DPI)</label>
+            <input id="exportScale" type="number" min="1" max="5" value="2">
+          </div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="previewExport">
+          <span data-i18n="previewExport">Preview at export size</span>
+        </label>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="primary" id="generate" data-i18n="generate">Generate spectrum</button>
+        <button type="button" class="secondary" id="download" data-i18n="download">Download PNG</button>
+      </div>
+      <div class="status" id="status" role="status"></div>
+    </section>
+
+    <section class="plot-wrap" aria-label="Spectrum plot">
+      <div id="plot"></div>
+    </section>
+  </main>
+
+  <footer data-i18n="footer">Made with Plotly.js · All calculations run in the browser</footer>
+
+  <script>
+    const exampleData = `229.171734 5.021981
+243.188475 105.326878
+244.117278 251.218299
+245.227142 0.385001
+255.190948 0.416775
+256.227004 18.092581
+257.222294 15.703728
+261.054260 0.302891
+273.014587 0.749061
+285.492096 0.272926
+286.124329 0.344009
+287.213196 0.452914
+294.818176 0.843925
+311.291504 0.452673
+315.236938 0.417173
+323.233414 12.090869
+327.976692 13.618586
+341.297180 24.572100
+359.166493 13.360824
+360.214929 2.160940
+377.124113 29806.880534
+377.728163 32.063554
+393.805817 0.586843
+405.025543 0.350309
+421.386128 1.761244
+435.328491 0.417305`;
+
+    const translations = {
+      en: {
+        title: "Mass Spectrum Generator",
+        subtitle: "Enter a list of m/z and intensity values to generate the spectrum",
+        tabData: "Data",
+        tabStyle: "Style",
+        tabAxes: "Axes & peaks",
+        tabExport: "Export",
+        secondSpectrum: "Add a second spectrum below",
+        thirdSpectrum: "Add a third spectrum below",
+        dataLabel: "Data (m/z, intensity)",
+        dataLabel2: "Data 2 (m/z, intensity)",
+        dataLabel3: "Data 3 (m/z, intensity)",
+        loadExample: "Load example",
+        clear: "Clear",
+        loadFile: "Load file (.csv/.txt)",
+        chartTitle: "Chart title",
+        xLabel: "X label",
+        yLabel: "Y label",
+        peakColor: "Peak color",
+        peakColor2: "Peak color (2nd)",
+        peakColor3: "Peak color (3rd)",
+        backgroundColor: "Background color",
+        textColor: "Text color",
+        gridColor: "Grid color",
+        font: "Font",
+        fontSize: "Font size (px)",
+        yOffset: "Y label offset (px)",
+        showGrid: "Show grid",
+        closeBox: "Close plot box",
+        showDots: "Show dot at peak tip",
+        normalize: "Normalize to base peak (100%)",
+        yScale: "Y scale (%)",
+        decimals: "m/z decimal places",
+        minMz: "Min m/z (auto if empty)",
+        maxMz: "Max m/z (auto if empty)",
+        threshold: "Label threshold (%)",
+        lockY: "Lock Y scales of all spectra",
+        labelPeaks: "Label main peaks",
+        clickMz: "Show m/z when clicking a peak",
+        clearSelection: "Clear peak selection",
+        width: "Width (px)",
+        height: "Height (px)",
+        scale: "Scale (DPI)",
+        previewExport: "Preview at export size",
+        generate: "Generate spectrum",
+        download: "Download PNG",
+        footer: "Made with Plotly.js · All calculations run in the browser",
+        generated: count => `Spectrum generated with ${count} peaks.`,
+        empty: "Add at least one valid pair of m/z and intensity values.",
+        parseError: "Some lines could not be read and were skipped.",
+        fileLoaded: "File loaded. Generate the spectrum to update the chart.",
+        selectionCleared: "Peak selection cleared.",
+        selected: mz => `Selected peak: m/z ${mz}`
+      },
+      pt: {
+        title: "Gerador de Espectro de Massa",
+        subtitle: "Insira uma lista de valores m/z e intensidade para gerar o espectro",
+        tabData: "Dados",
+        tabStyle: "Estilo",
+        tabAxes: "Eixos e picos",
+        tabExport: "Exportar",
+        secondSpectrum: "Adicionar um segundo espectro abaixo",
+        thirdSpectrum: "Adicionar um terceiro espectro abaixo",
+        dataLabel: "Dados (m/z, intensidade)",
+        dataLabel2: "Dados 2 (m/z, intensidade)",
+        dataLabel3: "Dados 3 (m/z, intensidade)",
+        loadExample: "Carregar exemplo",
+        clear: "Limpar",
+        loadFile: "Carregar arquivo (.csv/.txt)",
+        chartTitle: "Título do gráfico",
+        xLabel: "Rótulo X",
+        yLabel: "Rótulo Y",
+        peakColor: "Cor dos picos",
+        peakColor2: "Cor dos picos (2º)",
+        peakColor3: "Cor dos picos (3º)",
+        backgroundColor: "Cor de fundo",
+        textColor: "Cor do texto",
+        gridColor: "Cor da grade",
+        font: "Fonte",
+        fontSize: "Tamanho da fonte (px)",
+        yOffset: "Deslocamento do rótulo Y (px)",
+        showGrid: "Mostrar grade",
+        closeBox: "Fechar caixa do gráfico",
+        showDots: "Mostrar ponto no topo do pico",
+        normalize: "Normalizar pelo pico base (100%)",
+        yScale: "Escala Y (%)",
+        decimals: "Casas decimais de m/z",
+        minMz: "m/z mínimo (automático se vazio)",
+        maxMz: "m/z máximo (automático se vazio)",
+        threshold: "Limite para rotular (%)",
+        lockY: "Travar escalas Y de todos os espectros",
+        labelPeaks: "Rotular picos principais",
+        clickMz: "Mostrar m/z ao clicar em um pico",
+        clearSelection: "Limpar seleção de pico",
+        width: "Largura (px)",
+        height: "Altura (px)",
+        scale: "Escala (DPI)",
+        previewExport: "Pré-visualizar no tamanho exportado",
+        generate: "Gerar espectro",
+        download: "Baixar PNG",
+        footer: "Feito com Plotly.js · Todos os cálculos rodam no navegador",
+        generated: count => `Espectro gerado com ${count} picos.`,
+        empty: "Adicione pelo menos um par válido de m/z e intensidade.",
+        parseError: "Algumas linhas não puderam ser lidas e foram ignoradas.",
+        fileLoaded: "Arquivo carregado. Gere o espectro para atualizar o gráfico.",
+        selectionCleared: "Seleção de pico limpa.",
+        selected: mz => `Pico selecionado: m/z ${mz}`
+      }
+    };
+
+    const $ = id => document.getElementById(id);
+    let language = "en";
+    let selectedPeaks = [];
+    let lastPlot = { data: [], layout: {}, config: {} };
+    let clickHandlerBound = false;
+
+    function t(key) {
+      return translations[language][key];
+    }
+
+    function updateLanguage(nextLanguage) {
+      language = nextLanguage;
+      document.documentElement.lang = nextLanguage === "pt" ? "pt-BR" : "en";
+      $("ptBtn").classList.toggle("active", nextLanguage === "pt");
+      $("enBtn").classList.toggle("active", nextLanguage === "en");
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.dataset.i18n;
+        if (typeof translations[language][key] === "string") {
+          el.textContent = translations[language][key];
+        }
+      });
+      renderPlot();
+    }
+
+    function parseSpectrum(text) {
+      const peaks = [];
+      let skipped = 0;
+      text.split(/\r?\n/).forEach(line => {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith("#")) return;
+        const parts = trimmed.split(/[,\t; ]+/).filter(Boolean);
+        if (parts.length < 2) {
+          skipped += 1;
+          return;
+        }
+        const mz = Number(parts[0].replace(",", "."));
+        const intensity = Number(parts[1].replace(",", "."));
+        if (Number.isFinite(mz) && Number.isFinite(intensity)) {
+          peaks.push({ mz, intensity });
+        } else {
+          skipped += 1;
+        }
+      });
+      peaks.sort((a, b) => a.mz - b.mz);
+      return { peaks, skipped };
+    }
+
+    function getSpectra() {
+      const entries = [
+        { text: $("data1").value, color: $("peakColor1").value, name: "Spectrum 1" }
+      ];
+      if ($("secondSpectrum").checked) {
+        entries.push({ text: $("data2").value, color: $("peakColor2").value, name: "Spectrum 2" });
+      }
+      if ($("secondSpectrum").checked && $("thirdSpectrum").checked) {
+        entries.push({ text: $("data3").value, color: $("peakColor3").value, name: "Spectrum 3" });
+      }
+      return entries.map(entry => ({ ...entry, ...parseSpectrum(entry.text) })).filter(entry => entry.peaks.length);
+    }
+
+    function normalizePeaks(peaks) {
+      if (!$("normalize").checked) return peaks.map(p => ({ ...p, y: p.intensity }));
+      const max = Math.max(...peaks.map(p => p.intensity), 1);
+      return peaks.map(p => ({ ...p, y: (p.intensity / max) * 100 }));
+    }
+
+    function axisDomain(index, total) {
+      if (total === 1) return [0, 1];
+      const gap = 0.08;
+      const height = (1 - gap * (total - 1)) / total;
+      const topIndex = total - index - 1;
+      const start = topIndex * (height + gap);
+      return [start, start + height];
+    }
+
+    function makePeakTrace(spectrum, index, total, decimals, threshold) {
+      const normalized = normalizePeaks(spectrum.peaks);
+      const x = [];
+      const y = [];
+      const customdata = [];
+      normalized.forEach(peak => {
+        x.push(peak.mz, peak.mz, null);
+        y.push(0, peak.y, null);
+        customdata.push(peak.mz, peak.mz, null);
+      });
+      const trace = {
+        type: "scatter",
+        mode: $("showDots").checked ? "lines+markers" : "lines",
+        x,
+        y,
+        customdata,
+        name: spectrum.name,
+        line: { color: spectrum.color, width: 2 },
+        marker: { color: spectrum.color, size: 5 },
+        hovertemplate: "m/z %{customdata:.4f}<br>%{y:.2f}%<extra></extra>",
+        xaxis: "x",
+        yaxis: index === 0 ? "y" : `y${index + 1}`
+      };
+
+      if ($("labelPeaks").checked) {
+        const labelX = [];
+        const labelY = [];
+        const labelText = [];
+        normalized.forEach(peak => {
+          if (peak.y >= threshold) {
+            labelX.push(peak.mz);
+            labelY.push(peak.y);
+            labelText.push(peak.mz.toFixed(decimals));
+          }
+        });
+        return [trace, {
+          type: "scatter",
+          mode: "text",
+          x: labelX,
+          y: labelY,
+          text: labelText,
+          textposition: "top center",
+          textfont: { color: $("textColor").value, size: Number($("fontSize").value) - 1 },
+          hoverinfo: "skip",
+          showlegend: false,
+          xaxis: "x",
+          yaxis: index === 0 ? "y" : `y${index + 1}`
+        }];
+      }
+      return [trace];
+    }
+
+    function buildLayout(spectra) {
+      const total = spectra.length;
+      const fontSize = Number($("fontSize").value) || 14;
+      const yMax = Number($("yScale").value) || 100;
+      const minMz = $("minMz").value === "" ? undefined : Number($("minMz").value);
+      const maxMz = $("maxMz").value === "" ? undefined : Number($("maxMz").value);
+      const axisCommon = {
+        gridcolor: $("gridColor").value,
+        showgrid: $("showGrid").checked,
+        zeroline: false,
+        linecolor: $("textColor").value,
+        mirror: $("closeBox").checked,
+        ticks: "outside",
+        tickfont: { size: fontSize, color: $("textColor").value }
+      };
+      const layout = {
+        title: { text: $("chartTitle").value, font: { size: fontSize + 10, color: $("textColor").value } },
+        paper_bgcolor: $("backgroundColor").value,
+        plot_bgcolor: $("backgroundColor").value,
+        font: { family: $("fontFamily").value, size: fontSize, color: $("textColor").value },
+        margin: { l: 80 + Number($("yOffset").value || 0), r: 30, t: 80, b: 80 },
+        showlegend: total > 1,
+        legend: { orientation: "h", x: 0, y: -0.16 },
+        xaxis: {
+          ...axisCommon,
+          title: { text: $("xLabel").value, standoff: 18 },
+          range: Number.isFinite(minMz) && Number.isFinite(maxMz) ? [minMz, maxMz] : undefined,
+          anchor: total === 1 ? "y" : `y${total}`,
+          domain: [0, 1]
+        }
+      };
+
+      for (let i = 0; i < total; i += 1) {
+        const axisName = i === 0 ? "yaxis" : `yaxis${i + 1}`;
+        layout[axisName] = {
+          ...axisCommon,
+          title: i === 0 ? { text: $("yLabel").value, standoff: 20 } : undefined,
+          range: $("lockY").checked ? [0, yMax] : undefined,
+          domain: axisDomain(i, total),
+          anchor: "x"
+        };
+      }
+
+      return layout;
+    }
+
+    function renderPlot(statusMessage) {
+      const spectra = getSpectra();
+      const status = $("status");
+      if (!spectra.length) {
+        Plotly.purge("plot");
+        status.textContent = t("empty");
+        return;
+      }
+
+      const decimals = Number($("decimals").value) || 0;
+      const threshold = Number($("threshold").value) || 0;
+      const data = spectra.flatMap((spectrum, index) => makePeakTrace(spectrum, index, spectra.length, decimals, threshold));
+      const layout = buildLayout(spectra);
+      const config = {
+        responsive: true,
+        displaylogo: false,
+        modeBarButtonsToRemove: ["lasso2d", "select2d"]
+      };
+
+      if ($("previewExport").checked) {
+        $("plot").style.width = `${Number($("exportWidth").value) || 1200}px`;
+        $("plot").style.height = `${Number($("exportHeight").value) || 700}px`;
+      } else {
+        $("plot").style.width = "100%";
+        $("plot").style.height = "";
+      }
+
+      Plotly.react("plot", data, layout, config).then(plotDiv => {
+        if (!clickHandlerBound && typeof plotDiv.on === "function") {
+          plotDiv.on("plotly_click", handlePeakClick);
+          clickHandlerBound = true;
+        }
+        const peakCount = spectra.reduce((sum, spectrum) => sum + spectrum.peaks.length, 0);
+        const skipped = spectra.reduce((sum, spectrum) => sum + spectrum.skipped, 0);
+        status.textContent = statusMessage || `${t("generated")(peakCount)} ${skipped ? t("parseError") : ""}`.trim();
+      });
+      lastPlot = { data, layout, config };
+    }
+
+    function handlePeakClick(event) {
+      if (!$("clickMz").checked || !event.points || !event.points[0]) return;
+      const point = event.points[0];
+      const mz = Number(point.customdata || point.x);
+      if (!Number.isFinite(mz)) return;
+      selectedPeaks.push(mz);
+      $("status").textContent = t("selected")(mz.toFixed(Number($("decimals").value) || 1));
+    }
+
+    function setTab(name) {
+      document.querySelectorAll(".tab").forEach(tab => tab.classList.toggle("active", tab.dataset.tab === name));
+      document.querySelectorAll(".panel").forEach(panel => panel.classList.toggle("active", panel.id === `panel-${name}`));
+    }
+
+    function syncSpectrumVisibility() {
+      $("spectrum2").classList.toggle("hidden", !$("secondSpectrum").checked);
+      $("spectrum3").classList.toggle("hidden", !$("secondSpectrum").checked || !$("thirdSpectrum").checked);
+    }
+
+    function downloadPng() {
+      if (!lastPlot.data.length) renderPlot();
+      Plotly.toImage("plot", {
+        format: "png",
+        width: Number($("exportWidth").value) || 1200,
+        height: Number($("exportHeight").value) || 700,
+        scale: Number($("exportScale").value) || 2
+      }).then(url => {
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "mass-spectrum.png";
+        link.click();
+      });
+    }
+
+    document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", () => setTab(tab.dataset.tab)));
+    $("ptBtn").addEventListener("click", () => updateLanguage("pt"));
+    $("enBtn").addEventListener("click", () => updateLanguage("en"));
+    $("secondSpectrum").addEventListener("change", () => {
+      syncSpectrumVisibility();
+      renderPlot();
+    });
+    $("thirdSpectrum").addEventListener("change", () => {
+      syncSpectrumVisibility();
+      renderPlot();
+    });
+    $("loadExample").addEventListener("click", () => {
+      $("data1").value = exampleData;
+      renderPlot();
+    });
+    $("clearData").addEventListener("click", () => {
+      $("data1").value = "";
+      $("data2").value = "";
+      $("data3").value = "";
+      renderPlot();
+    });
+    $("chooseFile").addEventListener("click", () => $("fileInput").click());
+    $("fileInput").addEventListener("change", event => {
+      const file = event.target.files[0];
+      if (!file) return;
+      file.text().then(text => {
+        const target = $("secondSpectrum").checked ? ($("thirdSpectrum").checked ? $("data3") : $("data2")) : $("data1");
+        target.value = text;
+        $("status").textContent = t("fileLoaded");
+      });
+    });
+    $("generate").addEventListener("click", () => renderPlot());
+    $("download").addEventListener("click", downloadPng);
+    $("clearSelection").addEventListener("click", () => {
+      selectedPeaks = [];
+      renderPlot(t("selectionCleared"));
+    });
+
+    document.querySelectorAll("input, textarea, select").forEach(input => {
+      input.addEventListener("input", () => {
+        if (input.type !== "file") renderPlot();
+      });
+    });
+
+    $("data1").placeholder = "One pair per line. Accepted separators: comma, semicolon, tab or space.\n\nExample:\n50.1, 12\n77.0, 45\n91.1, 100\n105.0, 38\n120.2, 8";
+    $("data1").value = exampleData;
+    $("data2").value = `229.171734 2.1
+243.188475 18.8
+256.227004 42.5
+323.233414 72.9
+341.297180 38.1
+377.124113 100
+405.025543 11.7`;
+    $("data3").value = `230.2 16
+255.9 35
+287.4 21
+312.1 66
+359.7 52
+393.5 100
+421.4 24`;
+    updateLanguage("en");
+  </script>
+</body>
+</html>
