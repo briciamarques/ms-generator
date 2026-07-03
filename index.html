@@ -262,6 +262,11 @@
       pointer-events: none;
     }
 
+    #plot.inside-legend-rounded .annotation rect.bg {
+      rx: 6px;
+      ry: 6px;
+    }
+
     .status {
       border-top: 1px solid var(--line);
       padding: 14px 28px 22px;
@@ -356,6 +361,11 @@
         </label>
 
         <div class="field">
+          <label for="spectrumName1" data-i18n="spectrumName1">Spectrum 1 name</label>
+          <input id="spectrumName1" type="text" value="Spectrum 1">
+        </div>
+
+        <div class="field">
           <label for="data1" data-i18n="dataLabel">Data (m/z, intensity)</label>
           <textarea id="data1" spellcheck="false"></textarea>
         </div>
@@ -365,6 +375,10 @@
             <input type="checkbox" id="thirdSpectrum">
             <span data-i18n="thirdSpectrum">Add a third spectrum below</span>
           </label>
+          <div class="field">
+            <label for="spectrumName2" data-i18n="spectrumName2">Spectrum 2 name</label>
+            <input id="spectrumName2" type="text" value="Spectrum 2">
+          </div>
           <div class="field">
             <label for="data2" data-i18n="dataLabel2">Data 2 (m/z, intensity)</label>
             <textarea id="data2" spellcheck="false"></textarea>
@@ -377,12 +391,20 @@
             <span data-i18n="fourthSpectrum">Add a fourth spectrum below</span>
           </label>
           <div class="field">
+            <label for="spectrumName3" data-i18n="spectrumName3">Spectrum 3 name</label>
+            <input id="spectrumName3" type="text" value="Spectrum 3">
+          </div>
+          <div class="field">
             <label for="data3" data-i18n="dataLabel3">Data 3 (m/z, intensity)</label>
             <textarea id="data3" spellcheck="false"></textarea>
           </div>
         </div>
 
         <div id="spectrum4" class="spectrum-block hidden">
+          <div class="field">
+            <label for="spectrumName4" data-i18n="spectrumName4">Spectrum 4 name</label>
+            <input id="spectrumName4" type="text" value="Spectrum 4">
+          </div>
           <div class="field">
             <label for="data4" data-i18n="dataLabel4">Data 4 (m/z, intensity)</label>
             <textarea id="data4" spellcheck="false"></textarea>
@@ -410,6 +432,45 @@
           <div class="field">
             <label for="yLabel" data-i18n="yLabel">Y label</label>
             <input id="yLabel" type="text" value="Relative intensity (%)">
+          </div>
+          <div class="field">
+            <label for="legendMode" data-i18n="legendMode">Spectrum label display</label>
+            <select id="legendMode">
+              <option value="legend">Legend below plot</option>
+              <option value="inside">Names inside plots</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="insideLegendX" data-i18n="insideLegendX">Inside name X position (%)</label>
+            <input id="insideLegendX" type="number" min="0" max="100" value="2">
+          </div>
+          <div class="field">
+            <label for="insideLegendY" data-i18n="insideLegendY">Inside name Y position (%)</label>
+            <input id="insideLegendY" type="number" min="0" max="100" value="92">
+          </div>
+          <div class="field">
+            <label for="insideLegendTextColor" data-i18n="insideLegendTextColor">Inside name text color</label>
+            <input id="insideLegendTextColor" type="color" value="#1c2430">
+          </div>
+          <div class="field">
+            <label for="insideLegendBoxColor" data-i18n="insideLegendBoxColor">Inside name box color</label>
+            <input id="insideLegendBoxColor" type="color" value="#ffffff">
+          </div>
+          <div class="field">
+            <label for="insideLegendBorderColor" data-i18n="insideLegendBorderColor">Inside name border color</label>
+            <input id="insideLegendBorderColor" type="color" value="#1c2430">
+          </div>
+          <div class="field">
+            <label for="insideLegendBorderWidth" data-i18n="insideLegendBorderWidth">Inside name border width (px)</label>
+            <input id="insideLegendBorderWidth" type="number" min="0" max="6" step="0.5" value="1">
+          </div>
+          <div class="field">
+            <label for="insideLegendShape" data-i18n="insideLegendShape">Inside name box shape</label>
+            <select id="insideLegendShape">
+              <option value="square">Square</option>
+              <option value="rounded">Rounded</option>
+              <option value="none">No box</option>
+            </select>
           </div>
           <div class="field">
             <label for="peakColor1" data-i18n="peakColor">Peak color</label>
@@ -626,6 +687,10 @@
         secondSpectrum: "Add a second spectrum below",
         thirdSpectrum: "Add a third spectrum below",
         fourthSpectrum: "Add a fourth spectrum below",
+        spectrumName1: "Spectrum 1 name",
+        spectrumName2: "Spectrum 2 name",
+        spectrumName3: "Spectrum 3 name",
+        spectrumName4: "Spectrum 4 name",
         dataLabel: "Data (m/z, intensity)",
         dataLabel2: "Data 2 (m/z, intensity)",
         dataLabel3: "Data 3 (m/z, intensity)",
@@ -636,6 +701,14 @@
         chartTitle: "Chart title",
         xLabel: "X label",
         yLabel: "Y label",
+        legendMode: "Spectrum label display",
+        insideLegendX: "Inside name X position (%)",
+        insideLegendY: "Inside name Y position (%)",
+        insideLegendTextColor: "Inside name text color",
+        insideLegendBoxColor: "Inside name box color",
+        insideLegendBorderColor: "Inside name border color",
+        insideLegendBorderWidth: "Inside name border width (px)",
+        insideLegendShape: "Inside name box shape",
         peakColor: "Peak color",
         peakColor2: "Peak color (2nd)",
         peakColor3: "Peak color (3rd)",
@@ -692,6 +765,10 @@
         secondSpectrum: "Adicionar um segundo espectro abaixo",
         thirdSpectrum: "Adicionar um terceiro espectro abaixo",
         fourthSpectrum: "Adicionar um quarto espectro abaixo",
+        spectrumName1: "Nome do espectro 1",
+        spectrumName2: "Nome do espectro 2",
+        spectrumName3: "Nome do espectro 3",
+        spectrumName4: "Nome do espectro 4",
         dataLabel: "Dados (m/z, intensidade)",
         dataLabel2: "Dados 2 (m/z, intensidade)",
         dataLabel3: "Dados 3 (m/z, intensidade)",
@@ -804,16 +881,16 @@
 
     function getSpectra() {
       const entries = [
-        { text: $("data1").value, color: $("peakColor1").value, name: "Spectrum 1" }
+        { text: $("data1").value, color: $("peakColor1").value, name: $("spectrumName1").value || "Spectrum 1" }
       ];
       if ($("secondSpectrum").checked) {
-        entries.push({ text: $("data2").value, color: $("peakColor2").value, name: "Spectrum 2" });
+        entries.push({ text: $("data2").value, color: $("peakColor2").value, name: $("spectrumName2").value || "Spectrum 2" });
       }
       if ($("secondSpectrum").checked && $("thirdSpectrum").checked) {
-        entries.push({ text: $("data3").value, color: $("peakColor3").value, name: "Spectrum 3" });
+        entries.push({ text: $("data3").value, color: $("peakColor3").value, name: $("spectrumName3").value || "Spectrum 3" });
       }
       if ($("secondSpectrum").checked && $("thirdSpectrum").checked && $("fourthSpectrum").checked) {
-        entries.push({ text: $("data4").value, color: $("peakColor4").value, name: "Spectrum 4" });
+        entries.push({ text: $("data4").value, color: $("peakColor4").value, name: $("spectrumName4").value || "Spectrum 4" });
       }
       return entries.map(entry => ({ ...entry, ...parseSpectrum(entry.text) })).filter(entry => entry.peaks.length);
     }
@@ -1014,6 +1091,11 @@
       const xTickStep = $("xTickStep").value === "" ? undefined : Number($("xTickStep").value);
       const gridLineWidth = Number($("gridLineWidth").value) || 1;
       const boxLineWidth = Number($("boxLineWidth").value) || 1;
+      const legendMode = $("legendMode").value;
+      const insideLegendX = Math.min(Math.max(Number($("insideLegendX").value) || 0, 0), 100) / 100;
+      const insideLegendY = Math.min(Math.max(Number($("insideLegendY").value) || 0, 0), 100) / 100;
+      const insideLegendShape = $("insideLegendShape").value;
+      const insideLegendBorderWidth = Number($("insideLegendBorderWidth").value) || 0;
       const axisCommon = {
         gridcolor: $("gridColor").value,
         gridwidth: gridLineWidth,
@@ -1032,8 +1114,8 @@
         paper_bgcolor: $("backgroundColor").value,
         plot_bgcolor: $("backgroundColor").value,
         font: { family: $("fontFamily").value, size: fontSize, color: $("textColor").value },
-        margin: { l: 80 + Number($("yOffset").value || 0), r: 30, t: 80, b: 80 },
-        showlegend: total > 1,
+        margin: { l: (total > 1 ? 118 : 80) + Number($("yOffset").value || 0), r: 30, t: 80, b: 80 },
+        showlegend: total > 1 && legendMode === "legend",
         legend: { orientation: "h", x: 0, y: -0.16 },
         annotations: buildManualAnnotations(spectra, threshold, decimals)
       };
@@ -1041,7 +1123,7 @@
       if (total > 1) {
         layout.annotations.push({
           text: $("yLabel").value,
-          x: -0.12 - (Number($("yOffset").value || 0) / 900),
+          x: -0.075 - (Number($("yOffset").value || 0) / 1400),
           y: 0.5,
           xref: "paper",
           yref: "paper",
@@ -1084,6 +1166,31 @@
           domain: axisDomain(i, total, spectrumGap),
           anchor: xAxisId
         };
+        if (total > 1 && legendMode === "inside") {
+          const domain = axisDomain(i, total, spectrumGap);
+          const panelY = domain[0] + (domain[1] - domain[0]) * insideLegendY;
+          layout.annotations.push({
+            text: spectra[i].name,
+            x: insideLegendX,
+            y: panelY,
+            xref: "paper",
+            yref: "paper",
+            showarrow: false,
+            xanchor: "left",
+            yanchor: "middle",
+            font: {
+              family: $("fontFamily").value,
+              size: fontSize,
+              color: $("insideLegendTextColor").value
+            },
+            bgcolor: insideLegendShape === "none" ? "rgba(0,0,0,0)" : $("insideLegendBoxColor").value,
+            bordercolor: insideLegendShape === "none" || insideLegendBorderWidth === 0
+              ? "rgba(0,0,0,0)"
+              : $("insideLegendBorderColor").value,
+            borderwidth: insideLegendShape === "none" ? 0 : insideLegendBorderWidth,
+            borderpad: insideLegendShape === "rounded" ? 6 : 3
+          });
+        }
       }
 
       return layout;
@@ -1131,6 +1238,7 @@
         $("plot").style.height = "";
         layout.autosize = true;
       }
+      $("plot").classList.toggle("inside-legend-rounded", $("insideLegendShape").value === "rounded");
 
       Plotly.react("plot", data, layout, config).then(plotDiv => {
         Plotly.Plots.resize(plotDiv);
@@ -1276,6 +1384,18 @@
         chartTitle: "Mass Spectrum",
         xLabel: "<i>m/z</i>",
         yLabel: "Relative intensity (%)",
+        spectrumName1: "Spectrum 1",
+        spectrumName2: "Spectrum 2",
+        spectrumName3: "Spectrum 3",
+        spectrumName4: "Spectrum 4",
+        legendMode: "legend",
+        insideLegendX: "2",
+        insideLegendY: "92",
+        insideLegendTextColor: "#1c2430",
+        insideLegendBoxColor: "#ffffff",
+        insideLegendBorderColor: "#1c2430",
+        insideLegendBorderWidth: "1",
+        insideLegendShape: "square",
         peakColor1: "#1f4e8b",
         peakColor2: "#c94e4e",
         peakColor3: "#2c8f63",
