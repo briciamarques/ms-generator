@@ -1110,7 +1110,12 @@
         tickfont: { size: fontSize, color: $("textColor").value }
       };
       const layout = {
-        title: { text: $("chartTitle").value, font: { size: fontSize + 10, color: $("textColor").value } },
+        title: {
+          text: $("chartTitle").value,
+          x: 0.5,
+          xanchor: "center",
+          font: { size: fontSize + 10, color: $("textColor").value }
+        },
         paper_bgcolor: $("backgroundColor").value,
         plot_bgcolor: $("backgroundColor").value,
         font: { family: $("fontFamily").value, size: fontSize, color: $("textColor").value },
