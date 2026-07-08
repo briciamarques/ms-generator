@@ -834,6 +834,8 @@
     let lastPlot = { data: [], layout: {}, config: {} };
     let clickHandlerBound = false;
     let relayoutHandlerBound = false;
+    let annotationClickHandlerBound = false;
+    let lastAnnotationClick = { key: "", time: 0 };
 
     function t(key) {
       return translations[language][key];
@@ -990,18 +992,33 @@
       return Number.isFinite(value) && value > 0 ? value : sharedMax;
     }
 
+    function niceTickStep(max) {
+      if (!Number.isFinite(max) || max <= 0) return 1;
+      const rawStep = max / 5;
+      const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
+      const normalized = rawStep / magnitude;
+      const nice = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
+      return nice * magnitude;
+    }
+
+    function formatTickLabel(value) {
+      if (Math.abs(value) >= 1) return Number(value.toFixed(6)).toString();
+      return Number(value.toPrecision(3)).toString();
+    }
+
     function getYAxisTicks(max, index, compactStack) {
-      const step = max <= 140 ? 20 : Math.ceil(max / 5 / 10) * 10;
+      const safeMax = Number.isFinite(max) && max > 0 ? max : 1;
+      const step = safeMax <= 140 ? niceTickStep(safeMax) : Math.ceil(safeMax / 5 / 10) * 10;
       const ticks = [];
-      for (let value = 0; value < max; value += step) {
-        ticks.push(Number(value.toFixed(6)));
+      for (let value = 0; value < safeMax; value += step) {
+        ticks.push(Number(value.toFixed(10)));
       }
       const previousTick = ticks[ticks.length - 1];
-      const showMaxTick = !Number.isFinite(previousTick) || max - previousTick >= step * 0.45;
-      if (showMaxTick) ticks.push(max);
+      const showMaxTick = !Number.isFinite(previousTick) || safeMax - previousTick >= step * 0.45;
+      if (showMaxTick) ticks.push(safeMax);
       return {
         tickvals: ticks,
-        ticktext: ticks.map(value => compactStack && index > 0 && value === max ? "" : String(value))
+        ticktext: ticks.map(value => compactStack && index > 0 && value === safeMax ? "" : formatTickLabel(value))
       };
     }
 
@@ -1248,6 +1265,8 @@
       Plotly.react("plot", data, layout, config).then(plotDiv => {
         Plotly.Plots.resize(plotDiv);
         bringPlotBoxToFront();
+        requestAnimationFrame(bindAnnotationRemoval);
+        setTimeout(bindAnnotationRemoval, 50);
         if (!clickHandlerBound && typeof plotDiv.on === "function") {
           plotDiv.on("plotly_click", handlePeakClick);
           clickHandlerBound = true;
@@ -1255,6 +1274,10 @@
         if (!relayoutHandlerBound && typeof plotDiv.on === "function") {
           plotDiv.on("plotly_relayout", handleRelayout);
           relayoutHandlerBound = true;
+        }
+        if (!annotationClickHandlerBound && typeof plotDiv.on === "function") {
+          plotDiv.on("plotly_clickannotation", handleAnnotationClick);
+          annotationClickHandlerBound = true;
         }
         const peakCount = spectra.reduce((sum, spectrum) => sum + spectrum.peaks.length, 0);
         const skipped = spectra.reduce((sum, spectrum) => sum + spectrum.skipped, 0);
@@ -1308,6 +1331,57 @@
       }
       renderPlot(t("selected")(mz.toFixed(Number($("decimals").value) || 1)));
       $("status").textContent = t("selected")(mz.toFixed(Number($("decimals").value) || 1));
+    }
+
+    function handleAnnotationClick(event) {
+      if (!$("clickMz").checked) return;
+      const index = Number(event?.index);
+      const key = Number.isFinite(index) ? renderedAnnotationKeys[index] : "";
+      if (!key) return;
+      const now = Date.now();
+      if (lastAnnotationClick.key !== key || now - lastAnnotationClick.time > 450) {
+        lastAnnotationClick = { key, time: now };
+        return;
+      }
+      hideAnnotationByKey(key);
+      lastAnnotationClick = { key: "", time: 0 };
+    }
+
+    function hideAnnotationByKey(key) {
+      labelEdits[key] = { ...(labelEdits[key] || {}), hidden: true };
+      selectedPeaks = selectedPeaks.filter(label => label.key !== key);
+      renderPlot(t("selectionCleared"));
+    }
+
+    function bindAnnotationRemoval() {
+      const plot = $("plot");
+      document.querySelectorAll("#plot .annotation").forEach((annotation, index) => {
+        const key = renderedAnnotationKeys[index];
+        annotation.dataset.annotationKey = key || "";
+        annotation.style.cursor = key && $("clickMz").checked ? "pointer" : "";
+      });
+      if (plot.dataset.annotationRemovalBound === "true") return;
+      plot.dataset.annotationRemovalBound = "true";
+      document.addEventListener("click", event => {
+        if (!$("clickMz").checked) return;
+        const annotations = Array.from(document.querySelectorAll("#plot .annotation"));
+        const annotation = annotations.find(item => {
+          const box = item.getBoundingClientRect();
+          return event.clientX >= box.left && event.clientX <= box.right
+            && event.clientY >= box.top && event.clientY <= box.bottom;
+        });
+        if (!annotation) return;
+        const index = annotations.indexOf(annotation);
+        const key = renderedAnnotationKeys[index];
+        if (!key) return;
+        const now = Date.now();
+        const lastClick = Number(annotation.dataset.lastClick || 0);
+        annotation.dataset.lastClick = String(now);
+        if (now - lastClick > 450) return;
+        event.preventDefault();
+        event.stopPropagation();
+        hideAnnotationByKey(key);
+      }, true);
     }
 
     function handleRelayout(update) {
