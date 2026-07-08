@@ -104,9 +104,13 @@
     main {
       padding: 34px clamp(18px, 4vw, 54px);
       display: grid;
-      grid-template-columns: minmax(360px, 570px) minmax(540px, 1fr);
-      gap: 38px;
+      grid-template-columns: minmax(310px, 440px) minmax(540px, 1fr);
+      gap: 24px;
       align-items: start;
+    }
+
+    body.controls-collapsed main {
+      grid-template-columns: 76px minmax(540px, 1fr);
     }
 
     .controls,
@@ -122,6 +126,32 @@
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       border-bottom: 1px solid var(--line);
+    }
+
+    .controls-toggle {
+      display: none;
+      width: 100%;
+      min-height: 52px;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      border-radius: 0;
+      background: #fbfdff;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    body.controls-collapsed .controls-toggle {
+      min-height: 76px;
+      padding: 0;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+    }
+
+    body.controls-collapsed .tabs,
+    body.controls-collapsed .panel,
+    body.controls-collapsed .actions,
+    body.controls-collapsed .status {
+      display: none;
     }
 
     .tab {
@@ -283,8 +313,22 @@
       display: none;
     }
 
+    @media (max-width: 1280px) {
+      main {
+        grid-template-columns: minmax(290px, 360px) minmax(0, 1fr);
+      }
+
+      .controls-toggle {
+        display: block;
+      }
+    }
+
     @media (max-width: 1050px) {
       main {
+        grid-template-columns: 1fr;
+      }
+
+      body.controls-collapsed main {
         grid-template-columns: 1fr;
       }
 
@@ -294,6 +338,15 @@
 
       #plot {
         height: 500px;
+      }
+
+      body.controls-collapsed .controls {
+        min-height: 0;
+      }
+
+      body.controls-collapsed .controls-toggle {
+        min-height: 52px;
+        writing-mode: horizontal-tb;
       }
     }
 
@@ -347,6 +400,7 @@
 
   <main>
     <section class="controls" aria-label="Controls">
+      <button type="button" class="controls-toggle" id="controlsToggle">Hide settings</button>
       <nav class="tabs" aria-label="Settings tabs">
         <button type="button" class="tab active" data-tab="data" data-i18n="tabData">Data</button>
         <button type="button" class="tab" data-tab="style" data-i18n="tabStyle">Style</button>
@@ -827,6 +881,12 @@
     };
 
     const $ = id => document.getElementById(id);
+    function updateControlsToggleText() {
+      const collapsed = document.body.classList.contains("controls-collapsed");
+      const labels = language === "pt" ? ["Ocultar ajustes", "Mostrar ajustes"] : ["Hide settings", "Show settings"];
+      $("controlsToggle").textContent = labels[collapsed ? 1 : 0];
+    }
+
     let language = "en";
     let selectedPeaks = [];
     let labelEdits = {};
@@ -855,6 +915,7 @@
       if ($("resetDefaults") && !translations[language].resetDefaults) {
         $("resetDefaults").textContent = nextLanguage === "pt" ? "Restaurar padroes" : "Reset defaults";
       }
+      updateControlsToggleText();
       renderPlot();
     }
 
@@ -1575,6 +1636,11 @@
     $("generate").addEventListener("click", () => renderPlot());
     $("download").addEventListener("click", downloadPng);
     $("resetDefaults").addEventListener("click", resetDefaults);
+    $("controlsToggle").addEventListener("click", () => {
+      document.body.classList.toggle("controls-collapsed");
+      updateControlsToggleText();
+      setTimeout(() => Plotly.Plots.resize($("plot")), 120);
+    });
     $("clearSelection").addEventListener("click", () => {
       selectedPeaks = [];
       labelEdits = {};
