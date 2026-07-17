@@ -39,11 +39,45 @@
       gap: 24px;
     }
 
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
     h1 {
       color: #213f93;
       font-size: clamp(30px, 3vw, 42px);
-      margin: 0 0 12px;
+      margin: 0;
       line-height: 1.05;
+    }
+
+    .format-help-button {
+      width: 34px;
+      min-height: 34px;
+      height: 34px;
+      padding: 0;
+      border-radius: 50%;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-color: #bdd0f6;
+      flex: 0 0 auto;
+    }
+
+    .format-help-popover {
+      max-width: 520px;
+      margin: 8px 0 0;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdff;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+      box-shadow: 0 10px 24px rgba(28, 49, 82, 0.08);
     }
 
     header p {
@@ -181,13 +215,6 @@
 
     .field {
       margin-bottom: 18px;
-    }
-
-    .format-note {
-      margin: -4px 0 18px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.45;
     }
 
     .x-individual-field {
@@ -404,8 +431,12 @@
 <body>
   <header>
     <div>
-      <h1 data-i18n="title">Mass Spectrum Generator</h1>
+      <div class="title-row">
+        <h1 data-i18n="title">Mass Spectrum Generator</h1>
+        <button type="button" class="format-help-button" id="formatHelpButton" aria-expanded="false" aria-controls="formatHelpPopover" title="Text formatting help">?</button>
+      </div>
       <p data-i18n="subtitle">Enter a list of m/z and intensity values to generate the spectrum</p>
+      <p class="format-help-popover" id="formatHelpPopover" data-i18n="formatNote" hidden>Use _ for subscript and ^ for superscript: H_2O, M^+, SO_4^{2-}.</p>
     </div>
     <div class="language" role="group" aria-label="Language">
       <button type="button" id="ptBtn">PT</button>
@@ -501,9 +532,6 @@
           <div class="field">
             <label for="yLabel" data-i18n="yLabel">Y label</label>
             <input id="yLabel" type="text" value="Relative intensity (%)">
-          </div>
-          <div class="field">
-            <p class="format-note" data-i18n="formatNote">Use _ for subscript and ^ for superscript: H_2O, M^+, SO_4^{2-}.</p>
           </div>
           <div class="field">
             <label for="legendMode" data-i18n="legendMode">Spectrum label display</label>
@@ -1733,6 +1761,12 @@
     document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", () => setTab(tab.dataset.tab)));
     $("ptBtn").addEventListener("click", () => updateLanguage("pt"));
     $("enBtn").addEventListener("click", () => updateLanguage("en"));
+    $("formatHelpButton").addEventListener("click", () => {
+      const popover = $("formatHelpPopover");
+      const isOpen = !popover.hidden;
+      popover.hidden = isOpen;
+      $("formatHelpButton").setAttribute("aria-expanded", String(!isOpen));
+    });
     $("secondSpectrum").addEventListener("change", () => {
       syncSpectrumVisibility();
       renderPlot();
