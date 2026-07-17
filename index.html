@@ -815,6 +815,19 @@
             <input id="spectrumGap" type="number" min="0" max="30" value="8">
           </div>
         </div>
+        <details class="settings-group">
+          <summary data-i18n="compositeLayoutGroup">Composite layout</summary>
+          <div class="group-body">
+            <label class="toggle">
+              <input type="checkbox" id="showSecondXAxis">
+              <span data-i18n="showSecondXAxis">Show X axis on spectrum 2</span>
+            </label>
+            <div class="field">
+              <label for="groupGapAfter2" data-i18n="groupGapAfter2">Extra gap after spectrum 2 (%)</label>
+              <input id="groupGapAfter2" type="number" min="0" max="30" value="0">
+            </div>
+          </div>
+        </details>
         <label class="toggle">
           <input type="checkbox" id="lockY" checked>
           <span data-i18n="lockY">Lock Y scales of all spectra</span>
@@ -980,6 +993,9 @@
         xTickStep4: "X tick interval 4",
         threshold: "Label threshold (%)",
         spectrumGap: "Spectra spacing (%)",
+        compositeLayoutGroup: "Composite layout",
+        showSecondXAxis: "Show X axis on spectrum 2",
+        groupGapAfter2: "Extra gap after spectrum 2 (%)",
         lockY: "Lock Y scales of all spectra",
         lockX: "Lock X ranges of all spectra",
         labelPeaks: "Label main peaks",
@@ -1072,6 +1088,9 @@
         xTickStep4: "Intervalo X 4",
         threshold: "Limite para rotular (%)",
         spectrumGap: "Espaçamento entre espectros (%)",
+        compositeLayoutGroup: "Layout composto",
+        showSecondXAxis: "Mostrar eixo X no espectro 2",
+        groupGapAfter2: "Espaço extra após o espectro 2 (%)",
         lockY: "Travar escalas Y de todos os espectros",
         lockX: "Travar eixos X de todos os espectros",
         labelPeaks: "Rotular picos principais",
@@ -1196,12 +1215,20 @@
       return peaks.map(p => ({ ...p, y: (p.intensity / max) * 100 }));
     }
 
-    function axisDomain(index, total, gap) {
+    function axisDomain(index, total, gap, groupGap = 0) {
       if (total === 1) return [0, 1];
-      const height = (1 - gap * (total - 1)) / total;
-      const topIndex = total - index - 1;
-      const start = topIndex * (height + gap);
-      return [start, start + height];
+      let gaps = Array.from({ length: total - 1 }, (_, gapIndex) => gap + (gapIndex === 1 ? groupGap : 0));
+      const totalGap = gaps.reduce((sum, value) => sum + value, 0);
+      const safeTotalGap = Math.min(totalGap, 0.88);
+      if (totalGap > safeTotalGap && totalGap > 0) {
+        gaps = gaps.map(value => (value / totalGap) * safeTotalGap);
+      }
+      const height = (1 - safeTotalGap) / total;
+      let top = 1;
+      for (let i = 0; i < index; i += 1) {
+        top -= height + gaps[i];
+      }
+      return [top - height, top];
     }
 
     function getAxisId(prefix, index) {
@@ -1399,8 +1426,12 @@
       const gapPercent = Number($("spectrumGap").value);
       const cleanGapPercent = Number.isFinite(gapPercent) ? Math.min(Math.max(gapPercent, 0), 30) : 8;
       const spectrumGap = cleanGapPercent / 100;
-      const compactStack = total > 1 && cleanGapPercent <= 2;
-      const shareBoxBoundaries = $("closeBox").checked && total > 1 && cleanGapPercent === 0;
+      const groupGapPercent = Number($("groupGapAfter2").value);
+      const cleanGroupGapPercent = total >= 3 && Number.isFinite(groupGapPercent) ? Math.min(Math.max(groupGapPercent, 0), 30) : 0;
+      const groupGap = cleanGroupGapPercent / 100;
+      const compactStack = total > 1 && cleanGapPercent <= 2 && cleanGroupGapPercent <= 2;
+      const shareBoxBoundaries = $("closeBox").checked && total > 1 && cleanGapPercent === 0 && cleanGroupGapPercent === 0;
+      const showSecondXAxis = $("showSecondXAxis").checked && total >= 2;
       const lockX = $("lockX").checked;
       const minMz = numberValue("minMz");
       const maxMz = numberValue("maxMz");
@@ -1472,7 +1503,7 @@
         layout[xAxisName] = {
           ...axisCommon,
           mirror: shareBoxBoundaries ? i === 0 : $("closeBox").checked,
-          title: isBottomAxis ? { text: formatPlotText($("xLabel").value), standoff: 18, font: { size: axisTitleFontSize } } : undefined,
+          title: isBottomAxis || (showSecondXAxis && i === 1) ? { text: formatPlotText($("xLabel").value), standoff: 18, font: { size: axisTitleFontSize } } : undefined,
           range: Number.isFinite(getXMin(i)) && Number.isFinite(getXMax(i)) ? [getXMin(i), getXMax(i)] : undefined,
           autorange: !(Number.isFinite(getXMin(i)) && Number.isFinite(getXMax(i))),
           tickmode: Number.isFinite(getXTickStep(i)) && getXTickStep(i) > 0 ? "linear" : undefined,
@@ -1480,7 +1511,7 @@
           tick0: Number.isFinite(getXMin(i)) ? getXMin(i) : undefined,
           anchor: yAxisId,
           domain: [0, 1],
-          showticklabels: lockX ? isBottomAxis : true,
+          showticklabels: lockX ? isBottomAxis || (showSecondXAxis && i === 1) : true,
           matches: lockX && i > 0 ? "x" : undefined
         };
         layout[axisName] = {
@@ -1488,11 +1519,11 @@
           title: total === 1 && i === 0 ? { text: formatPlotText($("yLabel").value), standoff: Number($("yOffset").value || 20), font: { size: axisTitleFontSize } } : undefined,
           range: [0, getYScale(i, yMax)],
           ...getYAxisTicks(getYScale(i, yMax), i, compactStack),
-          domain: axisDomain(i, total, spectrumGap),
+          domain: axisDomain(i, total, spectrumGap, groupGap),
           anchor: xAxisId
         };
         if (total > 1 && legendMode === "inside") {
-          const domain = axisDomain(i, total, spectrumGap);
+          const domain = axisDomain(i, total, spectrumGap, groupGap);
           const panelY = domain[0] + (domain[1] - domain[0]) * insideLegendY;
           layout.annotations.push({
             text: formatPlotText(spectra[i].name),
@@ -1819,6 +1850,7 @@
         xTickStep4: "",
         threshold: "10",
         spectrumGap: "8",
+        groupGapAfter2: "0",
         exportWidth: "1200",
         exportHeight: "700",
         exportScale: "2"
@@ -1832,6 +1864,7 @@
       $("normalize").checked = true;
       $("lockY").checked = true;
       $("lockX").checked = true;
+      $("showSecondXAxis").checked = false;
       syncXControlVisibility();
       $("labelPeaks").checked = true;
       $("clickMz").checked = false;
