@@ -1436,9 +1436,7 @@
       const cleanGroupGapPercent = total >= 3 && Number.isFinite(groupGapPercent) ? Math.min(Math.max(groupGapPercent, 0), 30) : 0;
       const groupGap = cleanGroupGapPercent / 100;
       const compactStack = total > 1 && cleanGapPercent <= 2 && cleanGroupGapPercent <= 2;
-      const shareBoxBoundaries = $("closeBox").checked && total > 1 && cleanGapPercent === 0 && cleanGroupGapPercent === 0;
       const showSecondXAxis = $("showSecondXAxis").checked && total >= 2;
-      const mergeTouchingBoxes = $("closeBox").checked && total > 1 && cleanGapPercent === 0 && cleanGroupGapPercent === 0;
       const rawXLabelDistance = Number($("xLabelDistance").value);
       const xLabelDistance = Number.isFinite(rawXLabelDistance) ? Math.min(Math.max(rawXLabelDistance, 0), 80) : 18;
       const lockX = $("lockX").checked;
@@ -1511,7 +1509,8 @@
         const isBottomAxis = i === total - 1;
         const showsXAxisLabels = !lockX || isBottomAxis || (showSecondXAxis && i === 1);
         const showsXAxisTitle = isBottomAxis || (showSecondXAxis && i === 1);
-        const xAxisMirror = shareBoxBoundaries ? i === 0 : $("closeBox").checked && !(mergeTouchingBoxes && i > 0);
+        const gapBeforeAxis = i === 0 ? null : (i === 2 ? cleanGroupGapPercent : cleanGapPercent);
+        const xAxisMirror = $("closeBox").checked && (i === 0 || gapBeforeAxis > 0);
         layout[xAxisName] = {
           ...axisCommon,
           showline: $("closeBox").checked || showsXAxisLabels,
@@ -1775,13 +1774,36 @@
       const svg = document.querySelector("#plot svg.main-svg");
       if (!svg) return;
       svg.querySelector(".plot-box-overlay")?.remove();
+      const sourceLines = Array.from(document.querySelectorAll("#plot path.xlines-above.crisp, #plot path.ylines-above.crisp"));
+      sourceLines.forEach(path => {
+        path.style.opacity = "";
+      });
       if (!$("closeBox").checked) return;
 
       const overlay = document.createElementNS("http://www.w3.org/2000/svg", "g");
       overlay.setAttribute("class", "plot-box-overlay");
-      const lineData = Array.from(document.querySelectorAll("#plot path.xlines-above.crisp, #plot path.ylines-above.crisp"))
+      const seenLines = new Set();
+      const lineData = sourceLines
         .map(path => path.getAttribute("d"))
-        .filter(Boolean);
+        .filter(Boolean)
+        .filter(d => {
+          const match = d.match(/^M([0-9.-]+),([0-9.-]+)L([0-9.-]+),([0-9.-]+)$/);
+          if (!match) return true;
+          const [, x1, y1, x2, y2] = match.map(Number);
+          const horizontal = Math.abs(y1 - y2) < 0.5;
+          const vertical = Math.abs(x1 - x2) < 0.5;
+          const key = horizontal
+            ? `h:${Math.round(y1)}:${Math.round(Math.min(x1, x2))}:${Math.round(Math.max(x1, x2))}`
+            : vertical
+              ? `v:${Math.round(x1)}:${Math.round(Math.min(y1, y2))}:${Math.round(Math.max(y1, y2))}`
+              : d;
+          if (seenLines.has(key)) return false;
+          seenLines.add(key);
+          return true;
+        });
+      sourceLines.forEach(path => {
+        path.style.opacity = "0";
+      });
       lineData.forEach(d => {
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         path.setAttribute("d", d);
