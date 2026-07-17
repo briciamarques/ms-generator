@@ -272,6 +272,35 @@
       gap: 16px;
     }
 
+    .settings-group {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #fbfcfe;
+      overflow: hidden;
+    }
+
+    .settings-group summary {
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      color: var(--accent);
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .settings-group summary::marker {
+      color: var(--muted);
+    }
+
+    .settings-group .field-grid,
+    .settings-group .group-body {
+      padding: 16px;
+      border-top: 1px solid var(--line);
+    }
+
     .toggle {
       min-height: 56px;
       display: flex;
@@ -520,130 +549,171 @@
       </div>
 
       <div class="panel" id="panel-style">
-        <div class="field">
-          <label for="chartTitle" data-i18n="chartTitle">Chart title</label>
-          <input id="chartTitle" type="text" value="Mass Spectrum">
-        </div>
-        <div class="field-grid">
-          <div class="field">
-            <label for="xLabel" data-i18n="xLabel">X label</label>
-            <input id="xLabel" type="text" value="<i>m/z</i>">
+        <details class="settings-group" open>
+          <summary data-i18n="styleTextGroup">Text</summary>
+          <div class="field-grid">
+            <div class="field">
+              <label for="chartTitle" data-i18n="chartTitle">Chart title</label>
+              <input id="chartTitle" type="text" value="Mass Spectrum">
+            </div>
+            <div class="field">
+              <label for="xLabel" data-i18n="xLabel">X label</label>
+              <input id="xLabel" type="text" value="<i>m/z</i>">
+            </div>
+            <div class="field">
+              <label for="yLabel" data-i18n="yLabel">Y label</label>
+              <input id="yLabel" type="text" value="Relative intensity (%)">
+            </div>
+            <div class="field">
+              <label for="fontFamily" data-i18n="font">Font</label>
+              <select id="fontFamily">
+                <option>Arial</option>
+                <option>Helvetica</option>
+                <option>Times New Roman</option>
+                <option>Georgia</option>
+                <option>Courier New</option>
+                <option>Trebuchet MS</option>
+                <option>Verdana</option>
+                <option>Tahoma</option>
+                <option>Comic Sans MS</option>
+                <option>Lucida Console</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="fontSize" data-i18n="fontSize">Base font size (px)</label>
+              <input id="fontSize" type="number" min="8" max="40" value="14">
+            </div>
+            <div class="field">
+              <label for="titleFontSize" data-i18n="titleFontSize">Title font size (px)</label>
+              <input id="titleFontSize" type="number" min="8" max="60" value="24">
+            </div>
+            <div class="field">
+              <label for="axisTitleFontSize" data-i18n="axisTitleFontSize">Axis label font size (px)</label>
+              <input id="axisTitleFontSize" type="number" min="8" max="44" value="14">
+            </div>
+            <div class="field">
+              <label for="tickFontSize" data-i18n="tickFontSize">Tick label font size (px)</label>
+              <input id="tickFontSize" type="number" min="8" max="36" value="14">
+            </div>
+            <div class="field">
+              <label for="mzLabelFontSize" data-i18n="mzLabelFontSize">m/z label font size (px)</label>
+              <input id="mzLabelFontSize" type="number" min="8" max="44" value="14">
+            </div>
+            <div class="field">
+              <label for="yOffset" data-i18n="yOffset">Y label distance (px)</label>
+              <input id="yOffset" type="number" min="0" max="160" value="20">
+            </div>
           </div>
-          <div class="field">
-            <label for="yLabel" data-i18n="yLabel">Y label</label>
-            <input id="yLabel" type="text" value="Relative intensity (%)">
+        </details>
+
+        <details class="settings-group">
+          <summary data-i18n="styleLegendGroup">Spectrum names</summary>
+          <div class="field-grid">
+            <div class="field">
+              <label for="legendMode" data-i18n="legendMode">Spectrum label display</label>
+              <select id="legendMode">
+                <option value="legend">Legend below plot</option>
+                <option value="inside">Names inside plots</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="insideLegendX" data-i18n="insideLegendX">Inside name X position (%)</label>
+              <input id="insideLegendX" type="number" min="0" max="100" value="2">
+            </div>
+            <div class="field">
+              <label for="insideLegendY" data-i18n="insideLegendY">Inside name Y position (%)</label>
+              <input id="insideLegendY" type="number" min="0" max="100" value="92">
+            </div>
+            <div class="field">
+              <label for="insideLegendFontSize" data-i18n="insideLegendFontSize">Inside name font size (px)</label>
+              <input id="insideLegendFontSize" type="number" min="8" max="44" value="14">
+            </div>
+            <div class="field">
+              <label for="insideLegendTextColor" data-i18n="insideLegendTextColor">Inside name text color</label>
+              <input id="insideLegendTextColor" type="color" value="#1c2430">
+            </div>
+            <div class="field">
+              <label for="insideLegendBoxColor" data-i18n="insideLegendBoxColor">Inside name box color</label>
+              <input id="insideLegendBoxColor" type="color" value="#ffffff">
+            </div>
+            <div class="field">
+              <label for="insideLegendBorderColor" data-i18n="insideLegendBorderColor">Inside name border color</label>
+              <input id="insideLegendBorderColor" type="color" value="#1c2430">
+            </div>
+            <div class="field">
+              <label for="insideLegendBorderWidth" data-i18n="insideLegendBorderWidth">Inside name border width (px)</label>
+              <input id="insideLegendBorderWidth" type="number" min="0" max="6" step="0.5" value="1">
+            </div>
+            <div class="field">
+              <label for="insideLegendShape" data-i18n="insideLegendShape">Inside name box shape</label>
+              <select id="insideLegendShape">
+                <option value="square">Square</option>
+                <option value="rounded">Rounded</option>
+                <option value="none">No box</option>
+              </select>
+            </div>
           </div>
-          <div class="field">
-            <label for="legendMode" data-i18n="legendMode">Spectrum label display</label>
-            <select id="legendMode">
-              <option value="legend">Legend below plot</option>
-              <option value="inside">Names inside plots</option>
-            </select>
+        </details>
+
+        <details class="settings-group">
+          <summary data-i18n="styleColorsGroup">Colors and lines</summary>
+          <div class="field-grid">
+            <div class="field">
+              <label for="peakColor1" data-i18n="peakColor">Peak color</label>
+              <input id="peakColor1" type="color" value="#1f4e8b">
+            </div>
+            <div class="field">
+              <label for="peakColor2" data-i18n="peakColor2">Peak color (2nd)</label>
+              <input id="peakColor2" type="color" value="#c94e4e">
+            </div>
+            <div class="field">
+              <label for="peakColor3" data-i18n="peakColor3">Peak color (3rd)</label>
+              <input id="peakColor3" type="color" value="#2c8f63">
+            </div>
+            <div class="field">
+              <label for="peakColor4" data-i18n="peakColor4">Peak color (4th)</label>
+              <input id="peakColor4" type="color" value="#8a5cc2">
+            </div>
+            <div class="field">
+              <label for="backgroundColor" data-i18n="backgroundColor">Background color</label>
+              <input id="backgroundColor" type="color" value="#ffffff">
+            </div>
+            <div class="field">
+              <label for="textColor" data-i18n="textColor">Text color</label>
+              <input id="textColor" type="color" value="#1c2430">
+            </div>
+            <div class="field">
+              <label for="gridColor" data-i18n="gridColor">Grid color</label>
+              <input id="gridColor" type="color" value="#eceff3">
+            </div>
+            <div class="field">
+              <label for="boxLineWidth" data-i18n="boxLineWidth">Plot box line width (px)</label>
+              <input id="boxLineWidth" type="number" min="0.5" max="8" step="0.5" value="1">
+            </div>
+            <div class="field">
+              <label for="gridLineWidth" data-i18n="gridLineWidth">Grid line width (px)</label>
+              <input id="gridLineWidth" type="number" min="0.25" max="5" step="0.25" value="1">
+            </div>
           </div>
-          <div class="field">
-            <label for="insideLegendX" data-i18n="insideLegendX">Inside name X position (%)</label>
-            <input id="insideLegendX" type="number" min="0" max="100" value="2">
+        </details>
+
+        <details class="settings-group">
+          <summary data-i18n="styleDisplayGroup">Display</summary>
+          <div class="group-body">
+            <label class="toggle">
+              <input type="checkbox" id="showGrid" checked>
+              <span data-i18n="showGrid">Show grid</span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" id="closeBox">
+              <span data-i18n="closeBox">Close plot box</span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" id="showDots">
+              <span data-i18n="showDots">Show dot at peak tip</span>
+            </label>
           </div>
-          <div class="field">
-            <label for="insideLegendY" data-i18n="insideLegendY">Inside name Y position (%)</label>
-            <input id="insideLegendY" type="number" min="0" max="100" value="92">
-          </div>
-          <div class="field">
-            <label for="insideLegendTextColor" data-i18n="insideLegendTextColor">Inside name text color</label>
-            <input id="insideLegendTextColor" type="color" value="#1c2430">
-          </div>
-          <div class="field">
-            <label for="insideLegendBoxColor" data-i18n="insideLegendBoxColor">Inside name box color</label>
-            <input id="insideLegendBoxColor" type="color" value="#ffffff">
-          </div>
-          <div class="field">
-            <label for="insideLegendBorderColor" data-i18n="insideLegendBorderColor">Inside name border color</label>
-            <input id="insideLegendBorderColor" type="color" value="#1c2430">
-          </div>
-          <div class="field">
-            <label for="insideLegendBorderWidth" data-i18n="insideLegendBorderWidth">Inside name border width (px)</label>
-            <input id="insideLegendBorderWidth" type="number" min="0" max="6" step="0.5" value="1">
-          </div>
-          <div class="field">
-            <label for="insideLegendShape" data-i18n="insideLegendShape">Inside name box shape</label>
-            <select id="insideLegendShape">
-              <option value="square">Square</option>
-              <option value="rounded">Rounded</option>
-              <option value="none">No box</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="peakColor1" data-i18n="peakColor">Peak color</label>
-            <input id="peakColor1" type="color" value="#1f4e8b">
-          </div>
-          <div class="field">
-            <label for="peakColor2" data-i18n="peakColor2">Peak color (2nd)</label>
-            <input id="peakColor2" type="color" value="#c94e4e">
-          </div>
-          <div class="field">
-            <label for="peakColor3" data-i18n="peakColor3">Peak color (3rd)</label>
-            <input id="peakColor3" type="color" value="#2c8f63">
-          </div>
-          <div class="field">
-            <label for="peakColor4" data-i18n="peakColor4">Peak color (4th)</label>
-            <input id="peakColor4" type="color" value="#8a5cc2">
-          </div>
-          <div class="field">
-            <label for="backgroundColor" data-i18n="backgroundColor">Background color</label>
-            <input id="backgroundColor" type="color" value="#ffffff">
-          </div>
-          <div class="field">
-            <label for="textColor" data-i18n="textColor">Text color</label>
-            <input id="textColor" type="color" value="#1c2430">
-          </div>
-          <div class="field">
-            <label for="gridColor" data-i18n="gridColor">Grid color</label>
-            <input id="gridColor" type="color" value="#eceff3">
-          </div>
-          <div class="field">
-            <label for="boxLineWidth" data-i18n="boxLineWidth">Plot box line width (px)</label>
-            <input id="boxLineWidth" type="number" min="0.5" max="8" step="0.5" value="1">
-          </div>
-          <div class="field">
-            <label for="gridLineWidth" data-i18n="gridLineWidth">Grid line width (px)</label>
-            <input id="gridLineWidth" type="number" min="0.25" max="5" step="0.25" value="1">
-          </div>
-          <div class="field">
-            <label for="fontFamily" data-i18n="font">Font</label>
-            <select id="fontFamily">
-              <option>Arial</option>
-              <option>Helvetica</option>
-              <option>Times New Roman</option>
-              <option>Georgia</option>
-              <option>Courier New</option>
-              <option>Trebuchet MS</option>
-              <option>Verdana</option>
-              <option>Tahoma</option>
-              <option>Comic Sans MS</option>
-              <option>Lucida Console</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="fontSize" data-i18n="fontSize">Font size (px)</label>
-            <input id="fontSize" type="number" min="8" max="40" value="14">
-          </div>
-          <div class="field">
-            <label for="yOffset" data-i18n="yOffset">Y label offset (px)</label>
-            <input id="yOffset" type="number" min="0" max="120" value="20">
-          </div>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" id="showGrid" checked>
-          <span data-i18n="showGrid">Show grid</span>
-        </label>
-        <label class="toggle">
-          <input type="checkbox" id="closeBox">
-          <span data-i18n="closeBox">Close plot box</span>
-        </label>
-        <label class="toggle">
-          <input type="checkbox" id="showDots">
-          <span data-i18n="showDots">Show dot at peak tip</span>
-        </label>
+        </details>
       </div>
 
       <div class="panel" id="panel-axes">
@@ -853,6 +923,15 @@
         chartTitle: "Chart title",
         xLabel: "X label",
         yLabel: "Y label",
+        styleTextGroup: "Text",
+        styleLegendGroup: "Spectrum names",
+        styleColorsGroup: "Colors and lines",
+        styleDisplayGroup: "Display",
+        titleFontSize: "Title font size (px)",
+        axisTitleFontSize: "Axis label font size (px)",
+        tickFontSize: "Tick label font size (px)",
+        mzLabelFontSize: "m/z label font size (px)",
+        insideLegendFontSize: "Inside name font size (px)",
         legendMode: "Spectrum label display",
         formatNote: "Use _ for subscript and ^ for superscript: H_2O, M^+, SO_4^{2-}.",
         insideLegendX: "Inside name X position (%)",
@@ -872,8 +951,8 @@
         boxLineWidth: "Plot box line width (px)",
         gridLineWidth: "Grid line width (px)",
         font: "Font",
-        fontSize: "Font size (px)",
-        yOffset: "Y label offset (px)",
+        fontSize: "Base font size (px)",
+        yOffset: "Y label distance (px)",
         showGrid: "Show grid",
         closeBox: "Close plot box",
         showDots: "Show dot at peak tip",
@@ -945,6 +1024,15 @@
         chartTitle: "Título do gráfico",
         xLabel: "Rótulo X",
         yLabel: "Rótulo Y",
+        styleTextGroup: "Texto",
+        styleLegendGroup: "Nomes dos espectros",
+        styleColorsGroup: "Cores e linhas",
+        styleDisplayGroup: "Exibição",
+        titleFontSize: "Tamanho do título (px)",
+        axisTitleFontSize: "Tamanho dos rótulos dos eixos (px)",
+        tickFontSize: "Tamanho dos números dos eixos (px)",
+        mzLabelFontSize: "Tamanho dos rótulos m/z (px)",
+        insideLegendFontSize: "Tamanho dos nomes internos (px)",
         peakColor: "Cor dos picos",
         formatNote: "Use _ para subscrito e ^ para sobrescrito: H_2O, M^+, SO_4^{2-}.",
         peakColor2: "Cor dos picos (2º)",
@@ -956,8 +1044,8 @@
         boxLineWidth: "Espessura da caixa (px)",
         gridLineWidth: "Espessura da grade (px)",
         font: "Fonte",
-        fontSize: "Tamanho da fonte (px)",
-        yOffset: "Deslocamento do rótulo Y (px)",
+        fontSize: "Tamanho base da fonte (px)",
+        yOffset: "Distância do rótulo Y (px)",
         showGrid: "Mostrar grade",
         closeBox: "Fechar caixa do gráfico",
         showDots: "Mostrar ponto no topo do pico",
@@ -1180,7 +1268,7 @@
           y: labelY,
           text: labelText,
           textposition: "top center",
-          textfont: { color: $("textColor").value, size: Number($("fontSize").value) - 1 },
+          textfont: { color: $("textColor").value, size: Number($("mzLabelFontSize").value) || Number($("fontSize").value) || 14 },
           hoverinfo: "skip",
           showlegend: false,
           xaxis: xAxisId,
@@ -1261,7 +1349,7 @@
         ay: label.ay,
         font: {
           family: $("fontFamily").value,
-          size: Number($("fontSize").value) || 14,
+          size: Number($("mzLabelFontSize").value) || Number($("fontSize").value) || 14,
           color: $("textColor").value
         },
         bgcolor: $("backgroundColor").value,
@@ -1302,6 +1390,11 @@
     function buildLayout(spectra, threshold, decimals) {
       const total = spectra.length;
       const fontSize = Number($("fontSize").value) || 14;
+      const titleFontSize = Number($("titleFontSize").value) || fontSize + 10;
+      const axisTitleFontSize = Number($("axisTitleFontSize").value) || fontSize;
+      const tickFontSize = Number($("tickFontSize").value) || fontSize;
+      const mzLabelFontSize = Number($("mzLabelFontSize").value) || fontSize;
+      const insideLegendFontSize = Number($("insideLegendFontSize").value) || fontSize;
       const yMax = Number($("yScale").value) || 100;
       const gapPercent = Number($("spectrumGap").value);
       const cleanGapPercent = Number.isFinite(gapPercent) ? Math.min(Math.max(gapPercent, 0), 30) : 8;
@@ -1333,14 +1426,14 @@
         showline: $("closeBox").checked,
         mirror: $("closeBox").checked,
         ticks: "outside",
-        tickfont: { size: fontSize, color: $("textColor").value }
+        tickfont: { size: tickFontSize, color: $("textColor").value }
       };
       const layout = {
         title: {
           text: formatPlotText($("chartTitle").value),
           x: 0.5,
           xanchor: "center",
-          font: { size: fontSize + 10, color: $("textColor").value }
+          font: { size: titleFontSize, color: $("textColor").value }
         },
         paper_bgcolor: $("backgroundColor").value,
         plot_bgcolor: $("backgroundColor").value,
@@ -1364,7 +1457,7 @@
           yanchor: "middle",
           font: {
             family: $("fontFamily").value,
-            size: fontSize,
+            size: axisTitleFontSize,
             color: $("textColor").value
           }
         });
@@ -1379,7 +1472,7 @@
         layout[xAxisName] = {
           ...axisCommon,
           mirror: shareBoxBoundaries ? i === 0 : $("closeBox").checked,
-          title: isBottomAxis ? { text: formatPlotText($("xLabel").value), standoff: 18 } : undefined,
+          title: isBottomAxis ? { text: formatPlotText($("xLabel").value), standoff: 18, font: { size: axisTitleFontSize } } : undefined,
           range: Number.isFinite(getXMin(i)) && Number.isFinite(getXMax(i)) ? [getXMin(i), getXMax(i)] : undefined,
           autorange: !(Number.isFinite(getXMin(i)) && Number.isFinite(getXMax(i))),
           tickmode: Number.isFinite(getXTickStep(i)) && getXTickStep(i) > 0 ? "linear" : undefined,
@@ -1392,7 +1485,7 @@
         };
         layout[axisName] = {
           ...axisCommon,
-          title: total === 1 && i === 0 ? { text: formatPlotText($("yLabel").value), standoff: 20 } : undefined,
+          title: total === 1 && i === 0 ? { text: formatPlotText($("yLabel").value), standoff: Number($("yOffset").value || 20), font: { size: axisTitleFontSize } } : undefined,
           range: [0, getYScale(i, yMax)],
           ...getYAxisTicks(getYScale(i, yMax), i, compactStack),
           domain: axisDomain(i, total, spectrumGap),
@@ -1410,9 +1503,10 @@
             showarrow: false,
             xanchor: "left",
             yanchor: "middle",
+            valign: "middle",
             font: {
               family: $("fontFamily").value,
-              size: fontSize,
+              size: insideLegendFontSize,
               color: $("insideLegendTextColor").value
             },
             bgcolor: insideLegendShape === "none" ? "rgba(0,0,0,0)" : $("insideLegendBoxColor").value,
@@ -1696,6 +1790,11 @@
         gridLineWidth: "1",
         fontFamily: "Arial",
         fontSize: "14",
+        titleFontSize: "24",
+        axisTitleFontSize: "14",
+        tickFontSize: "14",
+        mzLabelFontSize: "14",
+        insideLegendFontSize: "14",
         yOffset: "20",
         yScale: "120",
         yScale1: "120",
