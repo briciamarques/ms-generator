@@ -826,6 +826,10 @@
               <label for="groupGapAfter2" data-i18n="groupGapAfter2">Extra gap after spectrum 2 (%)</label>
               <input id="groupGapAfter2" type="number" min="0" max="30" value="0">
             </div>
+            <div class="field">
+              <label for="xLabelDistance" data-i18n="xLabelDistance">m/z label distance (px)</label>
+              <input id="xLabelDistance" type="number" min="0" max="80" value="18">
+            </div>
           </div>
         </details>
         <label class="toggle">
@@ -996,6 +1000,7 @@
         compositeLayoutGroup: "Composite layout",
         showSecondXAxis: "Show X axis on spectrum 2",
         groupGapAfter2: "Extra gap after spectrum 2 (%)",
+        xLabelDistance: "m/z label distance (px)",
         lockY: "Lock Y scales of all spectra",
         lockX: "Lock X ranges of all spectra",
         labelPeaks: "Label main peaks",
@@ -1091,6 +1096,7 @@
         compositeLayoutGroup: "Layout composto",
         showSecondXAxis: "Mostrar eixo X no espectro 2",
         groupGapAfter2: "Espaço extra após o espectro 2 (%)",
+        xLabelDistance: "Distância do rótulo m/z (px)",
         lockY: "Travar escalas Y de todos os espectros",
         lockX: "Travar eixos X de todos os espectros",
         labelPeaks: "Rotular picos principais",
@@ -1432,6 +1438,9 @@
       const compactStack = total > 1 && cleanGapPercent <= 2 && cleanGroupGapPercent <= 2;
       const shareBoxBoundaries = $("closeBox").checked && total > 1 && cleanGapPercent === 0 && cleanGroupGapPercent === 0;
       const showSecondXAxis = $("showSecondXAxis").checked && total >= 2;
+      const compositeSplit = showSecondXAxis || cleanGroupGapPercent > 0;
+      const rawXLabelDistance = Number($("xLabelDistance").value);
+      const xLabelDistance = Number.isFinite(rawXLabelDistance) ? Math.min(Math.max(rawXLabelDistance, 0), 80) : 18;
       const lockX = $("lockX").checked;
       const minMz = numberValue("minMz");
       const maxMz = numberValue("maxMz");
@@ -1500,10 +1509,14 @@
         const yAxisId = getAxisId("y", i);
         const xAxisId = getAxisId("x", i);
         const isBottomAxis = i === total - 1;
+        const showsXAxisLabels = !lockX || isBottomAxis || (showSecondXAxis && i === 1);
+        const showsXAxisTitle = isBottomAxis || (showSecondXAxis && i === 1);
+        const xAxisMirror = shareBoxBoundaries ? i === 0 : $("closeBox").checked && (!compositeSplit || i === 0);
         layout[xAxisName] = {
           ...axisCommon,
-          mirror: shareBoxBoundaries ? i === 0 : $("closeBox").checked,
-          title: isBottomAxis || (showSecondXAxis && i === 1) ? { text: formatPlotText($("xLabel").value), standoff: 18, font: { size: axisTitleFontSize } } : undefined,
+          showline: $("closeBox").checked || showsXAxisLabels,
+          mirror: xAxisMirror,
+          title: showsXAxisTitle ? { text: formatPlotText($("xLabel").value), standoff: xLabelDistance, font: { size: axisTitleFontSize } } : undefined,
           range: Number.isFinite(getXMin(i)) && Number.isFinite(getXMax(i)) ? [getXMin(i), getXMax(i)] : undefined,
           autorange: !(Number.isFinite(getXMin(i)) && Number.isFinite(getXMax(i))),
           tickmode: Number.isFinite(getXTickStep(i)) && getXTickStep(i) > 0 ? "linear" : undefined,
@@ -1511,7 +1524,7 @@
           tick0: Number.isFinite(getXMin(i)) ? getXMin(i) : undefined,
           anchor: yAxisId,
           domain: [0, 1],
-          showticklabels: lockX ? isBottomAxis || (showSecondXAxis && i === 1) : true,
+          showticklabels: showsXAxisLabels,
           matches: lockX && i > 0 ? "x" : undefined
         };
         layout[axisName] = {
@@ -1851,6 +1864,7 @@
         threshold: "10",
         spectrumGap: "8",
         groupGapAfter2: "0",
+        xLabelDistance: "18",
         exportWidth: "1200",
         exportHeight: "700",
         exportScale: "2"
