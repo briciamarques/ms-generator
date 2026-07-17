@@ -183,6 +183,21 @@
       margin-bottom: 18px;
     }
 
+    .format-note {
+      margin: -4px 0 18px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .x-individual-field {
+      display: none;
+    }
+
+    body.x-unlocked .x-individual-field {
+      display: block;
+    }
+
     .field label,
     .label {
       display: block;
@@ -488,6 +503,9 @@
             <input id="yLabel" type="text" value="Relative intensity (%)">
           </div>
           <div class="field">
+            <p class="format-note" data-i18n="formatNote">Use _ for subscript and ^ for superscript: H_2O, M^+, SO_4^{2-}.</p>
+          </div>
+          <div class="field">
             <label for="legendMode" data-i18n="legendMode">Spectrum label display</label>
             <select id="legendMode">
               <option value="legend">Legend below plot</option>
@@ -642,51 +660,51 @@
             <label for="xTickStep" data-i18n="xTickStep">X tick interval (auto if empty)</label>
             <input id="xTickStep" type="number" min="0" step="any">
           </div>
-          <div class="field">
+          <div class="field x-individual-field">
             <label for="minMz1" data-i18n="minMz1">Min m/z 1</label>
             <input id="minMz1" type="number" step="any">
           </div>
-          <div class="field">
+          <div class="field x-individual-field">
             <label for="maxMz1" data-i18n="maxMz1">Max m/z 1</label>
             <input id="maxMz1" type="number" step="any">
           </div>
-          <div class="field">
+          <div class="field x-individual-field">
             <label for="xTickStep1" data-i18n="xTickStep1">X tick interval 1</label>
             <input id="xTickStep1" type="number" min="0" step="any">
           </div>
-          <div class="field">
+          <div class="field x-individual-field">
             <label for="minMz2" data-i18n="minMz2">Min m/z 2</label>
             <input id="minMz2" type="number" step="any">
           </div>
-          <div class="field">
+          <div class="field x-individual-field">
             <label for="maxMz2" data-i18n="maxMz2">Max m/z 2</label>
             <input id="maxMz2" type="number" step="any">
           </div>
-          <div class="field">
+          <div class="field x-individual-field">
             <label for="xTickStep2" data-i18n="xTickStep2">X tick interval 2</label>
             <input id="xTickStep2" type="number" min="0" step="any">
           </div>
-          <div class="field">
+          <div class="field x-individual-field">
             <label for="minMz3" data-i18n="minMz3">Min m/z 3</label>
             <input id="minMz3" type="number" step="any">
           </div>
-          <div class="field">
+          <div class="field x-individual-field">
             <label for="maxMz3" data-i18n="maxMz3">Max m/z 3</label>
             <input id="maxMz3" type="number" step="any">
           </div>
-          <div class="field">
+          <div class="field x-individual-field">
             <label for="xTickStep3" data-i18n="xTickStep3">X tick interval 3</label>
             <input id="xTickStep3" type="number" min="0" step="any">
           </div>
-          <div class="field">
+          <div class="field x-individual-field">
             <label for="minMz4" data-i18n="minMz4">Min m/z 4</label>
             <input id="minMz4" type="number" step="any">
           </div>
-          <div class="field">
+          <div class="field x-individual-field">
             <label for="maxMz4" data-i18n="maxMz4">Max m/z 4</label>
             <input id="maxMz4" type="number" step="any">
           </div>
-          <div class="field">
+          <div class="field x-individual-field">
             <label for="xTickStep4" data-i18n="xTickStep4">X tick interval 4</label>
             <input id="xTickStep4" type="number" min="0" step="any">
           </div>
@@ -808,6 +826,7 @@
         xLabel: "X label",
         yLabel: "Y label",
         legendMode: "Spectrum label display",
+        formatNote: "Use _ for subscript and ^ for superscript: H_2O, M^+, SO_4^{2-}.",
         insideLegendX: "Inside name X position (%)",
         insideLegendY: "Inside name Y position (%)",
         insideLegendTextColor: "Inside name text color",
@@ -899,6 +918,7 @@
         xLabel: "Rótulo X",
         yLabel: "Rótulo Y",
         peakColor: "Cor dos picos",
+        formatNote: "Use _ para subscrito e ^ para sobrescrito: H_2O, M^+, SO_4^{2-}.",
         peakColor2: "Cor dos picos (2º)",
         peakColor3: "Cor dos picos (3º)",
         peakColor4: "Cor dos picos (4º)",
@@ -963,6 +983,10 @@
       const collapsed = document.body.classList.contains("controls-collapsed");
       const labels = language === "pt" ? ["Ocultar ajustes", "Mostrar ajustes"] : ["Hide settings", "Show settings"];
       $("controlsToggle").textContent = labels[collapsed ? 1 : 0];
+    }
+
+    function syncXControlVisibility() {
+      document.body.classList.toggle("x-unlocked", !$("lockX").checked);
     }
 
     let language = "en";
@@ -1329,6 +1353,7 @@
           mirror: shareBoxBoundaries ? i === 0 : $("closeBox").checked,
           title: isBottomAxis ? { text: formatPlotText($("xLabel").value), standoff: 18 } : undefined,
           range: Number.isFinite(getXMin(i)) && Number.isFinite(getXMax(i)) ? [getXMin(i), getXMax(i)] : undefined,
+          autorange: !(Number.isFinite(getXMin(i)) && Number.isFinite(getXMax(i))),
           tickmode: Number.isFinite(getXTickStep(i)) && getXTickStep(i) > 0 ? "linear" : undefined,
           dtick: Number.isFinite(getXTickStep(i)) && getXTickStep(i) > 0 ? getXTickStep(i) : undefined,
           tick0: Number.isFinite(getXMin(i)) ? getXMin(i) : undefined,
@@ -1680,6 +1705,7 @@
       $("normalize").checked = true;
       $("lockY").checked = true;
       $("lockX").checked = true;
+      syncXControlVisibility();
       $("labelPeaks").checked = true;
       $("clickMz").checked = false;
       $("previewExport").checked = false;
@@ -1745,6 +1771,10 @@
     $("generate").addEventListener("click", () => renderPlot());
     $("download").addEventListener("click", downloadPng);
     $("resetDefaults").addEventListener("click", resetDefaults);
+    $("lockX").addEventListener("change", () => {
+      syncXControlVisibility();
+      renderPlot();
+    });
     $("controlsToggle").addEventListener("click", () => {
       document.body.classList.toggle("controls-collapsed");
       updateControlsToggleText();
@@ -1786,6 +1816,7 @@
 338.4 100
 376.9 72
 409.2 31`;
+    syncXControlVisibility();
     updateLanguage("en");
   </script>
 </body>
