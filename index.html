@@ -705,7 +705,7 @@
               <span data-i18n="showGrid">Show grid</span>
             </label>
             <label class="toggle">
-              <input type="checkbox" id="closeBox">
+              <input type="checkbox" id="closeBox" checked>
               <span data-i18n="closeBox">Close plot box</span>
             </label>
             <label class="toggle">
@@ -1438,7 +1438,7 @@
       const compactStack = total > 1 && cleanGapPercent <= 2 && cleanGroupGapPercent <= 2;
       const shareBoxBoundaries = $("closeBox").checked && total > 1 && cleanGapPercent === 0 && cleanGroupGapPercent === 0;
       const showSecondXAxis = $("showSecondXAxis").checked && total >= 2;
-      const compositeSplit = showSecondXAxis || cleanGroupGapPercent > 0;
+      const mergeTouchingBoxes = $("closeBox").checked && total > 1 && cleanGapPercent === 0 && cleanGroupGapPercent === 0;
       const rawXLabelDistance = Number($("xLabelDistance").value);
       const xLabelDistance = Number.isFinite(rawXLabelDistance) ? Math.min(Math.max(rawXLabelDistance, 0), 80) : 18;
       const lockX = $("lockX").checked;
@@ -1511,7 +1511,7 @@
         const isBottomAxis = i === total - 1;
         const showsXAxisLabels = !lockX || isBottomAxis || (showSecondXAxis && i === 1);
         const showsXAxisTitle = isBottomAxis || (showSecondXAxis && i === 1);
-        const xAxisMirror = shareBoxBoundaries ? i === 0 : $("closeBox").checked && (!compositeSplit || i === 0);
+        const xAxisMirror = shareBoxBoundaries ? i === 0 : $("closeBox").checked && !(mergeTouchingBoxes && i > 0);
         layout[xAxisName] = {
           ...axisCommon,
           showline: $("closeBox").checked || showsXAxisLabels,
@@ -1873,7 +1873,7 @@
         if ($(id)) $(id).value = value;
       });
       $("showGrid").checked = true;
-      $("closeBox").checked = false;
+      $("closeBox").checked = true;
       $("showDots").checked = false;
       $("normalize").checked = true;
       $("lockY").checked = true;
