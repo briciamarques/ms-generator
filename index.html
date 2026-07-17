@@ -1772,7 +1772,8 @@
 
     function drawPlotBoxOverlay() {
       const svg = document.querySelector("#plot svg.main-svg");
-      if (!svg) return;
+      const plotDiv = $("plot");
+      if (!svg || !plotDiv) return;
       svg.querySelector(".plot-box-overlay")?.remove();
       const sourceLines = Array.from(document.querySelectorAll("#plot path.xlines-above.crisp, #plot path.ylines-above.crisp"));
       sourceLines.forEach(path => {
@@ -1780,27 +1781,40 @@
       });
       if (!$("closeBox").checked) return;
 
+      const plotRects = Array.from(document.querySelectorAll("#plot .draglayer rect.nsewdrag.drag"));
+      if (!plotRects.length) return;
+
       const overlay = document.createElementNS("http://www.w3.org/2000/svg", "g");
       overlay.setAttribute("class", "plot-box-overlay");
       const seenLines = new Set();
-      const lineData = sourceLines
-        .map(path => path.getAttribute("d"))
-        .filter(Boolean)
-        .filter(d => {
-          const match = d.match(/^M([0-9.-]+),([0-9.-]+)L([0-9.-]+),([0-9.-]+)$/);
-          if (!match) return true;
-          const [, x1, y1, x2, y2] = match.map(Number);
-          const horizontal = Math.abs(y1 - y2) < 0.5;
-          const vertical = Math.abs(x1 - x2) < 0.5;
-          const key = horizontal
-            ? `h:${Math.round(y1)}:${Math.round(Math.min(x1, x2))}:${Math.round(Math.max(x1, x2))}`
-            : vertical
-              ? `v:${Math.round(x1)}:${Math.round(Math.min(y1, y2))}:${Math.round(Math.max(y1, y2))}`
-              : d;
-          if (seenLines.has(key)) return false;
-          seenLines.add(key);
-          return true;
-        });
+      const lineData = [];
+      const addLine = (x1, y1, x2, y2) => {
+        if (![x1, y1, x2, y2].every(Number.isFinite)) return;
+        const horizontal = Math.abs(y1 - y2) < 0.5;
+        const vertical = Math.abs(x1 - x2) < 0.5;
+        const key = horizontal
+          ? `h:${Math.round(y1)}:${Math.round(Math.min(x1, x2))}:${Math.round(Math.max(x1, x2))}`
+          : vertical
+            ? `v:${Math.round(x1)}:${Math.round(Math.min(y1, y2))}:${Math.round(Math.max(y1, y2))}`
+            : `d:${[x1, y1, x2, y2].map(value => Math.round(value)).join(":")}`;
+        if (seenLines.has(key)) return;
+        seenLines.add(key);
+        lineData.push(`M${x1},${y1}L${x2},${y2}`);
+      };
+
+      plotRects.forEach(rect => {
+        const left = Number(rect.getAttribute("x"));
+        const top = Number(rect.getAttribute("y"));
+        const width = Number(rect.getAttribute("width"));
+        const height = Number(rect.getAttribute("height"));
+        const right = left + width;
+        const bottom = top + height;
+        addLine(left, top, right, top);
+        addLine(left, bottom, right, bottom);
+        addLine(left, top, left, bottom);
+        addLine(right, top, right, bottom);
+      });
+
       sourceLines.forEach(path => {
         path.style.opacity = "0";
       });
