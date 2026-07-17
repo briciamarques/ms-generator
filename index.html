@@ -643,6 +643,54 @@
             <input id="xTickStep" type="number" min="0" step="any">
           </div>
           <div class="field">
+            <label for="minMz1" data-i18n="minMz1">Min m/z 1</label>
+            <input id="minMz1" type="number" step="any">
+          </div>
+          <div class="field">
+            <label for="maxMz1" data-i18n="maxMz1">Max m/z 1</label>
+            <input id="maxMz1" type="number" step="any">
+          </div>
+          <div class="field">
+            <label for="xTickStep1" data-i18n="xTickStep1">X tick interval 1</label>
+            <input id="xTickStep1" type="number" min="0" step="any">
+          </div>
+          <div class="field">
+            <label for="minMz2" data-i18n="minMz2">Min m/z 2</label>
+            <input id="minMz2" type="number" step="any">
+          </div>
+          <div class="field">
+            <label for="maxMz2" data-i18n="maxMz2">Max m/z 2</label>
+            <input id="maxMz2" type="number" step="any">
+          </div>
+          <div class="field">
+            <label for="xTickStep2" data-i18n="xTickStep2">X tick interval 2</label>
+            <input id="xTickStep2" type="number" min="0" step="any">
+          </div>
+          <div class="field">
+            <label for="minMz3" data-i18n="minMz3">Min m/z 3</label>
+            <input id="minMz3" type="number" step="any">
+          </div>
+          <div class="field">
+            <label for="maxMz3" data-i18n="maxMz3">Max m/z 3</label>
+            <input id="maxMz3" type="number" step="any">
+          </div>
+          <div class="field">
+            <label for="xTickStep3" data-i18n="xTickStep3">X tick interval 3</label>
+            <input id="xTickStep3" type="number" min="0" step="any">
+          </div>
+          <div class="field">
+            <label for="minMz4" data-i18n="minMz4">Min m/z 4</label>
+            <input id="minMz4" type="number" step="any">
+          </div>
+          <div class="field">
+            <label for="maxMz4" data-i18n="maxMz4">Max m/z 4</label>
+            <input id="maxMz4" type="number" step="any">
+          </div>
+          <div class="field">
+            <label for="xTickStep4" data-i18n="xTickStep4">X tick interval 4</label>
+            <input id="xTickStep4" type="number" min="0" step="any">
+          </div>
+          <div class="field">
             <label for="threshold" data-i18n="threshold">Label threshold (%)</label>
             <input id="threshold" type="number" min="0" max="100" value="10">
           </div>
@@ -654,6 +702,10 @@
         <label class="toggle">
           <input type="checkbox" id="lockY" checked>
           <span data-i18n="lockY">Lock Y scales of all spectra</span>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" id="lockX" checked>
+          <span data-i18n="lockX">Lock X ranges of all spectra</span>
         </label>
         <label class="toggle">
           <input type="checkbox" id="labelPeaks" checked>
@@ -785,12 +837,25 @@
         yScale3: "Y scale 3 (%)",
         yScale4: "Y scale 4 (%)",
         decimals: "m/z decimal places",
-        minMz: "Min m/z (auto if empty)",
-        maxMz: "Max m/z (auto if empty)",
-        xTickStep: "X tick interval (auto if empty)",
+        minMz: "Min m/z (all; auto if empty)",
+        maxMz: "Max m/z (all; auto if empty)",
+        xTickStep: "X tick interval (all; auto if empty)",
+        minMz1: "Min m/z 1",
+        maxMz1: "Max m/z 1",
+        xTickStep1: "X tick interval 1",
+        minMz2: "Min m/z 2",
+        maxMz2: "Max m/z 2",
+        xTickStep2: "X tick interval 2",
+        minMz3: "Min m/z 3",
+        maxMz3: "Max m/z 3",
+        xTickStep3: "X tick interval 3",
+        minMz4: "Min m/z 4",
+        maxMz4: "Max m/z 4",
+        xTickStep4: "X tick interval 4",
         threshold: "Label threshold (%)",
         spectrumGap: "Spectra spacing (%)",
         lockY: "Lock Y scales of all spectra",
+        lockX: "Lock X ranges of all spectra",
         labelPeaks: "Label main peaks",
         clickMz: "Manual m/z labels",
         clearSelection: "Clear manual labels",
@@ -855,11 +920,24 @@
         yScale3: "Escala Y 3 (%)",
         yScale4: "Escala Y 4 (%)",
         decimals: "Casas decimais de m/z",
-        minMz: "m/z mínimo (automático se vazio)",
-        maxMz: "m/z máximo (automático se vazio)",
+        minMz: "m/z mínimo (todos; automático se vazio)",
+        maxMz: "m/z máximo (todos; automático se vazio)",
+        minMz1: "m/z mínimo 1",
+        maxMz1: "m/z máximo 1",
+        xTickStep1: "Intervalo X 1",
+        minMz2: "m/z mínimo 2",
+        maxMz2: "m/z máximo 2",
+        xTickStep2: "Intervalo X 2",
+        minMz3: "m/z mínimo 3",
+        maxMz3: "m/z máximo 3",
+        xTickStep3: "Intervalo X 3",
+        minMz4: "m/z mínimo 4",
+        maxMz4: "m/z máximo 4",
+        xTickStep4: "Intervalo X 4",
         threshold: "Limite para rotular (%)",
         spectrumGap: "Espaçamento entre espectros (%)",
         lockY: "Travar escalas Y de todos os espectros",
+        lockX: "Travar eixos X de todos os espectros",
         labelPeaks: "Rotular picos principais",
         clickMz: "Rótulos manuais de m/z",
         clearSelection: "Limpar rótulos manuais",
@@ -899,6 +977,20 @@
 
     function t(key) {
       return translations[language][key];
+    }
+
+    function formatPlotText(text) {
+      return String(text || "")
+        .replace(/_\{([^}]+)\}/g, "<sub>$1</sub>")
+        .replace(/\^\{([^}]+)\}/g, "<sup>$1</sup>")
+        .replace(/_([A-Za-z0-9+\-])/g, "<sub>$1</sub>")
+        .replace(/\^([A-Za-z0-9+\-])/g, "<sup>$1</sup>");
+    }
+
+    function numberValue(id) {
+      if (!$(id) || $(id).value === "") return undefined;
+      const value = Number($(id).value);
+      return Number.isFinite(value) ? value : undefined;
     }
 
     function updateLanguage(nextLanguage) {
@@ -994,7 +1086,7 @@
         x,
         y,
         customdata,
-        name: spectrum.name,
+        name: formatPlotText(spectrum.name),
         line: { color: spectrum.color, width: 2 },
         hovertemplate: "m/z %{customdata:.4f}<br>%{y:.2f}%<extra></extra>",
         xaxis: xAxisId,
@@ -1164,9 +1256,13 @@
       const spectrumGap = cleanGapPercent / 100;
       const compactStack = total > 1 && cleanGapPercent <= 2;
       const shareBoxBoundaries = $("closeBox").checked && total > 1 && cleanGapPercent === 0;
-      const minMz = $("minMz").value === "" ? undefined : Number($("minMz").value);
-      const maxMz = $("maxMz").value === "" ? undefined : Number($("maxMz").value);
-      const xTickStep = $("xTickStep").value === "" ? undefined : Number($("xTickStep").value);
+      const lockX = $("lockX").checked;
+      const minMz = numberValue("minMz");
+      const maxMz = numberValue("maxMz");
+      const xTickStep = numberValue("xTickStep");
+      const getXMin = index => lockX ? minMz : numberValue(`minMz${index + 1}`);
+      const getXMax = index => lockX ? maxMz : numberValue(`maxMz${index + 1}`);
+      const getXTickStep = index => lockX ? xTickStep : numberValue(`xTickStep${index + 1}`);
       const gridLineWidth = Number($("gridLineWidth").value) || 1;
       const boxLineWidth = Number($("boxLineWidth").value) || 1;
       const legendMode = $("legendMode").value;
@@ -1189,7 +1285,7 @@
       };
       const layout = {
         title: {
-          text: $("chartTitle").value,
+          text: formatPlotText($("chartTitle").value),
           x: 0.5,
           xanchor: "center",
           font: { size: fontSize + 10, color: $("textColor").value }
@@ -1205,7 +1301,7 @@
 
       if (total > 1) {
         layout.annotations.push({
-          text: $("yLabel").value,
+          text: formatPlotText($("yLabel").value),
           x: -0.075 - (Number($("yOffset").value || 0) / 1400),
           y: 0.5,
           xref: "paper",
@@ -1231,19 +1327,19 @@
         layout[xAxisName] = {
           ...axisCommon,
           mirror: shareBoxBoundaries ? i === 0 : $("closeBox").checked,
-          title: isBottomAxis ? { text: $("xLabel").value, standoff: 18 } : undefined,
-          range: Number.isFinite(minMz) && Number.isFinite(maxMz) ? [minMz, maxMz] : undefined,
-          tickmode: Number.isFinite(xTickStep) && xTickStep > 0 ? "linear" : undefined,
-          dtick: Number.isFinite(xTickStep) && xTickStep > 0 ? xTickStep : undefined,
-          tick0: Number.isFinite(minMz) ? minMz : undefined,
+          title: isBottomAxis ? { text: formatPlotText($("xLabel").value), standoff: 18 } : undefined,
+          range: Number.isFinite(getXMin(i)) && Number.isFinite(getXMax(i)) ? [getXMin(i), getXMax(i)] : undefined,
+          tickmode: Number.isFinite(getXTickStep(i)) && getXTickStep(i) > 0 ? "linear" : undefined,
+          dtick: Number.isFinite(getXTickStep(i)) && getXTickStep(i) > 0 ? getXTickStep(i) : undefined,
+          tick0: Number.isFinite(getXMin(i)) ? getXMin(i) : undefined,
           anchor: yAxisId,
           domain: [0, 1],
-          showticklabels: isBottomAxis,
-          matches: i === 0 ? undefined : "x"
+          showticklabels: lockX ? isBottomAxis : true,
+          matches: lockX && i > 0 ? "x" : undefined
         };
         layout[axisName] = {
           ...axisCommon,
-          title: total === 1 && i === 0 ? { text: $("yLabel").value, standoff: 20 } : undefined,
+          title: total === 1 && i === 0 ? { text: formatPlotText($("yLabel").value), standoff: 20 } : undefined,
           range: [0, getYScale(i, yMax)],
           ...getYAxisTicks(getYScale(i, yMax), i, compactStack),
           domain: axisDomain(i, total, spectrumGap),
@@ -1253,7 +1349,7 @@
           const domain = axisDomain(i, total, spectrumGap);
           const panelY = domain[0] + (domain[1] - domain[0]) * insideLegendY;
           layout.annotations.push({
-            text: spectra[i].name,
+            text: formatPlotText(spectra[i].name),
             x: insideLegendX,
             y: panelY,
             xref: "paper",
@@ -1557,6 +1653,18 @@
         minMz: "",
         maxMz: "",
         xTickStep: "",
+        minMz1: "",
+        maxMz1: "",
+        xTickStep1: "",
+        minMz2: "",
+        maxMz2: "",
+        xTickStep2: "",
+        minMz3: "",
+        maxMz3: "",
+        xTickStep3: "",
+        minMz4: "",
+        maxMz4: "",
+        xTickStep4: "",
         threshold: "10",
         spectrumGap: "8",
         exportWidth: "1200",
@@ -1571,6 +1679,7 @@
       $("showDots").checked = false;
       $("normalize").checked = true;
       $("lockY").checked = true;
+      $("lockX").checked = true;
       $("labelPeaks").checked = true;
       $("clickMz").checked = false;
       $("previewExport").checked = false;
