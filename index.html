@@ -183,6 +183,7 @@
 
     body.controls-collapsed .tabs,
     body.controls-collapsed .panel,
+    body.controls-collapsed .project-panel,
     body.controls-collapsed .actions,
     body.controls-collapsed .status {
       display: none;
@@ -334,6 +335,33 @@
       padding: 0 28px 26px;
     }
 
+    .project-panel {
+      border-top: 1px solid var(--line);
+      padding: 18px 28px;
+      background: #fbfcfe;
+    }
+
+    .project-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+
+    .project-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .project-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
     .file-line {
       display: flex;
       flex-wrap: wrap;
@@ -444,10 +472,15 @@
       }
 
       .panel,
+      .project-panel,
       .actions,
       .status {
         padding-left: 18px;
         padding-right: 18px;
+      }
+
+      .project-grid {
+        grid-template-columns: 1fr;
       }
 
       textarea {
@@ -873,6 +906,25 @@
         </label>
       </div>
 
+      <div class="project-panel" aria-label="Saved projects">
+        <div class="project-grid">
+          <div class="field">
+            <label for="projectName" data-i18n="projectName">Project name</label>
+            <input id="projectName" type="text" placeholder="My spectrum figure">
+          </div>
+          <div class="field">
+            <label for="savedProjectSelect" data-i18n="savedProjects">Saved projects</label>
+            <select id="savedProjectSelect"></select>
+          </div>
+        </div>
+        <div class="project-actions">
+          <button type="button" class="secondary" id="saveProject" data-i18n="saveProject">Save project</button>
+          <button type="button" class="secondary" id="loadProject" data-i18n="loadProject">Open project</button>
+          <button type="button" class="secondary" id="deleteProject" data-i18n="deleteProject">Delete project</button>
+        </div>
+        <p class="project-note" data-i18n="projectNote">Projects are saved in this browser on this computer.</p>
+      </div>
+
       <div class="actions">
         <button type="button" class="primary" id="generate" data-i18n="generate">Generate spectrum</button>
         <button type="button" class="secondary" id="download" data-i18n="download">Download PNG</button>
@@ -1011,6 +1063,14 @@
         height: "Height (px)",
         scale: "Scale (DPI)",
         previewExport: "Preview at export size",
+        projectName: "Project name",
+        savedProjects: "Saved projects",
+        saveProject: "Save project",
+        loadProject: "Open project",
+        deleteProject: "Delete project",
+        projectNote: "Projects are saved in this browser on this computer.",
+        newProject: "New project",
+        noSavedProjects: "No saved projects yet",
         generate: "Generate spectrum",
         download: "Download PNG",
         footer: "Made with Plotly.js · All calculations run in the browser",
@@ -1018,6 +1078,10 @@
         empty: "Add at least one valid pair of m/z and intensity values.",
         parseError: "Some lines could not be read and were skipped.",
         fileLoaded: "File loaded. Generate the spectrum to update the chart.",
+        projectSaved: name => `Project saved: ${name}`,
+        projectLoaded: name => `Project opened: ${name}`,
+        projectDeleted: name => `Project deleted: ${name}`,
+        projectMissing: "Choose a saved project first.",
         selectionCleared: "Peak selection cleared.",
         selected: mz => `Manual label added: m/z ${mz}`
       },
@@ -1107,6 +1171,14 @@
         height: "Altura (px)",
         scale: "Escala (DPI)",
         previewExport: "Pré-visualizar no tamanho exportado",
+        projectName: "Nome do projeto",
+        savedProjects: "Projetos salvos",
+        saveProject: "Salvar projeto",
+        loadProject: "Abrir projeto",
+        deleteProject: "Apagar projeto",
+        projectNote: "Os projetos ficam salvos neste navegador deste computador.",
+        newProject: "Novo projeto",
+        noSavedProjects: "Nenhum projeto salvo ainda",
         generate: "Gerar espectro",
         download: "Baixar PNG",
         footer: "Feito com Plotly.js · Todos os cálculos rodam no navegador",
@@ -1114,6 +1186,10 @@
         empty: "Adicione pelo menos um par válido de m/z e intensidade.",
         parseError: "Algumas linhas não puderam ser lidas e foram ignoradas.",
         fileLoaded: "Arquivo carregado. Gere o espectro para atualizar o gráfico.",
+        projectSaved: name => `Projeto salvo: ${name}`,
+        projectLoaded: name => `Projeto aberto: ${name}`,
+        projectDeleted: name => `Projeto apagado: ${name}`,
+        projectMissing: "Escolha um projeto salvo primeiro.",
         selectionCleared: "Seleção de pico limpa.",
         selected: mz => `Rótulo manual adicionado: m/z ${mz}`
       }
@@ -1139,6 +1215,7 @@
     let relayoutHandlerBound = false;
     let annotationClickHandlerBound = false;
     let lastAnnotationClick = { key: "", time: 0 };
+    const PROJECT_STORAGE_KEY = "msGeneratorProjects";
 
     function t(key) {
       return translations[language][key];
@@ -1173,6 +1250,7 @@
         $("resetDefaults").textContent = nextLanguage === "pt" ? "Restaurar padroes" : "Reset defaults";
       }
       updateControlsToggleText();
+      refreshProjectList();
       renderPlot();
     }
 
@@ -1842,6 +1920,128 @@
       $("spectrum4").classList.toggle("hidden", !$("secondSpectrum").checked || !$("thirdSpectrum").checked || !$("fourthSpectrum").checked);
     }
 
+    function projectFieldElements() {
+      return Array.from(document.querySelectorAll("#panel-data input, #panel-data textarea, #panel-data select, #panel-style input, #panel-style textarea, #panel-style select, #panel-axes input, #panel-axes textarea, #panel-axes select, #panel-export input, #panel-export textarea, #panel-export select"))
+        .filter(element => element.id && element.type !== "file");
+    }
+
+    function readProjects() {
+      try {
+        const projects = JSON.parse(localStorage.getItem(PROJECT_STORAGE_KEY) || "[]");
+        return Array.isArray(projects) ? projects : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function writeProjects(projects) {
+      localStorage.setItem(PROJECT_STORAGE_KEY, JSON.stringify(projects));
+      refreshProjectList();
+    }
+
+    function projectFromForm(name) {
+      const fields = {};
+      projectFieldElements().forEach(element => {
+        fields[element.id] = element.type === "checkbox" ? element.checked : element.value;
+      });
+      return {
+        id: $("savedProjectSelect").value || `project-${Date.now()}`,
+        name,
+        updatedAt: new Date().toISOString(),
+        fields,
+        selectedPeaks: selectedPeaks.map(label => ({ ...label })),
+        labelEdits: { ...labelEdits }
+      };
+    }
+
+    function applyProject(project) {
+      Object.entries(project.fields || {}).forEach(([id, value]) => {
+        const element = $(id);
+        if (!element || element.type === "file") return;
+        if (element.type === "checkbox") {
+          element.checked = Boolean(value);
+        } else {
+          element.value = value ?? "";
+        }
+      });
+      selectedPeaks = Array.isArray(project.selectedPeaks) ? project.selectedPeaks.map(label => ({ ...label })) : [];
+      labelEdits = project.labelEdits && typeof project.labelEdits === "object" ? { ...project.labelEdits } : {};
+      renderedAnnotationKeys = [];
+      $("projectName").value = project.name || "";
+      $("savedProjectSelect").value = project.id;
+      syncSpectrumVisibility();
+      syncXControlVisibility();
+      updateProjectButtons();
+      renderPlot(t("projectLoaded")(project.name || t("newProject")));
+    }
+
+    function refreshProjectList() {
+      const select = $("savedProjectSelect");
+      if (!select) return;
+      const current = select.value;
+      const projects = readProjects().sort((a, b) => String(b.updatedAt || "").localeCompare(String(a.updatedAt || "")));
+      select.innerHTML = "";
+      const emptyOption = document.createElement("option");
+      emptyOption.value = "";
+      emptyOption.textContent = projects.length ? t("newProject") : t("noSavedProjects");
+      select.appendChild(emptyOption);
+      projects.forEach(project => {
+        const option = document.createElement("option");
+        option.value = project.id;
+        option.textContent = project.name || t("newProject");
+        select.appendChild(option);
+      });
+      select.value = projects.some(project => project.id === current) ? current : "";
+      updateProjectButtons();
+    }
+
+    function updateProjectButtons() {
+      if (!$("loadProject") || !$("deleteProject")) return;
+      const hasSelection = Boolean($("savedProjectSelect").value);
+      $("loadProject").disabled = !hasSelection;
+      $("deleteProject").disabled = !hasSelection;
+    }
+
+    function saveProject() {
+      const existingProjects = readProjects();
+      const selectedId = $("savedProjectSelect").value;
+      const selectedProject = existingProjects.find(project => project.id === selectedId);
+      const fallbackName = selectedProject?.name || $("chartTitle").value || t("newProject");
+      const name = ($("projectName").value || fallbackName).trim();
+      const project = projectFromForm(name);
+      const projects = existingProjects.filter(item => item.id !== project.id);
+      projects.unshift(project);
+      writeProjects(projects);
+      $("savedProjectSelect").value = project.id;
+      $("projectName").value = project.name;
+      updateProjectButtons();
+      $("status").textContent = t("projectSaved")(project.name);
+    }
+
+    function loadProject() {
+      const project = readProjects().find(item => item.id === $("savedProjectSelect").value);
+      if (!project) {
+        $("status").textContent = t("projectMissing");
+        return;
+      }
+      applyProject(project);
+    }
+
+    function deleteProject() {
+      const id = $("savedProjectSelect").value;
+      const projects = readProjects();
+      const project = projects.find(item => item.id === id);
+      if (!project) {
+        $("status").textContent = t("projectMissing");
+        return;
+      }
+      writeProjects(projects.filter(item => item.id !== id));
+      $("savedProjectSelect").value = "";
+      $("projectName").value = "";
+      updateProjectButtons();
+      $("status").textContent = t("projectDeleted")(project.name || t("newProject"));
+    }
+
     function resetDefaults() {
       const defaults = {
         chartTitle: "Mass Spectrum",
@@ -1986,6 +2186,14 @@
     });
     $("generate").addEventListener("click", () => renderPlot());
     $("download").addEventListener("click", downloadPng);
+    $("saveProject").addEventListener("click", saveProject);
+    $("loadProject").addEventListener("click", loadProject);
+    $("deleteProject").addEventListener("click", deleteProject);
+    $("savedProjectSelect").addEventListener("change", () => {
+      const project = readProjects().find(item => item.id === $("savedProjectSelect").value);
+      $("projectName").value = project ? project.name || "" : "";
+      updateProjectButtons();
+    });
     $("resetDefaults").addEventListener("click", resetDefaults);
     $("lockX").addEventListener("change", () => {
       syncXControlVisibility();
@@ -2005,7 +2213,7 @@
 
     document.querySelectorAll("input, textarea, select").forEach(input => {
       input.addEventListener("input", () => {
-        if (input.type !== "file") renderPlot();
+        if (input.type !== "file" && !input.closest(".project-panel")) renderPlot();
       });
     });
 
