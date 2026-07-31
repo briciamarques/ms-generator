@@ -1560,6 +1560,7 @@
     let clickHandlerBound = false;
     let relayoutHandlerBound = false;
     let annotationClickHandlerBound = false;
+    let annotationDblClickGuardBound = false;
     let lastAnnotationClick = { key: "", time: 0 };
     const PROJECT_STORAGE_KEY = "msGeneratorProjects";
     const JOURNAL_PRESETS_KEY = "msGeneratorJournalPresets";
@@ -2256,7 +2257,31 @@
       return layout;
     }
 
-    function renderPlot(statusMessage) {
+    function captureCurrentAxisRanges() {
+      const plot = $("plot");
+      const layout = plot?.layout;
+      if (!layout) return null;
+      const ranges = {};
+      Object.keys(layout).forEach(key => {
+        if (!/^xaxis\d*$/.test(key) && !/^yaxis\d*$/.test(key)) return;
+        const range = layout[key]?.range;
+        if (Array.isArray(range) && range.length === 2 && range.every(value => Number.isFinite(Number(value)))) {
+          ranges[key] = [Number(range[0]), Number(range[1])];
+        }
+      });
+      return Object.keys(ranges).length ? ranges : null;
+    }
+
+    function applyAxisRanges(layout, ranges) {
+      if (!ranges) return;
+      Object.entries(ranges).forEach(([axisName, range]) => {
+        if (!layout[axisName] || !Array.isArray(range)) return;
+        layout[axisName].range = range;
+        layout[axisName].autorange = false;
+      });
+    }
+
+    function renderPlot(statusMessage, options = {}) {
       const spectra = getSpectra();
       const status = $("status");
       if (!spectra.length) {
@@ -2268,7 +2293,9 @@
       const decimals = Number($("decimals").value) || 0;
       const threshold = Number($("threshold").value) || 0;
       const data = spectra.flatMap((spectrum, index) => makePeakTrace(spectrum, index, spectra.length, decimals, threshold));
+      const preservedRanges = options.preserveRanges ? captureCurrentAxisRanges() : null;
       const layout = buildLayout(spectra, threshold, decimals);
+      applyAxisRanges(layout, preservedRanges);
       updateCalculatedOutput();
       const config = {
         responsive: true,
@@ -2283,7 +2310,8 @@
           shapePosition: false,
           titleText: false
         },
-        modeBarButtonsToRemove: ["lasso2d", "select2d"]
+        modeBarButtonsToRemove: ["lasso2d", "select2d"],
+        doubleClick: $("clickMz").checked ? false : "reset"
       };
 
       if ($("previewExport")?.checked) {
@@ -2364,7 +2392,7 @@
           ay: -28
         });
       }
-      renderPlot(t("selected")(mz.toFixed(Number($("decimals").value) || 1)));
+      renderPlot(t("selected")(mz.toFixed(Number($("decimals").value) || 1)), { preserveRanges: true });
       $("status").textContent = t("selected")(mz.toFixed(Number($("decimals").value) || 1));
     }
 
@@ -2385,8 +2413,19 @@
     function hideAnnotationByKey(key) {
       labelEdits[key] = { ...(labelEdits[key] || {}), hidden: true };
       selectedPeaks = selectedPeaks.filter(label => label.key !== key);
-      renderPlot(t("selectionCleared"));
+      renderPlot(t("selectionCleared"), { preserveRanges: true });
     }
+
+    function isPointerInsideAnnotation(event) {
+      const annotations = Array.from(document.querySelectorAll("#plot .annotation"));
+      return annotations.find(item => {
+        const box = item.getBoundingClientRect();
+        return event.clientX >= box.left && event.clientX <= box.right
+          && event.clientY >= box.top && event.clientY <= box.bottom;
+      });
+    }
+
+
 
     function bindAnnotationRemoval() {
       const plot = $("plot");
@@ -2395,16 +2434,21 @@
         annotation.dataset.annotationKey = key || "";
         annotation.style.cursor = key && $("clickMz").checked ? "pointer" : "";
       });
+      if (!annotationDblClickGuardBound) {
+        plot.addEventListener("dblclick", event => {
+          if (!$("clickMz").checked || !isPointerInsideAnnotation(event)) return;
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }, true);
+        annotationDblClickGuardBound = true;
+      }
+
       if (plot.dataset.annotationRemovalBound === "true") return;
       plot.dataset.annotationRemovalBound = "true";
       document.addEventListener("click", event => {
         if (!$("clickMz").checked) return;
         const annotations = Array.from(document.querySelectorAll("#plot .annotation"));
-        const annotation = annotations.find(item => {
-          const box = item.getBoundingClientRect();
-          return event.clientX >= box.left && event.clientX <= box.right
-            && event.clientY >= box.top && event.clientY <= box.bottom;
-        });
+        const annotation = isPointerInsideAnnotation(event);
         if (!annotation) return;
         const index = annotations.indexOf(annotation);
         const key = renderedAnnotationKeys[index];
@@ -2436,7 +2480,7 @@
         annotationMoved = true;
       });
       if (annotationMoved) {
-        requestAnimationFrame(() => renderPlot());
+        requestAnimationFrame(() => renderPlot(undefined, { preserveRanges: true }));
       }
     }
 
@@ -3314,7 +3358,7 @@
       selectedPeaks = [];
       labelEdits = {};
       renderedAnnotationKeys = [];
-      renderPlot(t("selectionCleared"));
+      renderPlot(t("selectionCleared"), { preserveRanges: true });
     });
 
     document.querySelectorAll("input, textarea, select").forEach(input => {
