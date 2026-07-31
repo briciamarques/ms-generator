@@ -2365,6 +2365,12 @@
       const xTitleStandoff = Math.max(xLabelDistance, minimumAxisTitleStandoff);
       const yTitleStandoff = Math.max(yLabelDistance, minimumAxisTitleStandoff);
       const leftAxisMargin = Math.ceil(Math.max(total > 1 ? 88 : 64, tickFontSize * 1.8 + axisTitleFontSize + yTitleStandoff + 18));
+      const plotAreaWidthForPaper = Math.max(1, (Number($("exportWidth")?.value) || 1200) - leftAxisMargin - 24);
+      const sharedYTitleOffset = Math.min(
+        Math.max(24, leftAxisMargin - axisTitleFontSize * 0.35),
+        Math.max(48, tickFontSize * 1.8 + yTitleStandoff + axisTitleFontSize * 0.5)
+      );
+      const sharedYTitleX = -(sharedYTitleOffset / plotAreaWidthForPaper);
       const bottomAxisMargin = Math.ceil(Math.max(58, tickFontSize + axisTitleFontSize + xTitleStandoff + 18));
       const externalLegendMargin = total > 1 && $("legendMode").value === "legend" ? Math.ceil(fontSize * 1.5 + 18) : 0;
       const topAxisMargin = Math.ceil(Math.max($("chartTitle").value.trim() ? titleFontSize + 24 : 24, 24));
@@ -2418,7 +2424,7 @@
       if (total > 1) {
         layout.annotations.push({
           text: formatAxisTitleText($("yLabel").value),
-          x: -0.075 - (yTitleStandoff / 1400),
+          x: sharedYTitleX,
           y: 0.5,
           xref: "paper",
           yref: "paper",
