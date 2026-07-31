@@ -2091,6 +2091,17 @@
       return index === 0 ? prefix : `${prefix}${index + 1}`;
     }
 
+    function getMzDecimals() {
+      const value = Number($("decimals")?.value);
+      if (!Number.isFinite(value)) return 0;
+      return Math.min(Math.max(Math.round(value), 0), 6);
+    }
+
+    function formatMzLabel(value, decimals = getMzDecimals()) {
+      const numeric = Number(value);
+      return Number.isFinite(numeric) ? numeric.toFixed(decimals) : String(value || "");
+    }
+
     function makePeakTrace(spectrum, index, total, decimals, threshold) {
       const normalized = normalizePeaks(spectrum.peaks);
       const xAxisId = getAxisId("x", index);
@@ -2141,7 +2152,7 @@
           if (peak.y >= threshold) {
             labelX.push(peak.mz);
             labelY.push(peak.y);
-            labelText.push(peak.mz.toFixed(decimals));
+            labelText.push(formatMzLabel(peak.mz, decimals));
           }
         });
         traces.push({
@@ -2254,7 +2265,7 @@
             y: peak.y,
             xref,
             yref,
-            text: peak.mz.toFixed(decimals),
+            text: formatMzLabel(peak.mz, decimals),
             ax: 0,
             ay: -28
           }));
@@ -2264,7 +2275,10 @@
     function buildManualAnnotations(spectra, threshold, decimals) {
       const labels = [
         ...getDefaultLabelCandidates(spectra, threshold, decimals),
-        ...selectedPeaks
+        ...selectedPeaks.map(label => ({
+          ...label,
+          text: Number.isFinite(Number(label.x)) ? formatMzLabel(label.x, decimals) : label.text
+        }))
       ].map(applyLabelEdit).filter(label => !label.hidden);
       renderedAnnotationKeys = labels.map(label => label.key);
       return labels.map(makeAnnotation);
@@ -2537,7 +2551,7 @@
         return;
       }
 
-      const decimals = Number($("decimals").value) || 0;
+      const decimals = getMzDecimals();
       const threshold = Number($("threshold").value) || 0;
       const data = spectra.flatMap((spectrum, index) => makePeakTrace(spectrum, index, spectra.length, decimals, threshold));
       const preservedRanges = options.preserveRanges ? captureCurrentAxisRanges() : null;
@@ -2639,13 +2653,13 @@
           y,
           xref,
           yref,
-          text: mz.toFixed(Number($("decimals").value) || 1),
+          text: formatMzLabel(mz),
           ax: 0,
           ay: -28
         });
       }
-      renderPlot(t("selected")(mz.toFixed(Number($("decimals").value) || 1)), { preserveRanges: true });
-      $("status").textContent = t("selected")(mz.toFixed(Number($("decimals").value) || 1));
+      renderPlot(t("selected")(formatMzLabel(mz)), { preserveRanges: true });
+      $("status").textContent = t("selected")(formatMzLabel(mz));
     }
 
     function createCustomAnnotationFromForm(position) {
