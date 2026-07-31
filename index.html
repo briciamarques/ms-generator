@@ -32,11 +32,12 @@
     header {
       background: var(--panel);
       border-bottom: 1px solid var(--line);
-      padding: 30px clamp(18px, 4vw, 54px) 26px;
+      padding: 22px clamp(18px, 4vw, 54px) 20px;
       display: flex;
+      flex-wrap: wrap;
       align-items: flex-start;
       justify-content: space-between;
-      gap: 24px;
+      gap: 18px;
     }
 
     .title-row {
@@ -44,7 +45,7 @@
       align-items: center;
       gap: 10px;
       flex-wrap: wrap;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
 
     h1 {
@@ -83,11 +84,73 @@
     header p {
       margin: 0;
       color: var(--muted);
-      font-size: 20px;
+      font-size: 18px;
+    }
+    header > div:first-child {
+      min-width: min(100%, 360px);
+      max-width: 100%;
+      flex: 1 1 380px;
+    }
+
+    .header-tools {
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-end;
+      gap: 12px;
+      flex: 1 1 560px;
+      min-width: min(100%, 360px);
+      max-width: 100%;
+    }
+
+    header .project-panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: #fbfcfe;
+      box-shadow: none;
+      flex: 1 1 460px;
+      max-width: 620px;
+      min-width: 0;
+    }
+
+    header .project-grid {
+      grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr);
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    header .project-panel .field {
+      margin-bottom: 0;
+    }
+
+    header .project-panel label {
+      font-size: 11px;
+      margin-bottom: 4px;
+    }
+
+    header .project-panel input,
+    header .project-panel select {
+      min-height: 36px;
+      padding: 7px 9px;
+    }
+
+    header .project-actions {
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    header .project-actions button {
+      min-height: 34px;
+      padding: 0 10px;
+    }
+
+    header .project-note {
+      font-size: 12px;
     }
 
     .language {
       display: flex;
+      flex: 0 0 auto;
       gap: 8px;
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -108,7 +171,7 @@
       border-radius: 8px;
       background: #ffffff;
       color: var(--ink);
-      padding: 0 16px;
+      padding: 0 12px;
       cursor: pointer;
       transition: border-color 160ms ease, background 160ms ease, color 160ms ease, transform 160ms ease;
     }
@@ -136,10 +199,10 @@
     }
 
     main {
-      padding: 34px clamp(18px, 4vw, 54px);
+      padding: 22px clamp(18px, 4vw, 54px);
       display: grid;
       grid-template-columns: minmax(310px, 440px) minmax(540px, 1fr);
-      gap: 24px;
+      gap: 18px;
       align-items: start;
     }
 
@@ -156,8 +219,16 @@
       overflow: hidden;
     }
 
+    .controls {
+      max-height: calc(100vh - 150px);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
     .tabs {
       display: grid;
+      flex: 0 0 auto;
       grid-template-columns: repeat(4, 1fr);
       border-bottom: 1px solid var(--line);
     }
@@ -165,7 +236,7 @@
     .controls-toggle {
       display: none;
       width: 100%;
-      min-height: 52px;
+      min-height: 44px;
       border: 0;
       border-bottom: 1px solid var(--line);
       border-radius: 0;
@@ -183,7 +254,6 @@
 
     body.controls-collapsed .tabs,
     body.controls-collapsed .panel,
-    body.controls-collapsed .project-panel,
     body.controls-collapsed .actions,
     body.controls-collapsed .status {
       display: none;
@@ -192,7 +262,7 @@
     .tab {
       border: 0;
       border-radius: 0;
-      min-height: 64px;
+      min-height: 48px;
       font-weight: 700;
       color: var(--muted);
       background: #ffffff;
@@ -207,15 +277,18 @@
 
     .panel {
       display: none;
-      padding: 26px 28px;
+      padding: 16px 18px;
     }
 
     .panel.active {
       display: block;
+      overflow-y: auto;
+      flex: 1 1 auto;
+      min-height: 0;
     }
 
     .field {
-      margin-bottom: 18px;
+      margin-bottom: 12px;
     }
 
     .x-individual-field {
@@ -260,7 +333,7 @@
     }
 
     textarea {
-      min-height: 360px;
+      min-height: 300px;
       resize: vertical;
       line-height: 1.55;
       font-family: "Courier New", monospace;
@@ -270,22 +343,22 @@
     .field-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 16px;
+      gap: 12px;
     }
 
     .settings-group {
       border: 1px solid var(--line);
       border-radius: 8px;
-      margin-bottom: 16px;
+      margin-bottom: 10px;
       background: #fbfcfe;
       overflow: hidden;
     }
 
     .settings-group summary {
-      min-height: 52px;
+      min-height: 44px;
       display: flex;
       align-items: center;
-      padding: 0 16px;
+      padding: 0 12px;
       color: var(--accent);
       font-weight: 700;
       cursor: pointer;
@@ -298,19 +371,19 @@
 
     .settings-group .field-grid,
     .settings-group .group-body {
-      padding: 16px;
+      padding: 12px;
       border-top: 1px solid var(--line);
     }
 
     .toggle {
-      min-height: 56px;
+      min-height: 46px;
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 10px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      padding: 12px 14px;
-      margin-bottom: 18px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
       background: #fbfcfe;
       cursor: pointer;
       user-select: none;
@@ -324,28 +397,29 @@
 
     .spectrum-block {
       border-top: 1px solid var(--line);
-      padding-top: 18px;
-      margin-top: 18px;
+      padding-top: 12px;
+      margin-top: 12px;
     }
 
     .actions {
       display: flex;
+      flex: 0 0 auto;
       flex-wrap: wrap;
       gap: 12px;
-      padding: 0 28px 26px;
+      padding: 0 18px 16px;
     }
 
     .project-panel {
       border-top: 1px solid var(--line);
-      padding: 18px 28px;
+      padding: 12px 18px;
       background: #fbfcfe;
     }
 
     .project-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-bottom: 12px;
+      gap: 10px;
+      margin-bottom: 8px;
     }
 
     .project-actions {
@@ -362,18 +436,108 @@
       line-height: 1.45;
     }
 
+    .calculated-output,
+    .compliance-results {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 10px 12px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .compliance-results {
+      display: grid;
+      gap: 8px;
+    }
+
+    .compliance-summary,
+    .compliance-stale,
+    .compliance-item {
+      border-left: 4px solid var(--line);
+      padding: 6px 8px;
+      background: #fbfcfe;
+    }
+
+    .compliance-summary {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--text);
+    }
+
+    .compliance-item {
+      display: grid;
+      gap: 2px;
+    }
+
+    .compliance-item.pass {
+      border-left-color: #2c8f63;
+      color: #1d6d47;
+    }
+
+    .compliance-item.warning,
+    .compliance-stale {
+      border-left-color: #c28a17;
+      color: #765409;
+    }
+
+    .compliance-item.na {
+      border-left-color: #8a95a6;
+      color: var(--muted);
+    }
+
+    .hidden-compat {
+      display: none;
+    }
+
     .file-line {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       gap: 12px;
       color: var(--muted);
-      margin-bottom: 16px;
+      margin-bottom: 10px;
     }
 
     .plot-wrap {
       min-height: 680px;
       padding: 20px;
+    }
+
+    .plot-preview-info {
+      display: grid;
+      gap: 4px;
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .plot-viewport {
+      width: 100%;
+      overflow-x: visible;
+      overflow-y: visible;
+    }
+
+    .plot-stage {
+      width: 100%;
+    }
+
+    .plot-wrap.final-size-preview-active {
+      min-height: 0;
+    }
+
+    .plot-wrap.final-size-preview-active .plot-viewport {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding-bottom: 10px;
+    }
+
+    .plot-wrap.final-size-preview-active #plot {
+      max-width: none;
+      transform-origin: top left;
     }
 
     #plot {
@@ -397,10 +561,11 @@
     }
 
     .status {
+      flex: 0 0 auto;
       border-top: 1px solid var(--line);
-      padding: 14px 28px 22px;
+      padding: 10px 18px 14px;
       color: var(--muted);
-      min-height: 52px;
+      min-height: 44px;
     }
 
     footer {
@@ -444,23 +609,37 @@
       }
 
       body.controls-collapsed .controls-toggle {
-        min-height: 52px;
+        min-height: 44px;
         writing-mode: horizontal-tb;
       }
     }
 
     @media (max-width: 640px) {
       header {
-        display: block;
+        flex-direction: column;
+        padding-top: 18px;
+      }
+
+      .header-tools {
+        width: 100%;
+        flex-direction: column;
+      }
+
+      header .project-panel {
+        width: 100%;
+        max-width: none;
+      }
+
+      header .project-grid {
+        grid-template-columns: 1fr;
       }
 
       .language {
-        margin-top: 18px;
         width: max-content;
       }
 
       main {
-        padding-top: 18px;
+        padding-top: 12px;
       }
 
       .tabs {
@@ -472,7 +651,6 @@
       }
 
       .panel,
-      .project-panel,
       .actions,
       .status {
         padding-left: 18px;
@@ -500,9 +678,29 @@
       <p data-i18n="subtitle">Enter a list of m/z and intensity values to generate the spectrum</p>
       <p class="format-help-popover" id="formatHelpPopover" data-i18n="formatNote" hidden>Use _ for subscript and ^ for superscript: H_2O, M^+, SO_4^{2-}.</p>
     </div>
-    <div class="language" role="group" aria-label="Language">
-      <button type="button" id="ptBtn">PT</button>
-      <button type="button" id="enBtn" class="active">EN</button>
+    <div class="header-tools">
+        <div class="project-panel" aria-label="Saved projects">
+          <div class="project-grid">
+            <div class="field">
+              <label for="projectName" data-i18n="projectName">Project name</label>
+              <input id="projectName" type="text" placeholder="My spectrum figure">
+            </div>
+            <div class="field">
+              <label for="savedProjectSelect" data-i18n="savedProjects">Saved projects</label>
+              <select id="savedProjectSelect"></select>
+            </div>
+          </div>
+          <div class="project-actions">
+            <button type="button" class="secondary" id="saveProject" data-i18n="saveProject">Save project</button>
+            <button type="button" class="secondary" id="loadProject" data-i18n="loadProject">Open project</button>
+            <button type="button" class="secondary" id="deleteProject" data-i18n="deleteProject">Delete project</button>
+          </div>
+          <p class="project-note" data-i18n="projectNote">Projects are saved in this browser on this computer.</p>
+        </div>
+      <div class="language" role="group" aria-label="Language">
+        <button type="button" id="ptBtn">PT</button>
+        <button type="button" id="enBtn" class="active">EN</button>
+      </div>
     </div>
   </header>
 
@@ -582,16 +780,32 @@
       </div>
 
       <div class="panel" id="panel-style">
-        <details class="settings-group" open>
+                <details class="settings-group" open>
+          <summary data-i18n="figureStyleGroup">Figure style preset</summary>
+          <div class="group-body">
+            <div class="field-grid">
+              <div class="field">
+                <label for="figureStylePreset" data-i18n="figureStylePreset">Figure style preset</label>
+                <select id="figureStylePreset"></select>
+              </div>
+            </div>
+            <div class="file-line">
+              <button type="button" class="secondary" id="applyFigureStyle" data-i18n="applyFigureStyle">Apply figure style</button>
+              <button type="button" class="secondary" id="saveFigureStyle" data-i18n="saveFigureStyle">Save current style</button>
+              <button type="button" class="secondary" id="deleteFigureStyle" data-i18n="deleteFigureStyle" disabled>Delete preset</button>
+            </div>
+          </div>
+        </details>
+<details class="settings-group" open>
           <summary data-i18n="styleTextGroup">Text</summary>
           <div class="field-grid">
             <div class="field">
               <label for="chartTitle" data-i18n="chartTitle">Chart title</label>
-              <input id="chartTitle" type="text" value="Mass Spectrum">
+              <input id="chartTitle" type="text" value="">
             </div>
             <div class="field">
               <label for="xLabel" data-i18n="xLabel">X label</label>
-              <input id="xLabel" type="text" value="<i>m/z</i>">
+              <input id="xLabel" type="text" value="m/z">
             </div>
             <div class="field">
               <label for="yLabel" data-i18n="yLabel">Y label</label>
@@ -613,24 +827,24 @@
               </select>
             </div>
             <div class="field">
-              <label for="fontSize" data-i18n="fontSize">Base font size (px)</label>
-              <input id="fontSize" type="number" min="8" max="40" value="14">
+              <label for="fontSize" data-i18n="fontSize">Base font size (pt)</label>
+              <input id="fontSize" type="number" min="1" max="40" step="0.1" value="8">
             </div>
             <div class="field">
-              <label for="titleFontSize" data-i18n="titleFontSize">Title font size (px)</label>
-              <input id="titleFontSize" type="number" min="8" max="60" value="24">
+              <label for="titleFontSize" data-i18n="titleFontSize">Title font size (pt)</label>
+              <input id="titleFontSize" type="number" min="1" max="60" step="0.1" value="9">
             </div>
             <div class="field">
-              <label for="axisTitleFontSize" data-i18n="axisTitleFontSize">Axis label font size (px)</label>
-              <input id="axisTitleFontSize" type="number" min="8" max="44" value="14">
+              <label for="axisTitleFontSize" data-i18n="axisTitleFontSize">Axis label font size (pt)</label>
+              <input id="axisTitleFontSize" type="number" min="1" max="44" step="0.1" value="8.5">
             </div>
             <div class="field">
-              <label for="tickFontSize" data-i18n="tickFontSize">Tick label font size (px)</label>
-              <input id="tickFontSize" type="number" min="8" max="36" value="14">
+              <label for="tickFontSize" data-i18n="tickFontSize">Tick label font size (pt)</label>
+              <input id="tickFontSize" type="number" min="1" max="36" step="0.1" value="8">
             </div>
             <div class="field">
-              <label for="mzLabelFontSize" data-i18n="mzLabelFontSize">m/z label font size (px)</label>
-              <input id="mzLabelFontSize" type="number" min="8" max="44" value="14">
+              <label for="mzLabelFontSize" data-i18n="mzLabelFontSize">m/z label font size (pt)</label>
+              <input id="mzLabelFontSize" type="number" min="1" max="44" step="0.1" value="7.5">
             </div>
             <div class="field">
               <label for="yOffset" data-i18n="yOffset">Y label distance (px)</label>
@@ -658,8 +872,12 @@
               <input id="insideLegendY" type="number" min="0" max="100" value="92">
             </div>
             <div class="field">
-              <label for="insideLegendFontSize" data-i18n="insideLegendFontSize">Inside name font size (px)</label>
-              <input id="insideLegendFontSize" type="number" min="8" max="44" value="14">
+              <label for="insideLegendFontSize" data-i18n="insideLegendFontSize">Inside name font size (pt)</label>
+              <input id="insideLegendFontSize" type="number" min="1" max="44" step="0.1" value="8">
+            </div>
+            <div class="field">
+              <label for="panelLabelFontSize" data-i18n="panelLabelFontSize">Panel label font size (pt)</label>
+              <input id="panelLabelFontSize" type="number" min="1" max="44" step="0.1" value="10">
             </div>
             <div class="field">
               <label for="insideLegendTextColor" data-i18n="insideLegendTextColor">Inside name text color</label>
@@ -720,12 +938,16 @@
               <input id="gridColor" type="color" value="#eceff3">
             </div>
             <div class="field">
-              <label for="boxLineWidth" data-i18n="boxLineWidth">Plot box line width (px)</label>
-              <input id="boxLineWidth" type="number" min="0.5" max="8" step="0.5" value="1">
+              <label for="boxLineWidth" data-i18n="boxLineWidth">Plot box line width (pt)</label>
+              <input id="boxLineWidth" type="number" min="0.1" max="8" step="0.05" value="0.75">
             </div>
             <div class="field">
-              <label for="gridLineWidth" data-i18n="gridLineWidth">Grid line width (px)</label>
-              <input id="gridLineWidth" type="number" min="0.25" max="5" step="0.25" value="1">
+              <label for="gridLineWidth" data-i18n="gridLineWidth">Grid line width (pt)</label>
+              <input id="gridLineWidth" type="number" min="0.1" max="8" step="0.05" value="0.5">
+            </div>
+            <div class="field">
+              <label for="peakLineWidth" data-i18n="peakLineWidth">Spectrum peak line width (pt)</label>
+              <input id="peakLineWidth" type="number" min="0.1" max="8" step="0.05" value="0.65">
             </div>
           </div>
         </details>
@@ -734,7 +956,7 @@
           <summary data-i18n="styleDisplayGroup">Display</summary>
           <div class="group-body">
             <label class="toggle">
-              <input type="checkbox" id="showGrid" checked>
+              <input type="checkbox" id="showGrid">
               <span data-i18n="showGrid">Show grid</span>
             </label>
             <label class="toggle">
@@ -757,23 +979,23 @@
         <div class="field-grid">
           <div class="field">
             <label for="yScale" data-i18n="yScale">Y scale (%)</label>
-            <input id="yScale" type="number" min="1" value="120">
+            <input id="yScale" type="number" min="1" value="110">
           </div>
           <div class="field">
             <label for="yScale1" data-i18n="yScale1">Y scale 1 (%)</label>
-            <input id="yScale1" type="number" min="1" value="120">
+            <input id="yScale1" type="number" min="1" value="110">
           </div>
           <div class="field">
             <label for="yScale2" data-i18n="yScale2">Y scale 2 (%)</label>
-            <input id="yScale2" type="number" min="1" value="120">
+            <input id="yScale2" type="number" min="1" value="110">
           </div>
           <div class="field">
             <label for="yScale3" data-i18n="yScale3">Y scale 3 (%)</label>
-            <input id="yScale3" type="number" min="1" value="120">
+            <input id="yScale3" type="number" min="1" value="110">
           </div>
           <div class="field">
             <label for="yScale4" data-i18n="yScale4">Y scale 4 (%)</label>
-            <input id="yScale4" type="number" min="1" value="120">
+            <input id="yScale4" type="number" min="1" value="110">
           </div>
           <div class="field">
             <label for="decimals" data-i18n="decimals">m/z decimal places</label>
@@ -886,43 +1108,85 @@
       </div>
 
       <div class="panel" id="panel-export">
-        <div class="field-grid">
-          <div class="field">
-            <label for="exportWidth" data-i18n="width">Width (px)</label>
-            <input id="exportWidth" type="number" min="300" value="1200">
+        <details class="settings-group" open>
+          <summary data-i18n="journalPresetGroup">Journal preset</summary>
+          <div class="group-body">
+            <div class="field-grid">
+              <div class="field">
+                <label for="journalPreset" data-i18n="journalPreset">Journal preset</label>
+                <select id="journalPreset"></select>
+              </div>
+              <div class="field">
+                <label for="figureType" data-i18n="figureType">Figure content</label>
+                <select id="figureType">
+                  <option value="color" data-i18n="figureTypeColor">Color</option>
+                  <option value="grayscale" data-i18n="figureTypeGray">Grayscale</option>
+                  <option value="lineart" data-i18n="figureTypeLine">Line art / black and white</option>
+                </select>
+              </div>
+            </div>
+            <p class="project-note" id="journalPresetInfo"></p>
+            <p class="project-note" id="journalResolutionInfo"></p>
+            <div class="file-line">
+              <button type="button" class="secondary" id="applyJournalPreset" data-i18n="applyJournalPreset">Apply journal preset</button>
+            </div>
           </div>
-          <div class="field">
-            <label for="exportHeight" data-i18n="height">Height (px)</label>
-            <input id="exportHeight" type="number" min="250" value="700">
+        </details>
+<details class="settings-group" open>
+          <summary data-i18n="publicationSizeGroup">Publication size and export</summary>
+          <div class="field-grid">
+            <div class="field">
+              <label for="exportFormat" data-i18n="exportFormat">Export format</label>
+              <select id="exportFormat">
+                <option value="png">PNG</option>
+                <option value="svg">SVG</option>
+              </select>
+            </div>
+            <div class="field" id="rasterDpiField">
+              <label for="rasterDpi" data-i18n="rasterDpi">Raster resolution</label>
+              <select id="rasterDpi">
+                <option value="300">300 dpi</option>
+                <option value="600">600 dpi</option>
+                <option value="1200">1200 dpi</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="finalWidth" data-i18n="finalWidth">Final width (mm)</label>
+              <input id="finalWidth" type="number" min="0.1" step="0.1" value="84.6">
+            </div>
+            <div class="field">
+              <label for="exportWidth" data-i18n="baseWidth">Base width (px)</label>
+              <input id="exportWidth" type="number" min="1" value="1200">
+            </div>
+            <div class="field">
+              <label for="exportHeight" data-i18n="baseHeight">Base height (px)</label>
+              <input id="exportHeight" type="number" min="1" value="700">
+            </div>
           </div>
-          <div class="field">
-            <label for="exportScale" data-i18n="scale">Scale (DPI)</label>
-            <input id="exportScale" type="number" min="1" max="5" value="2">
+          <div class="calculated-output" id="calculatedOutput"></div>
+          <label class="toggle">
+            <input type="checkbox" id="previewExport">
+            <span data-i18n="previewExport">Preview at final size</span>
+          </label>
+          <div class="file-line">
+            <button type="button" class="secondary" id="checkCompliance" data-i18n="checkCompliance">Check JASMS compliance</button>
           </div>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" id="previewExport">
-          <span data-i18n="previewExport">Preview at export size</span>
-        </label>
-      </div>
+          <div class="compliance-results" id="complianceResults"></div>
+        </details>
 
-      <div class="project-panel" aria-label="Saved projects">
-        <div class="project-grid">
-          <div class="field">
-            <label for="projectName" data-i18n="projectName">Project name</label>
-            <input id="projectName" type="text" placeholder="My spectrum figure">
-          </div>
-          <div class="field">
-            <label for="savedProjectSelect" data-i18n="savedProjects">Saved projects</label>
-            <select id="savedProjectSelect"></select>
-          </div>
+        <div class="hidden-compat" aria-hidden="true">
+          <select id="sizeUnit">
+            <option value="mm">mm</option>
+          </select>
+          <select id="finalHeightMode">
+            <option value="auto">Automatic</option>
+          </select>
+          <input id="finalHeight" type="number" min="0.1" step="0.01" value="49.4">
+          <input id="advancedExportScale" type="number" min="1" max="5" step="0.25" value="1">
+          <input id="exportScale" type="number" min="1" max="20" step="0.01" value="3.125">
+          <input id="fontUnit" type="hidden" value="pt">
+          <input id="lineUnit" type="hidden" value="pt">
         </div>
-        <div class="project-actions">
-          <button type="button" class="secondary" id="saveProject" data-i18n="saveProject">Save project</button>
-          <button type="button" class="secondary" id="loadProject" data-i18n="loadProject">Open project</button>
-          <button type="button" class="secondary" id="deleteProject" data-i18n="deleteProject">Delete project</button>
-        </div>
-        <p class="project-note" data-i18n="projectNote">Projects are saved in this browser on this computer.</p>
       </div>
 
       <div class="actions">
@@ -932,12 +1196,20 @@
       <div class="status" id="status" role="status"></div>
     </section>
 
-    <section class="plot-wrap" aria-label="Spectrum plot">
-      <div id="plot"></div>
+    <section class="plot-wrap" id="plotWrap" aria-label="Spectrum plot">
+      <div class="plot-preview-info" id="finalSizePreviewInfo" hidden>
+        <span id="finalSizePreviewSummary"></span>
+        <span data-i18n="finalSizePreviewNote">Approximate on-screen size; actual physical size depends on browser zoom and display scaling.</span>
+      </div>
+      <div class="plot-viewport" id="plotViewport">
+        <div class="plot-stage" id="plotStage">
+          <div id="plot"></div>
+        </div>
+      </div>
     </section>
   </main>
 
-  <footer data-i18n="footer">Made with Plotly.js · All calculations run in the browser</footer>
+  <footer data-i18n="footer">Made with Plotly.js ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· All calculations run in the browser</footer>
 
   <script>
     const exampleData = `229.171734 5.021981
@@ -996,11 +1268,12 @@
         styleLegendGroup: "Spectrum names",
         styleColorsGroup: "Colors and lines",
         styleDisplayGroup: "Display",
-        titleFontSize: "Title font size (px)",
-        axisTitleFontSize: "Axis label font size (px)",
-        tickFontSize: "Tick label font size (px)",
-        mzLabelFontSize: "m/z label font size (px)",
-        insideLegendFontSize: "Inside name font size (px)",
+        titleFontSize: "Condition/title font size (pt)",
+        axisTitleFontSize: "Axis title font size (pt)",
+        tickFontSize: "Tick label font size (pt)",
+        mzLabelFontSize: "Peak m/z label font size (pt)",
+        insideLegendFontSize: "Inside name font size (pt)",
+        panelLabelFontSize: "Panel label font size (pt)",
         legendMode: "Spectrum label display",
         formatNote: "Use _ for subscript and ^ for superscript: H_2O, M^+, SO_4^{2-}.",
         insideLegendX: "Inside name X position (%)",
@@ -1017,10 +1290,11 @@
         backgroundColor: "Background color",
         textColor: "Text color",
         gridColor: "Grid color",
-        boxLineWidth: "Plot box line width (px)",
-        gridLineWidth: "Grid line width (px)",
+        boxLineWidth: "Plot box line width (pt)",
+        gridLineWidth: "Grid line width (pt)",
+        peakLineWidth: "Spectrum peak line width (pt)",
         font: "Font",
-        fontSize: "Base font size (px)",
+        fontSize: "Base font size (pt)",
         yOffset: "Y label distance (px)",
         showGrid: "Show grid",
         closeBox: "Close plot box",
@@ -1061,8 +1335,38 @@
         resetDefaults: "Reset defaults",
         width: "Width (px)",
         height: "Height (px)",
-        scale: "Scale (DPI)",
-        previewExport: "Preview at export size",
+        scale: "Export multiplier",
+        previewExport: "Preview at final size",
+        finalSizePreviewNote: "Approximate on-screen size; actual physical size depends on browser zoom and display scaling.",
+        journalPresetGroup: "Journal preset",
+        journalPreset: "Journal preset",
+        figureType: "Figure content",
+        figureTypeColor: "Color",
+        figureTypeGray: "Grayscale",
+        figureTypeLine: "Line art / black and white",
+        applyJournalPreset: "Apply journal preset",
+        saveJournalPreset: "Save as journal preset",
+        setDefaultJournal: "Set as default journal",
+        figureStyleGroup: "Figure style preset",
+        figureStylePreset: "Figure style",
+        presetName: "Preset name",
+        applyFigureStyle: "Apply figure style",
+        saveFigureStyle: "Save current style",
+        deleteFigureStyle: "Delete preset",
+        resetToPreset: "Reset to preset",
+        publicationSizeGroup: "Publication size and export",
+        exportFormat: "Export format",
+        rasterDpi: "Raster resolution",
+        sizeUnit: "Size unit",
+        finalWidth: "Final width (mm)",
+        baseWidth: "Base width (px)",
+        baseHeight: "Base height (px)",
+        finalHeightMode: "Final height",
+        finalHeight: "Final height value",
+        heightAuto: "Automatic",
+        heightCustom: "Custom",
+        advancedExportScale: "Advanced export scale multiplier",
+        checkCompliance: "Check JASMS compliance",
         projectName: "Project name",
         savedProjects: "Saved projects",
         saveProject: "Save project",
@@ -1073,7 +1377,7 @@
         noSavedProjects: "No saved projects yet",
         generate: "Generate spectrum",
         download: "Download PNG",
-        footer: "Made with Plotly.js · All calculations run in the browser",
+        footer: "Made with Plotly.js ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· All calculations run in the browser",
         generated: count => `Spectrum generated with ${count} peaks.`,
         empty: "Add at least one valid pair of m/z and intensity values.",
         parseError: "Some lines could not be read and were skipped.",
@@ -1106,33 +1410,35 @@
         loadExample: "Carregar exemplo",
         clear: "Limpar",
         loadFile: "Carregar arquivo (.csv/.txt)",
-        chartTitle: "Título do gráfico",
-        xLabel: "Rótulo X",
-        yLabel: "Rótulo Y",
+        chartTitle: "TÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­tulo do grÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡fico",
+        xLabel: "RÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³tulo X",
+        yLabel: "RÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³tulo Y",
         styleTextGroup: "Texto",
         styleLegendGroup: "Nomes dos espectros",
         styleColorsGroup: "Cores e linhas",
-        styleDisplayGroup: "Exibição",
-        titleFontSize: "Tamanho do título (px)",
-        axisTitleFontSize: "Tamanho dos rótulos dos eixos (px)",
-        tickFontSize: "Tamanho dos números dos eixos (px)",
-        mzLabelFontSize: "Tamanho dos rótulos m/z (px)",
-        insideLegendFontSize: "Tamanho dos nomes internos (px)",
+        styleDisplayGroup: "ExibiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o",
+        titleFontSize: "Tamanho do tÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­tulo/condiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o (pt)",
+        axisTitleFontSize: "Tamanho dos tÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­tulos dos eixos (pt)",
+        tickFontSize: "Tamanho dos nÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âºmeros dos eixos (pt)",
+        mzLabelFontSize: "Tamanho dos rÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³tulos m/z (pt)",
+        insideLegendFontSize: "Tamanho do nome interno (pt)",
+        panelLabelFontSize: "Tamanho das letras dos painÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©is (pt)",
         peakColor: "Cor dos picos",
         formatNote: "Use _ para subscrito e ^ para sobrescrito: H_2O, M^+, SO_4^{2-}.",
-        peakColor2: "Cor dos picos (2º)",
-        peakColor3: "Cor dos picos (3º)",
-        peakColor4: "Cor dos picos (4º)",
+        peakColor2: "Cor dos picos (2ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âº)",
+        peakColor3: "Cor dos picos (3ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âº)",
+        peakColor4: "Cor dos picos (4ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âº)",
         backgroundColor: "Cor de fundo",
         textColor: "Cor do texto",
         gridColor: "Cor da grade",
-        boxLineWidth: "Espessura da caixa (px)",
-        gridLineWidth: "Espessura da grade (px)",
+        boxLineWidth: "Espessura da caixa (pt)",
+        gridLineWidth: "Espessura da grade (pt)",
+        peakLineWidth: "Espessura dos picos do espectro (pt)",
         font: "Fonte",
-        fontSize: "Tamanho base da fonte (px)",
-        yOffset: "Distância do rótulo Y (px)",
+        fontSize: "Tamanho base da fonte (pt)",
+        yOffset: "DistÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ncia do rÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³tulo Y (px)",
         showGrid: "Mostrar grade",
-        closeBox: "Fechar caixa do gráfico",
+        closeBox: "Fechar caixa do grÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡fico",
         showDots: "Mostrar ponto no topo do pico",
         normalize: "Normalizar pelo pico base (100%)",
         yScale: "Escala Y (%)",
@@ -1141,36 +1447,66 @@
         yScale3: "Escala Y 3 (%)",
         yScale4: "Escala Y 4 (%)",
         decimals: "Casas decimais de m/z",
-        minMz: "m/z mínimo (todos; automático se vazio)",
-        maxMz: "m/z máximo (todos; automático se vazio)",
-        minMz1: "m/z mínimo 1",
-        maxMz1: "m/z máximo 1",
+        minMz: "m/z mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­nimo (todos; automÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡tico se vazio)",
+        maxMz: "m/z mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ximo (todos; automÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡tico se vazio)",
+        minMz1: "m/z mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­nimo 1",
+        maxMz1: "m/z mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ximo 1",
         xTickStep1: "Intervalo X 1",
-        minMz2: "m/z mínimo 2",
-        maxMz2: "m/z máximo 2",
+        minMz2: "m/z mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­nimo 2",
+        maxMz2: "m/z mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ximo 2",
         xTickStep2: "Intervalo X 2",
-        minMz3: "m/z mínimo 3",
-        maxMz3: "m/z máximo 3",
+        minMz3: "m/z mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­nimo 3",
+        maxMz3: "m/z mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ximo 3",
         xTickStep3: "Intervalo X 3",
-        minMz4: "m/z mínimo 4",
-        maxMz4: "m/z máximo 4",
+        minMz4: "m/z mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­nimo 4",
+        maxMz4: "m/z mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ximo 4",
         xTickStep4: "Intervalo X 4",
         threshold: "Limite para rotular (%)",
-        spectrumGap: "Espaçamento entre espectros (%)",
+        spectrumGap: "EspaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§amento entre espectros (%)",
         compositeLayoutGroup: "Layout composto",
         showSecondXAxis: "Mostrar eixo X no espectro 2",
-        groupGapAfter2: "Espaço extra após o espectro 2 (%)",
-        xLabelDistance: "Distância do rótulo m/z (px)",
+        groupGapAfter2: "EspaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§o extra apÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³s o espectro 2 (%)",
+        xLabelDistance: "DistÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ncia do rÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³tulo m/z (px)",
         lockY: "Travar escalas Y de todos os espectros",
         lockX: "Travar eixos X de todos os espectros",
         labelPeaks: "Rotular picos principais",
-        clickMz: "Rótulos manuais de m/z",
-        clearSelection: "Limpar rótulos manuais",
+        clickMz: "RÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³tulos manuais de m/z",
+        clearSelection: "Limpar rÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³tulos manuais",
         xTickStep: "Intervalo do eixo X (automatico se vazio)",
         width: "Largura (px)",
         height: "Altura (px)",
-        scale: "Escala (DPI)",
-        previewExport: "Pré-visualizar no tamanho exportado",
+        scale: "Multiplicador de exportaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o",
+        previewExport: "Pre-visualizar no tamanho final",
+        finalSizePreviewNote: "Tamanho aproximado na tela; o tamanho fisico real depende do zoom do navegador e da escala do monitor.",
+        journalPresetGroup: "Preset de periÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³dico",
+        journalPreset: "Preset de periÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³dico",
+        figureType: "Conteudo da figura",
+        figureTypeColor: "Colorida",
+        figureTypeGray: "Escala de cinza",
+        figureTypeLine: "Line art / preto e branco",
+        applyJournalPreset: "Aplicar preset de periÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³dico",
+        saveJournalPreset: "Salvar como preset de periÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³dico",
+        setDefaultJournal: "Definir como periÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³dico padrÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o",
+        figureStyleGroup: "Preset de estilo da figura",
+        figureStylePreset: "Estilo da figura",
+        presetName: "Nome do preset",
+        applyFigureStyle: "Aplicar estilo da figura",
+        saveFigureStyle: "Salvar estilo atual",
+        deleteFigureStyle: "Apagar preset",
+        resetToPreset: "Voltar ao preset",
+        publicationSizeGroup: "Tamanho de publicaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o e exportaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o",
+        exportFormat: "Formato de exportaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o",
+        rasterDpi: "ResoluÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o raster",
+        sizeUnit: "Unidade de tamanho",
+        finalWidth: "Largura final (mm)",
+        baseWidth: "Largura base (px)",
+        baseHeight: "Altura base (px)",
+        finalHeightMode: "Altura final",
+        finalHeight: "Valor da altura final",
+        heightAuto: "AutomÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡tica",
+        heightCustom: "Personalizada",
+        advancedExportScale: "Multiplicador avanÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ado de exportaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o",
+        checkCompliance: "Verificar JASMS",
         projectName: "Nome do projeto",
         savedProjects: "Projetos salvos",
         saveProject: "Salvar projeto",
@@ -1181,17 +1517,17 @@
         noSavedProjects: "Nenhum projeto salvo ainda",
         generate: "Gerar espectro",
         download: "Baixar PNG",
-        footer: "Feito com Plotly.js · Todos os cálculos rodam no navegador",
+        footer: "Feito com Plotly.js ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· Todos os cÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lculos rodam no navegador",
         generated: count => `Espectro gerado com ${count} picos.`,
-        empty: "Adicione pelo menos um par válido de m/z e intensidade.",
-        parseError: "Algumas linhas não puderam ser lidas e foram ignoradas.",
-        fileLoaded: "Arquivo carregado. Gere o espectro para atualizar o gráfico.",
+        empty: "Adicione pelo menos um par vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido de m/z e intensidade.",
+        parseError: "Algumas linhas nÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o puderam ser lidas e foram ignoradas.",
+        fileLoaded: "Arquivo carregado. Gere o espectro para atualizar o grÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡fico.",
         projectSaved: name => `Projeto salvo: ${name}`,
         projectLoaded: name => `Projeto aberto: ${name}`,
         projectDeleted: name => `Projeto apagado: ${name}`,
         projectMissing: "Escolha um projeto salvo primeiro.",
-        selectionCleared: "Seleção de pico limpa.",
-        selected: mz => `Rótulo manual adicionado: m/z ${mz}`
+        selectionCleared: "SeleÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o de pico limpa.",
+        selected: mz => `RÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³tulo manual adicionado: m/z ${mz}`
       }
     };
 
@@ -1216,6 +1552,127 @@
     let annotationClickHandlerBound = false;
     let lastAnnotationClick = { key: "", time: 0 };
     const PROJECT_STORAGE_KEY = "msGeneratorProjects";
+    const JOURNAL_PRESETS_KEY = "msGeneratorJournalPresets";
+    const FIGURE_STYLE_PRESETS_KEY = "msGeneratorFigureStylePresets";
+    const DEFAULT_PRESETS_KEY = "msGeneratorPresetDefaults";
+    const CSS_PX_PER_PT = 96 / 72;
+    const MM_PER_IN = 25.4;
+    const FONT_SIZE_FIELD_IDS = [
+      "fontSize",
+      "titleFontSize",
+      "axisTitleFontSize",
+      "tickFontSize",
+      "mzLabelFontSize",
+      "insideLegendFontSize",
+      "panelLabelFontSize"
+    ];
+    const LINE_WIDTH_FIELD_IDS = [
+      "boxLineWidth",
+      "gridLineWidth",
+      "peakLineWidth"
+    ];
+    const FIGURE_STYLE_FIELD_IDS = [
+      "fontFamily",
+      "chartTitle",
+      "fontSize",
+      "panelLabelFontSize",
+      "titleFontSize",
+      "axisTitleFontSize",
+      "tickFontSize",
+      "mzLabelFontSize",
+      "insideLegendFontSize",
+      "boxLineWidth",
+      "peakLineWidth",
+      "backgroundColor",
+      "decimals",
+      "yScale",
+      "yScale1",
+      "yScale2",
+      "yScale3",
+      "yScale4",
+      "legendMode"
+    ];
+    const FIGURE_STYLE_CHECK_IDS = [
+      "showGrid"
+    ];
+    const CUSTOM_FIGURE_STYLE_FIELD_IDS = [
+      "fontFamily",
+      "fontSize",
+      "panelLabelFontSize",
+      "titleFontSize",
+      "axisTitleFontSize",
+      "tickFontSize",
+      "mzLabelFontSize",
+      "insideLegendFontSize",
+      "boxLineWidth",
+      "gridLineWidth",
+      "peakLineWidth",
+      "backgroundColor",
+      "decimals",
+      "yScale",
+      "yScale1",
+      "yScale2",
+      "yScale3",
+      "yScale4",
+      "legendMode"
+    ];
+
+    const builtInJournalPresets = [
+      {
+        id: "custom",
+        name: "Custom"
+      },
+      {
+        id: "jasms-single-column",
+        name: "JASMS - Single column",
+        widthMm: 84.6,
+        maxHeightMm: 232.8,
+        widthIn: 84.6 / MM_PER_IN,
+        maxHeightIn: 232.8 / MM_PER_IN,
+        fontFamily: "Arial",
+        minFontPt: 4.5,
+        minLinePt: 0.5,
+        preferredVectorFormat: "svg",
+        recommendedDpi: { color: 300, grayscale: 600, lineart: 1200 },
+        allowedDpi: [300, 600, 1200]
+      }
+    ];
+
+    const builtInFigureStylePresets = [
+      {
+        id: "custom",
+        name: "Custom"
+      },
+      {
+        id: "mass-spectrum-publication",
+        name: "Mass Spectrum - Publication",
+        figureType: "mass-spectrum",
+        fields: {
+          fontFamily: "Arial",
+          chartTitle: "",
+          fontSize: "8",
+          panelLabelFontSize: "10",
+          titleFontSize: "9",
+          axisTitleFontSize: "8.5",
+          tickFontSize: "8",
+          mzLabelFontSize: "7.5",
+          insideLegendFontSize: "8",
+          boxLineWidth: "0.75",
+          peakLineWidth: "0.5",
+          backgroundColor: "#ffffff",
+          decimals: "1",
+          yScale: "110",
+          yScale1: "110",
+          yScale2: "110",
+          yScale3: "110",
+          yScale4: "110",
+          legendMode: "legend"
+        },
+        checks: {
+          showGrid: false
+        }
+      }
+    ];
 
     function t(key) {
       return translations[language][key];
@@ -1229,10 +1686,143 @@
         .replace(/\^([A-Za-z0-9+\-])/g, "<sup>$1</sup>");
     }
 
+    function formatAxisTitleText(text) {
+      return formatPlotText(text).replace(/<i>\s*m\/z\s*<\/i>|m\/z/g, match => {
+        return match.startsWith("<i>") ? match : "<i>m/z</i>";
+      });
+    }
+
     function numberValue(id) {
       if (!$(id) || $(id).value === "") return undefined;
       const value = Number($(id).value);
       return Number.isFinite(value) ? value : undefined;
+    }
+
+    function ptToCssPx(value) {
+      const numeric = Number(value);
+      return Number.isFinite(numeric) ? numeric * CSS_PX_PER_PT : 0;
+    }
+
+    function finalWidthPt() {
+      const finalWidthMm = Math.max(0.1, Number($("finalWidth")?.value) || 84.6);
+      return finalWidthMm * 72 / MM_PER_IN;
+    }
+
+    function fontPtToPlotlyPx(value) {
+      const numeric = Number(value);
+      if (!Number.isFinite(numeric)) return 0;
+      const baseWidth = Math.max(1, Math.round(Number($("exportWidth")?.value) || 1200));
+      return numeric * baseWidth / finalWidthPt();
+    }
+
+    function linePtToPlotlyPx(value) {
+      const numeric = Number(value);
+      if (!Number.isFinite(numeric)) return 0;
+      const baseWidth = Math.max(1, Math.round(Number($("exportWidth")?.value) || 1200));
+      return numeric * baseWidth / finalWidthPt();
+    }
+
+    function unitToInches(value, unit = $("sizeUnit")?.value || "in") {
+      const numeric = Number(value);
+      if (!Number.isFinite(numeric) || numeric <= 0) return 0;
+      if (unit === "mm") return numeric / MM_PER_IN;
+      if (unit === "cm") return numeric / 2.54;
+      return numeric;
+    }
+
+    function inchesToUnit(valueIn, unit = $("sizeUnit")?.value || "in") {
+      if (unit === "mm") return valueIn * MM_PER_IN;
+      if (unit === "cm") return valueIn * 2.54;
+      return valueIn;
+    }
+
+    function getPublicationSize() {
+      const finalWidthMm = Math.max(0.1, Number($("finalWidth")?.value) || 84.6);
+      const baseWidth = Math.max(1, Math.round(Number($("exportWidth")?.value) || 1200));
+      const baseHeight = Math.max(1, Math.round(Number($("exportHeight")?.value) || 700));
+      const ratio = baseHeight / baseWidth;
+      const finalHeightMm = finalWidthMm * ratio;
+      const dpi = Number($("rasterDpi")?.value) || 300;
+      const outputWidth = Math.round((finalWidthMm / MM_PER_IN) * dpi);
+      const outputHeight = Math.round(outputWidth * ratio);
+      const scale = outputWidth / baseWidth;
+      const widthIn = finalWidthMm / MM_PER_IN;
+      const heightIn = finalHeightMm / MM_PER_IN;
+      return { finalWidthMm, finalHeightMm, widthIn, heightIn, baseWidth, baseHeight, ratio, dpi, advancedScale: 1, outputWidth, outputHeight, scale };
+    }
+
+    function currentJournalPreset() {
+      return allJournalPresets().find(preset => preset.id === $("journalPreset")?.value) || builtInJournalPresets[0];
+    }
+
+    function updateJournalPresetInfo() {
+      const preset = currentJournalPreset();
+      const info = $("journalPresetInfo");
+      const resolution = $("journalResolutionInfo");
+      if (!info || !resolution) return;
+      if (!preset || preset.id === "custom") {
+        info.textContent = "";
+        resolution.textContent = "";
+        return;
+      }
+      info.textContent = `${preset.widthMm.toFixed(1)} mm wide \u00b7 ${preset.maxHeightMm.toFixed(1)} mm max height \u00b7 minimum font ${preset.minFontPt} pt \u00b7 minimum line ${preset.minLinePt} pt`;
+      resolution.textContent = `${preset.recommendedDpi.color} dpi color \u00b7 ${preset.recommendedDpi.grayscale} dpi grayscale \u00b7 ${preset.recommendedDpi.lineart} dpi line art`;
+    }
+
+    function markJournalPresetCustom() {
+      if ($("journalPreset")) {
+        $("journalPreset").value = "custom";
+        updateJournalPresetInfo();
+      }
+    }
+
+    function updateFinalSizePreview(resizePlot = false) {
+      const size = getPublicationSize();
+      const isActive = Boolean($("previewExport")?.checked);
+      const wrap = $("plotWrap");
+      const stage = $("plotStage");
+      const plot = $("plot");
+      const info = $("finalSizePreviewInfo");
+      const summary = $("finalSizePreviewSummary");
+      if (!wrap || !stage || !plot) return size;
+      wrap.classList.toggle("final-size-preview-active", isActive);
+      if (info) info.hidden = !isActive;
+      if (summary) summary.textContent = `Final-size preview: ${size.finalWidthMm.toFixed(1)} x ${size.finalHeightMm.toFixed(1)} mm`;
+      if (isActive) {
+        const cssPxPerMm = 96 / MM_PER_IN;
+        const scale = (size.finalWidthMm * cssPxPerMm) / size.baseWidth;
+        stage.style.width = `${size.finalWidthMm.toFixed(3)}mm`;
+        stage.style.height = `${size.finalHeightMm.toFixed(3)}mm`;
+        plot.style.width = `${size.baseWidth}px`;
+        plot.style.height = `${size.baseHeight}px`;
+        plot.style.transform = `scale(${scale})`;
+      } else {
+        stage.style.width = "";
+        stage.style.height = "";
+        plot.style.width = "";
+        plot.style.height = "";
+        plot.style.transform = "";
+      }
+      if (resizePlot && window.Plotly && plot.data) Plotly.Plots.resize(plot);
+      return size;
+    }
+
+    function updateCalculatedOutput() {
+      if (!$("calculatedOutput")) return;
+      const size = updateFinalSizePreview(false);
+      const format = $("exportFormat")?.value || "png";
+      const isSvg = format === "svg";
+      $("rasterDpiField")?.toggleAttribute("hidden", isSvg);
+      $("exportScale").value = format === "png" ? String(size.scale) : "1";
+      if ($("finalHeight")) $("finalHeight").value = size.finalHeightMm.toFixed(1);
+      const widthMm = size.finalWidthMm.toFixed(1);
+      const heightMm = size.finalHeightMm.toFixed(1);
+      const fontNote = ` Fonts sized for final publication width: ${widthMm} mm.`;
+      if (isSvg) {
+        $("calculatedOutput").textContent = `Output: SVG vector, ${widthMm} x ${heightMm} mm. SVG does not depend on raster DPI.${fontNote}`;
+      } else {
+        $("calculatedOutput").textContent = `Output: ${size.outputWidth} x ${size.outputHeight} px at ${size.dpi} dpi. Final size: ${widthMm} x ${heightMm} mm.${fontNote}`;
+      }
     }
 
     function updateLanguage(nextLanguage) {
@@ -1251,6 +1841,8 @@
       }
       updateControlsToggleText();
       refreshProjectList();
+      refreshPresetSelectors();
+      updateCalculatedOutput();
       renderPlot();
     }
 
@@ -1338,7 +1930,7 @@
         y,
         customdata,
         name: formatPlotText(spectrum.name),
-        line: { color: spectrum.color, width: 2 },
+        line: { color: spectrum.color, width: linePtToPlotlyPx($("peakLineWidth")?.value || 0.65) },
         hovertemplate: "m/z %{customdata:.4f}<br>%{y:.2f}%<extra></extra>",
         xaxis: xAxisId,
         yaxis: yAxisId
@@ -1379,7 +1971,7 @@
           y: labelY,
           text: labelText,
           textposition: "top center",
-          textfont: { color: $("textColor").value, size: Number($("mzLabelFontSize").value) || Number($("fontSize").value) || 14 },
+          textfont: { color: $("textColor").value, size: fontPtToPlotlyPx(Number($("mzLabelFontSize").value) || Number($("fontSize").value) || 7.5) },
           hoverinfo: "skip",
           showlegend: false,
           xaxis: xAxisId,
@@ -1460,7 +2052,7 @@
         ay: label.ay,
         font: {
           family: $("fontFamily").value,
-          size: Number($("mzLabelFontSize").value) || Number($("fontSize").value) || 14,
+          size: fontPtToPlotlyPx(Number($("mzLabelFontSize").value) || Number($("fontSize").value) || 7.5),
           color: $("textColor").value
         },
         bgcolor: $("backgroundColor").value,
@@ -1500,12 +2092,13 @@
 
     function buildLayout(spectra, threshold, decimals) {
       const total = spectra.length;
-      const fontSize = Number($("fontSize").value) || 14;
-      const titleFontSize = Number($("titleFontSize").value) || fontSize + 10;
-      const axisTitleFontSize = Number($("axisTitleFontSize").value) || fontSize;
-      const tickFontSize = Number($("tickFontSize").value) || fontSize;
-      const mzLabelFontSize = Number($("mzLabelFontSize").value) || fontSize;
-      const insideLegendFontSize = Number($("insideLegendFontSize").value) || fontSize;
+      const baseFontPt = Number($("fontSize").value) || 8;
+      const fontSize = fontPtToPlotlyPx(baseFontPt);
+      const titleFontSize = fontPtToPlotlyPx(Number($("titleFontSize").value) || 9);
+      const axisTitleFontSize = fontPtToPlotlyPx(Number($("axisTitleFontSize").value) || baseFontPt);
+      const tickFontSize = fontPtToPlotlyPx(Number($("tickFontSize").value) || baseFontPt);
+      const mzLabelFontSize = fontPtToPlotlyPx(Number($("mzLabelFontSize").value) || baseFontPt);
+      const insideLegendFontSize = fontPtToPlotlyPx(Number($("insideLegendFontSize").value) || baseFontPt);
       const yMax = Number($("yScale").value) || 100;
       const gapPercent = Number($("spectrumGap").value);
       const cleanGapPercent = Number.isFinite(gapPercent) ? Math.min(Math.max(gapPercent, 0), 30) : 8;
@@ -1517,6 +2110,15 @@
       const showSecondXAxis = $("showSecondXAxis").checked && total >= 2;
       const rawXLabelDistance = Number($("xLabelDistance").value);
       const xLabelDistance = Number.isFinite(rawXLabelDistance) ? Math.min(Math.max(rawXLabelDistance, 0), 80) : 18;
+      const rawYLabelDistance = Number($("yOffset").value);
+      const yLabelDistance = Number.isFinite(rawYLabelDistance) ? Math.max(rawYLabelDistance, 0) : 20;
+      const minimumAxisTitleStandoff = Math.ceil(Math.max(12, axisTitleFontSize * 0.45, tickFontSize * 0.35));
+      const xTitleStandoff = Math.max(xLabelDistance, minimumAxisTitleStandoff);
+      const yTitleStandoff = Math.max(yLabelDistance, minimumAxisTitleStandoff);
+      const leftAxisMargin = Math.ceil(Math.max(total > 1 ? 88 : 64, tickFontSize * 1.8 + axisTitleFontSize + yTitleStandoff + 18));
+      const bottomAxisMargin = Math.ceil(Math.max(58, tickFontSize + axisTitleFontSize + xTitleStandoff + 18));
+      const externalLegendMargin = total > 1 && $("legendMode").value === "legend" ? Math.ceil(fontSize * 1.5 + 18) : 0;
+      const topAxisMargin = Math.ceil(Math.max($("chartTitle").value.trim() ? titleFontSize + 24 : 24, 24));
       const lockX = $("lockX").checked;
       const minMz = numberValue("minMz");
       const maxMz = numberValue("maxMz");
@@ -1524,8 +2126,8 @@
       const getXMin = index => lockX ? minMz : numberValue(`minMz${index + 1}`);
       const getXMax = index => lockX ? maxMz : numberValue(`maxMz${index + 1}`);
       const getXTickStep = index => lockX ? xTickStep : numberValue(`xTickStep${index + 1}`);
-      const gridLineWidth = Number($("gridLineWidth").value) || 1;
-      const boxLineWidth = Number($("boxLineWidth").value) || 1;
+      const gridLineWidth = linePtToPlotlyPx(Number($("gridLineWidth").value) || 0.5);
+      const boxLineWidth = linePtToPlotlyPx(Number($("boxLineWidth").value) || 0.75);
       const legendMode = $("legendMode").value;
       const insideLegendX = Math.min(Math.max(Number($("insideLegendX").value) || 0, 0), 100) / 100;
       const insideLegendY = Math.min(Math.max(Number($("insideLegendY").value) || 0, 0), 100) / 100;
@@ -1542,7 +2144,8 @@
         showline: $("closeBox").checked,
         mirror: $("closeBox").checked,
         ticks: "outside",
-        tickfont: { size: tickFontSize, color: $("textColor").value }
+        tickfont: { size: tickFontSize, color: $("textColor").value },
+        automargin: true
       };
       const layout = {
         title: {
@@ -1554,7 +2157,7 @@
         paper_bgcolor: $("backgroundColor").value,
         plot_bgcolor: $("backgroundColor").value,
         font: { family: $("fontFamily").value, size: fontSize, color: $("textColor").value },
-        margin: { l: (total > 1 ? 118 : 80) + Number($("yOffset").value || 0), r: 30, t: 80, b: 80 },
+        margin: { l: leftAxisMargin, r: 24, t: topAxisMargin, b: bottomAxisMargin + externalLegendMargin },
         showlegend: total > 1 && legendMode === "legend",
         legend: { orientation: "h", x: 0, y: -0.16 },
         annotations: buildManualAnnotations(spectra, threshold, decimals)
@@ -1562,8 +2165,8 @@
 
       if (total > 1) {
         layout.annotations.push({
-          text: formatPlotText($("yLabel").value),
-          x: -0.075 - (Number($("yOffset").value || 0) / 1400),
+          text: formatAxisTitleText($("yLabel").value),
+          x: -0.075 - (yTitleStandoff / 1400),
           y: 0.5,
           xref: "paper",
           yref: "paper",
@@ -1593,7 +2196,7 @@
           ...axisCommon,
           showline: $("closeBox").checked || showsXAxisLabels,
           mirror: xAxisMirror,
-          title: showsXAxisTitle ? { text: formatPlotText($("xLabel").value), standoff: xLabelDistance, font: { size: axisTitleFontSize } } : undefined,
+          title: showsXAxisTitle ? { text: formatAxisTitleText($("xLabel").value || "m/z"), standoff: xTitleStandoff, font: { size: axisTitleFontSize } } : undefined,
           range: Number.isFinite(getXMin(i)) && Number.isFinite(getXMax(i)) ? [getXMin(i), getXMax(i)] : undefined,
           autorange: !(Number.isFinite(getXMin(i)) && Number.isFinite(getXMax(i))),
           tickmode: Number.isFinite(getXTickStep(i)) && getXTickStep(i) > 0 ? "linear" : undefined,
@@ -1606,7 +2209,7 @@
         };
         layout[axisName] = {
           ...axisCommon,
-          title: total === 1 && i === 0 ? { text: formatPlotText($("yLabel").value), standoff: Number($("yOffset").value || 20), font: { size: axisTitleFontSize } } : undefined,
+          title: total === 1 && i === 0 ? { text: formatAxisTitleText($("yLabel").value), standoff: yTitleStandoff, font: { size: axisTitleFontSize } } : undefined,
           range: [0, getYScale(i, yMax)],
           ...getYAxisTicks(getYScale(i, yMax), i, compactStack),
           domain: axisDomain(i, total, spectrumGap, groupGap),
@@ -1656,8 +2259,7 @@
       const threshold = Number($("threshold").value) || 0;
       const data = spectra.flatMap((spectrum, index) => makePeakTrace(spectrum, index, spectra.length, decimals, threshold));
       const layout = buildLayout(spectra, threshold, decimals);
-      const previewWidth = Number($("exportWidth").value) || 1200;
-      const previewHeight = Number($("exportHeight").value) || 700;
+      updateCalculatedOutput();
       const config = {
         responsive: true,
         displaylogo: false,
@@ -1674,20 +2276,18 @@
         modeBarButtonsToRemove: ["lasso2d", "select2d"]
       };
 
-      if ($("previewExport").checked) {
-        $("plot").style.width = `${previewWidth}px`;
-        $("plot").style.height = `${previewHeight}px`;
-        layout.width = previewWidth;
-        layout.height = previewHeight;
-        layout.autosize = false;
+      if ($("previewExport")?.checked) {
+        updateFinalSizePreview(false);
       } else {
-        $("plot").style.width = "100%";
+        $("plot").style.width = "";
         $("plot").style.height = "";
-        layout.autosize = true;
+        $("plot").style.transform = "";
       }
+      layout.autosize = true;
       $("plot").classList.toggle("inside-legend-rounded", $("insideLegendShape").value === "rounded");
 
       Plotly.react("plot", data, layout, config).then(plotDiv => {
+        updateFinalSizePreview(false);
         Plotly.Plots.resize(plotDiv);
         bringPlotBoxToFront();
         requestAnimationFrame(bindAnnotationRemoval);
@@ -1901,7 +2501,7 @@
         path.setAttribute("d", d);
         path.setAttribute("fill", "none");
         path.setAttribute("stroke", $("textColor").value);
-        path.setAttribute("stroke-width", String(Number($("boxLineWidth").value) || 1));
+        path.setAttribute("stroke-width", String(linePtToPlotlyPx(Number($("boxLineWidth").value) || 0.75)));
         path.setAttribute("shape-rendering", "crispEdges");
         path.setAttribute("vector-effect", "non-scaling-stroke");
         overlay.appendChild(path);
@@ -1920,50 +2520,476 @@
       $("spectrum4").classList.toggle("hidden", !$("secondSpectrum").checked || !$("thirdSpectrum").checked || !$("fourthSpectrum").checked);
     }
 
-    function projectFieldElements() {
-      return Array.from(document.querySelectorAll("#panel-data input, #panel-data textarea, #panel-data select, #panel-style input, #panel-style textarea, #panel-style select, #panel-axes input, #panel-axes textarea, #panel-axes select, #panel-export input, #panel-export textarea, #panel-export select"))
-        .filter(element => element.id && element.type !== "file");
+    function allJournalPresets() {
+      return builtInJournalPresets;
     }
 
-    function readProjects() {
+    function allFigureStylePresets() {
+      return [...builtInFigureStylePresets, ...readCustomFigureStylePresets()];
+    }
+
+    function isBuiltInFigureStylePreset(presetOrId) {
+      const id = typeof presetOrId === "string" ? presetOrId : presetOrId?.id;
+      return builtInFigureStylePresets.some(preset => preset.id === id);
+    }
+
+    function normalizePresetName(name) {
+      return String(name || "").trim().replace(/[\u2013\u2014]/g, "-").replace(/\s+/g, " ").toLowerCase();
+    }
+
+    function sanitizeCustomFigureStylePreset(preset) {
+      if (!preset || typeof preset !== "object") return null;
+      const name = String(preset.name || "").trim();
+      if (!name) return null;
+      const reserved = builtInFigureStylePresets.some(item => normalizePresetName(item.name) === normalizePresetName(name) || item.id === String(preset.id || ""));
+      if (reserved) return null;
+      const fields = {};
+      CUSTOM_FIGURE_STYLE_FIELD_IDS.forEach(id => {
+        if (preset.fields && Object.prototype.hasOwnProperty.call(preset.fields, id)) fields[id] = String(preset.fields[id]);
+      });
+      const checks = {};
+      FIGURE_STYLE_CHECK_IDS.forEach(id => {
+        if (preset.checks && Object.prototype.hasOwnProperty.call(preset.checks, id)) checks[id] = Boolean(preset.checks[id]);
+      });
+      return {
+        id: String(preset.id || `figure-style-${Date.now()}-${Math.random().toString(36).slice(2)}`),
+        name,
+        figureType: "mass-spectrum",
+        custom: true,
+        fontUnit: "pt",
+        lineUnit: "pt",
+        fields,
+        checks
+      };
+    }
+
+    function readFigureStylePresetStore() {
       try {
-        const projects = JSON.parse(localStorage.getItem(PROJECT_STORAGE_KEY) || "[]");
-        return Array.isArray(projects) ? projects : [];
+        const parsed = JSON.parse(localStorage.getItem(FIGURE_STYLE_PRESETS_KEY) || "{\"version\":1,\"presets\":[]}");
+        const source = Array.isArray(parsed) ? parsed : (Array.isArray(parsed?.presets) ? parsed.presets : []);
+        return { version: 1, presets: source.map(sanitizeCustomFigureStylePreset).filter(Boolean) };
+      } catch {
+        return { version: 1, presets: [] };
+      }
+    }
+
+    function readCustomFigureStylePresets() {
+      return readFigureStylePresetStore().presets;
+    }
+
+    function writeCustomFigureStylePresets(presets) {
+      const clean = (Array.isArray(presets) ? presets : []).map(sanitizeCustomFigureStylePreset).filter(Boolean);
+      localStorage.setItem(FIGURE_STYLE_PRESETS_KEY, JSON.stringify({ version: 1, presets: clean }));
+    }
+
+    function readStorageArray(key) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key) || "[]");
+        return Array.isArray(value) ? value : [];
       } catch {
         return [];
       }
     }
 
-    function writeProjects(projects) {
-      localStorage.setItem(PROJECT_STORAGE_KEY, JSON.stringify(projects));
-      refreshProjectList();
+    function readDefaultPresets() {
+      try {
+        return JSON.parse(localStorage.getItem(DEFAULT_PRESETS_KEY) || "{}") || {};
+      } catch {
+        return {};
+      }
     }
 
-    function projectFromForm(name) {
-      const fields = {};
-      projectFieldElements().forEach(element => {
-        fields[element.id] = element.type === "checkbox" ? element.checked : element.value;
-      });
+    function writeDefaultPresets(defaults) {
+      localStorage.setItem(DEFAULT_PRESETS_KEY, JSON.stringify(defaults));
+    }
+
+    function resolveFigureStylePreset(preset, presets = allFigureStylePresets()) {
+      if (!preset?.basePreset) return preset;
+      const base = presets.find(item => item.id === preset.basePreset);
+      const resolvedBase = base && base !== preset ? resolveFigureStylePreset(base, presets) : {};
       return {
-        id: $("savedProjectSelect").value || `project-${Date.now()}`,
-        name,
-        updatedAt: new Date().toISOString(),
-        fields,
-        selectedPeaks: selectedPeaks.map(label => ({ ...label })),
-        labelEdits: { ...labelEdits }
+        ...resolvedBase,
+        ...preset,
+        fields: { ...(resolvedBase.fields || {}), ...(preset.fields || {}) },
+        checks: { ...(resolvedBase.checks || {}), ...(preset.checks || {}) }
       };
+    }
+
+    function refreshPresetSelectors() {
+      if (!$("journalPreset") || !$("figureStylePreset")) return;
+      const journalCurrent = $("journalPreset").value || "custom";
+      $("journalPreset").innerHTML = "";
+      allJournalPresets().forEach(preset => {
+        const option = document.createElement("option");
+        option.value = preset.id;
+        option.textContent = preset.name;
+        $("journalPreset").appendChild(option);
+      });
+      $("journalPreset").value = allJournalPresets().some(preset => preset.id === journalCurrent) ? journalCurrent : "custom";
+      updateJournalPresetInfo();
+
+      const styleCurrent = $("figureStylePreset").value || "custom";
+      $("figureStylePreset").innerHTML = "";
+      allFigureStylePresets().forEach(preset => {
+        const option = document.createElement("option");
+        option.value = preset.id;
+        option.textContent = preset.name;
+        $("figureStylePreset").appendChild(option);
+      });
+      $("figureStylePreset").value = allFigureStylePresets().some(preset => preset.id === styleCurrent) ? styleCurrent : "custom";
+      updateFigureStylePresetControls();
+    }
+
+    function applyJournalPreset() {
+      const preset = currentJournalPreset();
+      if (!preset || preset.id === "custom") {
+        updateJournalPresetInfo();
+        updateCalculatedOutput();
+        return;
+      }
+      $("sizeUnit").value = "mm";
+      $("finalWidth").value = String(preset.widthMm);
+      $("fontFamily").value = preset.fontFamily;
+      updateJournalPresetInfo();
+      updateCalculatedOutput();
+      renderPlot();
+      $("status").textContent = `Journal preset applied: ${preset.name}`;
+    }
+
+    function saveJournalPreset() {
+      const name = ($("presetName").value || $("journalPreset").selectedOptions[0]?.textContent || "Custom journal").trim();
+      const size = getPublicationSize();
+      const preset = {
+        id: `journal-${Date.now()}`,
+        name,
+        widthIn: size.widthIn,
+        maxHeightIn: size.heightIn,
+        fontFamily: $("fontFamily").value,
+        minFontPt: 4.5,
+        minLinePt: 0.5,
+        recommendedFormat: $("exportFormat").value,
+        recommendedDpi: { color: Number($("rasterDpi").value), grayscale: 600, lineart: 1200 },
+        allowedDpi: [300, 600, 1200]
+      };
+      const custom = readStorageArray(JOURNAL_PRESETS_KEY).filter(item => item.name !== preset.name);
+      custom.push(preset);
+      localStorage.setItem(JOURNAL_PRESETS_KEY, JSON.stringify(custom));
+      refreshPresetSelectors();
+      $("journalPreset").value = preset.id;
+      $("status").textContent = `Journal preset saved: ${preset.name}`;
+    }
+
+    function applyFigureStylePreset() {
+      const preset = allFigureStylePresets().find(item => item.id === $("figureStylePreset").value);
+      if (!preset || preset.id === "custom") return;
+      applyFieldsAndChecks(preset.fields || {}, preset.checks || {});
+      updateCalculatedOutput();
+      renderPlot();
+      $("status").textContent = `Figure style applied: ${preset.name}`;
+    }
+
+    function markFigureStyleCustom() {
+      if ($("figureStylePreset")) $("figureStylePreset").value = "custom";
+      updateFigureStylePresetControls();
+    }
+
+    function collectCurrentFigureStyleFields() {
+      const fields = {};
+      CUSTOM_FIGURE_STYLE_FIELD_IDS.forEach(id => {
+        if ($(id)) fields[id] = $(id).value;
+      });
+      const checks = {};
+      FIGURE_STYLE_CHECK_IDS.forEach(id => {
+        if ($(id)) checks[id] = $(id).checked;
+      });
+      return { fields, checks };
+    }
+
+    function updateFigureStylePresetControls() {
+      const selected = allFigureStylePresets().find(item => item.id === $("figureStylePreset")?.value);
+      if ($("deleteFigureStyle")) $("deleteFigureStyle").disabled = !selected?.custom;
+    }
+
+    function saveFigureStylePreset() {
+      const entered = window.prompt("Name this figure style preset:");
+      if (entered === null) return;
+      const name = entered.trim();
+      if (!name) {
+        $("status").textContent = "Preset name cannot be empty.";
+        return;
+      }
+      const normalizedName = normalizePresetName(name);
+      const reserved = builtInFigureStylePresets.some(preset => normalizePresetName(preset.name) === normalizedName || normalizePresetName(preset.id) === normalizedName);
+      if (reserved) {
+        $("status").textContent = "That name is reserved for an internal preset.";
+        return;
+      }
+      const custom = readCustomFigureStylePresets();
+      const existing = custom.find(preset => normalizePresetName(preset.name) === normalizedName);
+      if (existing && !window.confirm(`Overwrite the existing preset "${existing.name}"?`)) return;
+      const captured = collectCurrentFigureStyleFields();
+      const preset = sanitizeCustomFigureStylePreset({
+        id: existing?.id || `figure-style-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        name,
+        fields: captured.fields,
+        checks: captured.checks,
+        fontUnit: "pt",
+        lineUnit: "pt"
+      });
+      const next = custom.filter(item => normalizePresetName(item.name) !== normalizedName);
+      next.push(preset);
+      writeCustomFigureStylePresets(next);
+      refreshPresetSelectors();
+      $("figureStylePreset").value = preset.id;
+      updateFigureStylePresetControls();
+      $("status").textContent = `Figure style saved: ${preset.name}`;
+    }
+
+    function deleteFigureStylePreset() {
+      const selectedId = $("figureStylePreset")?.value;
+      const selected = allFigureStylePresets().find(item => item.id === selectedId);
+      if (!selected?.custom) return;
+      if (!window.confirm(`Delete the preset "${selected.name}"?`)) return;
+      const next = readCustomFigureStylePresets().filter(preset => preset.id !== selected.id);
+      writeCustomFigureStylePresets(next);
+      refreshPresetSelectors();
+      $("figureStylePreset").value = "custom";
+      updateFigureStylePresetControls();
+      $("status").textContent = `Figure style deleted: ${selected.name}`;
+    }
+
+    function setDefaultJournalPreset() {
+      const defaults = readDefaultPresets();
+      defaults.journal = $("journalPreset").value;
+      writeDefaultPresets(defaults);
+      $("status").textContent = "Default journal saved.";
+    }
+
+    function setDefaultFigureStylePreset() {
+      const defaults = readDefaultPresets();
+      defaults.figureStyleMassSpectrum = $("figureStylePreset").value;
+      writeDefaultPresets(defaults);
+      $("status").textContent = "Default figure style saved.";
+    }
+
+    function applyFieldsAndChecks(fields, checks = {}) {
+      Object.entries(fields || {}).forEach(([id, value]) => {
+        if ($(id)) $(id).value = value;
+      });
+      Object.entries(checks || {}).forEach(([id, value]) => {
+        if ($(id)) $(id).checked = Boolean(value);
+      });
+    }
+
+    function jasmsPresetRules() {
+      return builtInJournalPresets.find(preset => preset.id === "jasms-single-column");
+    }
+
+    function normalizeFontFamily(value) {
+      return String(value || "").replace(/["']/g, "").trim().toLowerCase();
+    }
+
+    function complianceStatusLabel(status) {
+      if (status === "pass") return "Pass";
+      if (status === "warning") return "Warning";
+      return "Not applicable";
+    }
+
+    function addComplianceItem(items, status, label, detail) {
+      items.push({ status, label, detail });
+    }
+
+    function applicableFontChecks(spectra) {
+      const checks = [["Base font", "fontSize"]];
+      if ($("chartTitle")?.value.trim()) checks.push(["Figure title font", "titleFontSize"]);
+      if ($("xLabel")?.value.trim() || $("yLabel")?.value.trim()) checks.push(["Axis title font", "axisTitleFontSize"]);
+      checks.push(["Tick label font", "tickFontSize"]);
+      if ($("labelPeaks")?.checked || selectedPeaks.length || Object.values(labelEdits || {}).some(edit => !edit.hidden)) {
+        checks.push(["Peak m/z label font", "mzLabelFontSize"]);
+      }
+      if (spectra.length > 1 && ["legend", "inside"].includes($("legendMode")?.value)) {
+        checks.push([$("legendMode").value === "inside" ? "Inside name font" : "Legend font", $("legendMode").value === "inside" ? "insideLegendFontSize" : "fontSize"]);
+      }
+      return checks;
+    }
+
+    function checkMinimumPt(items, label, id, minimum, kind) {
+      const value = Number($(id)?.value);
+      if (!Number.isFinite(value)) {
+        addComplianceItem(items, "warning", label, `${kind}: current value is invalid ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· minimum ${minimum} pt`);
+        return;
+      }
+      addComplianceItem(items, value + 1e-9 >= minimum ? "pass" : "warning", label, `${kind}: ${value.toFixed(2)} pt ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· minimum ${minimum} pt`);
+    }
+
+    function checkJournalCompliance() {
+      const rules = jasmsPresetRules();
+      const items = [];
+      const toleranceMm = 0.01;
+      const finalWidth = Number($("finalWidth")?.value);
+      const baseWidth = Number($("exportWidth")?.value);
+      const baseHeight = Number($("exportHeight")?.value);
+      const hasValidWidth = Number.isFinite(finalWidth) && finalWidth > 0;
+      const hasValidBase = Number.isFinite(baseWidth) && baseWidth > 0 && Number.isFinite(baseHeight) && baseHeight > 0;
+      const size = getPublicationSize();
+      const widthMm = hasValidWidth ? finalWidth : size.finalWidthMm;
+      const heightMm = hasValidBase ? widthMm * baseHeight / baseWidth : NaN;
+      const spectra = getSpectra();
+
+      if (!hasValidWidth) {
+        addComplianceItem(items, "warning", "Width", `Final width is invalid ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· maximum ${rules.widthMm.toFixed(1)} mm`);
+      } else {
+        addComplianceItem(items, widthMm <= rules.widthMm + toleranceMm ? "pass" : "warning", "Width", `${widthMm.toFixed(1)} mm ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· maximum ${rules.widthMm.toFixed(1)} mm`);
+      }
+
+      if (!hasValidBase) {
+        addComplianceItem(items, "warning", "Height", "Base width and base height must be positive numbers to calculate final height.");
+      } else {
+        addComplianceItem(items, heightMm <= rules.maxHeightMm + toleranceMm ? "pass" : "warning", "Height", `${heightMm.toFixed(1)} mm ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· maximum ${rules.maxHeightMm.toFixed(1)} mm`);
+      }
+
+      const fontFamily = $("fontFamily")?.value || "";
+      const recommendedFont = rules.fontFamily || "Arial";
+      addComplianceItem(
+        items,
+        normalizeFontFamily(fontFamily) === normalizeFontFamily(recommendedFont) ? "pass" : "warning",
+        "Font family",
+        `${fontFamily || "not set"} ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· recommended ${recommendedFont}`
+      );
+
+      const fontIssues = [];
+      applicableFontChecks(spectra).forEach(([label, id]) => {
+        const value = Number($(id)?.value);
+        if (!Number.isFinite(value) || value < rules.minFontPt) fontIssues.push(`${label}: ${Number.isFinite(value) ? value.toFixed(2) : "invalid"} pt ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· minimum ${rules.minFontPt} pt`);
+      });
+      if (fontIssues.length) {
+        fontIssues.forEach(issue => addComplianceItem(items, "warning", "Fonts", issue));
+      } else {
+        addComplianceItem(items, "pass", "Fonts", `All applicable sizes >= ${rules.minFontPt} pt`);
+      }
+      addComplianceItem(items, "na", "Panel labels", "Not applicable ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· panel letters are not currently rendered.");
+
+      checkMinimumPt(items, "Plot box / axis line", "boxLineWidth", rules.minLinePt, "Line width");
+      checkMinimumPt(items, "Spectrum peak line", "peakLineWidth", rules.minLinePt, "Line width");
+      if ($("showGrid")?.checked) {
+        checkMinimumPt(items, "Grid line", "gridLineWidth", rules.minLinePt, "Line width");
+      } else {
+        addComplianceItem(items, "na", "Grid line", "Not applicable ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· gridlines are off.");
+      }
+
+      const format = $("exportFormat")?.value || "png";
+      const figureContent = $("figureType")?.value || "color";
+      const contentLabels = { color: "color", grayscale: "grayscale", lineart: "line art" };
+      const minimumDpi = rules.recommendedDpi?.[figureContent] || rules.recommendedDpi?.color || 300;
+      const dpi = Number($("rasterDpi")?.value) || 0;
+      if (format === "svg") {
+        addComplianceItem(items, "na", "Raster resolution", "Not applicable ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· SVG is vector.");
+        addComplianceItem(items, "pass", "Format", "SVG ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· preferred vector format available in this app.");
+      } else {
+        addComplianceItem(items, dpi >= minimumDpi ? "pass" : "warning", "Raster resolution", `${dpi} dpi ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· minimum ${minimumDpi} dpi for ${contentLabels[figureContent] || figureContent}`);
+        addComplianceItem(items, "warning", "Format", "PNG is allowed, but SVG is the preferred vector format available in this app.");
+      }
+
+      const warningCount = items.filter(item => item.status === "warning").length;
+      const passCount = items.filter(item => item.status === "pass").length;
+      const unable = !hasValidWidth || !hasValidBase;
+      const summary = unable
+        ? `JASMS check: Unable to complete check ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· ${passCount} passed ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· ${warningCount} warning${warningCount === 1 ? "" : "s"}`
+        : (warningCount ? `JASMS check: Warnings found ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· ${passCount} passed ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· ${warningCount} warning${warningCount === 1 ? "" : "s"}` : `JASMS check: Pass ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· ${passCount} passed ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· 0 warnings`);
+      const checkedAt = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      $("complianceResults").dataset.checked = "true";
+      $("complianceResults").dataset.stale = "false";
+      $("complianceResults").innerHTML = [
+        `<div class="compliance-summary"><strong>${summary}</strong><span>Checked ${checkedAt}</span></div>`,
+        ...items.map(item => `<div class="compliance-item ${item.status}"><strong>${complianceStatusLabel(item.status)} ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· ${item.label}</strong><span>${item.detail}</span></div>`)
+      ].join("");
+    }
+
+    function clearComplianceResults() {
+      const panel = $("complianceResults");
+      if (!panel) return;
+      panel.innerHTML = "";
+      delete panel.dataset.checked;
+      delete panel.dataset.stale;
+    }
+
+    function markComplianceStale() {
+      const panel = $("complianceResults");
+      if (!panel?.dataset.checked || panel.dataset.stale === "true") return;
+      panel.dataset.stale = "true";
+      const note = document.createElement("div");
+      note.className = "compliance-stale";
+      note.textContent = "Settings changed ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· run the check again";
+      panel.prepend(note);
+    }
+    function normalizeLoadedExportFields(fields = {}) {
+      const originalUnit = fields.sizeUnit;
+      const loadedWidth = Number(fields.finalWidth);
+      if (Number.isFinite(loadedWidth) && loadedWidth > 0) {
+        if (originalUnit === "in") $("finalWidth").value = String(Number((loadedWidth * MM_PER_IN).toFixed(1)));
+        if (originalUnit === "cm") $("finalWidth").value = String(Number((loadedWidth * 10).toFixed(1)));
+      }
+      if ($("sizeUnit")) $("sizeUnit").value = "mm";
+    }
+
+    function normalizeLoadedFontFields(fields = {}) {
+      if ($("fontUnit")) $("fontUnit").value = "pt";
+      if (fields.fontUnit === "pt") return;
+      const values = FONT_SIZE_FIELD_IDS
+        .map(id => Number(fields[id]))
+        .filter(value => Number.isFinite(value) && value > 0);
+      const looksLikeLegacyPx = values.some(value => value >= 12);
+      if (!looksLikeLegacyPx) return;
+      const publicationWidthPt = finalWidthPt();
+      const baseWidth = Math.max(1, Math.round(Number($("exportWidth")?.value) || 1200));
+      FONT_SIZE_FIELD_IDS.forEach(id => {
+        const element = $(id);
+        const oldPx = Number(fields[id]);
+        if (!element || !Number.isFinite(oldPx) || oldPx <= 0) return;
+        element.value = (oldPx * publicationWidthPt / baseWidth).toFixed(2).replace(/\.00$/, "").replace(/0$/, "");
+      });
+    }
+
+    function formatLineWidthPt(value) {
+      return Number(value).toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
+    }
+
+    function normalizeLoadedLineFields(fields = {}) {
+      if ($("lineUnit")) $("lineUnit").value = "pt";
+      if (fields.lineUnit === "pt") return false;
+      const publicationWidthPt = finalWidthPt();
+      const baseWidth = Math.max(1, Math.round(Number($("exportWidth")?.value) || 1200));
+      let changed = false;
+      LINE_WIDTH_FIELD_IDS.forEach(id => {
+        const element = $(id);
+        const oldInternalWidth = Number(fields[id]);
+        if (!element || !Number.isFinite(oldInternalWidth) || oldInternalWidth <= 0) return;
+        element.value = formatLineWidthPt(oldInternalWidth * publicationWidthPt / baseWidth);
+        changed = true;
+      });
+      return changed;
     }
 
     function applyProject(project) {
       Object.entries(project.fields || {}).forEach(([id, value]) => {
         const element = $(id);
-        if (!element || element.type === "file") return;
+        if (!element || element.type === "file" || id === "previewExport") return;
         if (element.type === "checkbox") {
           element.checked = Boolean(value);
         } else {
           element.value = value ?? "";
         }
       });
+      if ($("figureStylePreset") && (!$("figureStylePreset").value || !allFigureStylePresets().some(preset => preset.id === $("figureStylePreset").value))) {
+        $("figureStylePreset").value = "custom";
+      }
+      updateFigureStylePresetControls();
+      if ($("figureType") && !Object.prototype.hasOwnProperty.call(project.fields || {}, "figureType")) {
+        $("figureType").value = "color";
+      }
+      normalizeLoadedExportFields(project.fields || {});
+      normalizeLoadedFontFields(project.fields || {});
+      const migratedLineWidths = normalizeLoadedLineFields(project.fields || {});
       selectedPeaks = Array.isArray(project.selectedPeaks) ? project.selectedPeaks.map(label => ({ ...label })) : [];
       labelEdits = project.labelEdits && typeof project.labelEdits === "object" ? { ...project.labelEdits } : {};
       renderedAnnotationKeys = [];
@@ -1972,6 +2998,12 @@
       syncSpectrumVisibility();
       syncXControlVisibility();
       updateProjectButtons();
+      if (migratedLineWidths) {
+        project.fields = projectFromForm(project.name || t("newProject")).fields;
+        const projects = readProjects().map(item => item.id === project.id ? { ...project, updatedAt: new Date().toISOString() } : item);
+        writeProjects(projects);
+      }
+      clearComplianceResults();
       renderPlot(t("projectLoaded")(project.name || t("newProject")));
     }
 
@@ -2066,21 +3098,23 @@
         backgroundColor: "#ffffff",
         textColor: "#1c2430",
         gridColor: "#eceff3",
-        boxLineWidth: "1",
-        gridLineWidth: "1",
+        boxLineWidth: "0.75",
+        gridLineWidth: "0.5",
+        peakLineWidth: "0.65",
         fontFamily: "Arial",
-        fontSize: "14",
-        titleFontSize: "24",
-        axisTitleFontSize: "14",
-        tickFontSize: "14",
-        mzLabelFontSize: "14",
-        insideLegendFontSize: "14",
+        fontSize: "8",
+        panelLabelFontSize: "10",
+        titleFontSize: "9",
+        axisTitleFontSize: "8.5",
+        tickFontSize: "8",
+        mzLabelFontSize: "7.5",
+        insideLegendFontSize: "8",
         yOffset: "20",
-        yScale: "120",
-        yScale1: "120",
-        yScale2: "120",
-        yScale3: "120",
-        yScale4: "120",
+        yScale: "110",
+        yScale1: "110",
+        yScale2: "110",
+        yScale3: "110",
+        yScale4: "110",
         decimals: "1",
         minMz: "",
         maxMz: "",
@@ -2101,14 +3135,25 @@
         spectrumGap: "8",
         groupGapAfter2: "0",
         xLabelDistance: "18",
+        exportFormat: "png",
+        rasterDpi: "300",
+        figureType: "color",
+        sizeUnit: "mm",
+        finalWidth: "84.6",
+        finalHeightMode: "auto",
+        finalHeight: "49.4",
+        advancedExportScale: "1",
         exportWidth: "1200",
         exportHeight: "700",
-        exportScale: "2"
+        exportScale: "3.125",
+        journalPreset: "custom",
+        figureStylePreset: "custom",
+        lineUnit: "pt"
       };
       Object.entries(defaults).forEach(([id, value]) => {
         if ($(id)) $(id).value = value;
       });
-      $("showGrid").checked = true;
+      $("showGrid").checked = false;
       $("closeBox").checked = true;
       $("showDots").checked = false;
       $("normalize").checked = true;
@@ -2125,17 +3170,39 @@
       renderPlot();
     }
 
+    function svgDataUrlWithPhysicalSize(url, size) {
+      const commaIndex = url.indexOf(",");
+      if (commaIndex === -1) return url;
+      const header = url.slice(0, commaIndex);
+      const payload = url.slice(commaIndex + 1);
+      const svg = header.includes(";base64") ? atob(payload) : decodeURIComponent(payload);
+      const width = `${size.finalWidthMm.toFixed(3)}mm`;
+      const height = `${size.finalHeightMm.toFixed(3)}mm`;
+      const viewBox = `0 0 ${size.baseWidth} ${size.baseHeight}`;
+      const updatedSvg = svg.replace(/<svg\b([^>]*)>/, (match, attrs) => {
+        let nextAttrs = attrs
+          .replace(/\swidth=("[^"]*"|'[^']*')/i, "")
+          .replace(/\sheight=("[^"]*"|'[^']*')/i, "")
+          .replace(/\sviewBox=("[^"]*"|'[^']*')/i, "");
+        return `<svg${nextAttrs} width="${width}" height="${height}" viewBox="${viewBox}">`;
+      });
+      return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(updatedSvg)}`;
+    }
+
     function downloadPng() {
       if (!lastPlot.data.length) renderPlot();
+      updateCalculatedOutput();
+      const size = getPublicationSize();
+      const format = $("exportFormat").value;
       Plotly.toImage("plot", {
-        format: "png",
-        width: Number($("exportWidth").value) || 1200,
-        height: Number($("exportHeight").value) || 700,
-        scale: Number($("exportScale").value) || 2
+        format,
+        width: size.baseWidth,
+        height: size.baseHeight,
+        scale: format === "png" ? size.scale : 1
       }).then(url => {
         const link = document.createElement("a");
-        link.href = url;
-        link.download = "mass-spectrum.png";
+        link.href = format === "svg" ? svgDataUrlWithPhysicalSize(url, size) : url;
+        link.download = `mass-spectrum.${format}`;
         link.click();
       });
     }
@@ -2186,6 +3253,35 @@
     });
     $("generate").addEventListener("click", () => renderPlot());
     $("download").addEventListener("click", downloadPng);
+    $("applyJournalPreset").addEventListener("click", applyJournalPreset);
+    $("applyFigureStyle").addEventListener("click", applyFigureStylePreset);
+    $("saveFigureStyle").addEventListener("click", saveFigureStylePreset);
+    $("deleteFigureStyle").addEventListener("click", deleteFigureStylePreset);
+    $("figureStylePreset").addEventListener("change", updateFigureStylePresetControls);
+    $("checkCompliance").addEventListener("click", checkJournalCompliance);
+    $("journalPreset").addEventListener("change", updateJournalPresetInfo);
+    ["finalWidth", "fontFamily"].forEach(id => {
+      $(id).addEventListener("input", markJournalPresetCustom);
+    });
+    FIGURE_STYLE_FIELD_IDS.forEach(id => {
+      if ($(id)) $(id).addEventListener("input", markFigureStyleCustom);
+    });
+    FIGURE_STYLE_CHECK_IDS.forEach(id => {
+      if ($(id)) $(id).addEventListener("change", markFigureStyleCustom);
+    });
+    ["finalWidth", "exportWidth", "exportHeight"].forEach(id => {
+      $(id).addEventListener("input", () => {
+        updateCalculatedOutput();
+        renderPlot();
+      });
+    });
+    ["exportFormat", "rasterDpi", "figureType"].forEach(id => {
+      $(id).addEventListener("input", updateCalculatedOutput);
+    });
+    ["finalWidth", "exportWidth", "exportHeight", "fontFamily", "fontSize", "titleFontSize", "axisTitleFontSize", "tickFontSize", "mzLabelFontSize", "insideLegendFontSize", "boxLineWidth", "gridLineWidth", "peakLineWidth", "showGrid", "chartTitle", "labelPeaks", "legendMode", "rasterDpi", "exportFormat", "figureType"].forEach(id => {
+      if ($(id)) $(id).addEventListener("input", markComplianceStale);
+      if ($(id)) $(id).addEventListener("change", markComplianceStale);
+    });
     $("saveProject").addEventListener("click", saveProject);
     $("loadProject").addEventListener("click", loadProject);
     $("deleteProject").addEventListener("click", deleteProject);
@@ -2195,6 +3291,10 @@
       updateProjectButtons();
     });
     $("resetDefaults").addEventListener("click", resetDefaults);
+    $("previewExport").addEventListener("change", () => {
+      updateCalculatedOutput();
+      renderPlot();
+    });
     $("lockX").addEventListener("change", () => {
       syncXControlVisibility();
       renderPlot();
@@ -2213,7 +3313,7 @@
 
     document.querySelectorAll("input, textarea, select").forEach(input => {
       input.addEventListener("input", () => {
-        if (input.type !== "file" && !input.closest(".project-panel")) renderPlot();
+        if (input.type !== "file" && !input.closest(".project-panel") && !input.closest("#panel-export")) renderPlot();
       });
     });
 
@@ -2240,7 +3340,10 @@
 338.4 100
 376.9 72
 409.2 31`;
+    refreshPresetSelectors();
+    const savedDefaults = readDefaultPresets();
     syncXControlVisibility();
+    updateCalculatedOutput();
     updateLanguage("en");
   </script>
 </body>
