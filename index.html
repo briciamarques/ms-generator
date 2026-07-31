@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mass Spectrum Generator</title>
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
@@ -36,7 +36,7 @@
       display: flex;
       flex-wrap: wrap;
       align-items: flex-start;
-      justify-content: space-between;
+      justify-content: flex-start;
       gap: 18px;
     }
 
@@ -87,18 +87,18 @@
       font-size: 18px;
     }
     header > div:first-child {
-      min-width: min(100%, 360px);
-      max-width: 100%;
-      flex: 1 1 380px;
+      min-width: min(100%, 330px);
+      max-width: 430px;
+      flex: 0 1 430px;
     }
 
     .header-tools {
       display: flex;
       align-items: flex-start;
-      justify-content: flex-end;
+      justify-content: flex-start;
       gap: 12px;
-      flex: 1 1 560px;
-      min-width: min(100%, 360px);
+      flex: 1 1 auto;
+      min-width: min(100%, 520px);
       max-width: 100%;
     }
 
@@ -108,15 +108,21 @@
       padding: 10px 12px;
       background: #fbfcfe;
       box-shadow: none;
-      flex: 1 1 460px;
-      max-width: 620px;
-      min-width: 0;
+      display: flex;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 8px 10px;
+      flex: 1 1 auto;
+      max-width: none;
+      min-width: min(100%, 520px);
     }
 
     header .project-grid {
-      grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr);
+      display: grid;
+      grid-template-columns: minmax(150px, 190px) minmax(190px, 260px);
       gap: 8px;
-      margin-bottom: 8px;
+      margin-bottom: 0;
+      flex: 0 1 auto;
     }
 
     header .project-panel .field {
@@ -136,7 +142,8 @@
 
     header .project-actions {
       gap: 8px;
-      margin-bottom: 6px;
+      margin-bottom: 0;
+      flex: 0 0 auto;
     }
 
     header .project-actions button {
@@ -146,6 +153,8 @@
 
     header .project-note {
       font-size: 12px;
+      flex: 1 1 220px;
+      min-width: 180px;
     }
 
     .language {
@@ -156,6 +165,7 @@
       border-radius: 8px;
       padding: 4px;
       background: #f8fafd;
+      margin-left: auto;
     }
 
     button,
@@ -1209,7 +1219,7 @@
     </section>
   </main>
 
-  <footer data-i18n="footer">Made with Plotly.js ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· All calculations run in the browser</footer>
+  <footer data-i18n="footer">Made with Plotly.js &middot; All calculations run in the browser</footer>
 
   <script>
     const exampleData = `229.171734 5.021981
@@ -1377,7 +1387,7 @@
         noSavedProjects: "No saved projects yet",
         generate: "Generate spectrum",
         download: "Download PNG",
-        footer: "Made with Plotly.js ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· All calculations run in the browser",
+        footer: "Made with Plotly.js \u00b7 All calculations run in the browser",
         generated: count => `Spectrum generated with ${count} peaks.`,
         empty: "Add at least one valid pair of m/z and intensity values.",
         parseError: "Some lines could not be read and were skipped.",
@@ -1410,24 +1420,24 @@
         loadExample: "Carregar exemplo",
         clear: "Limpar",
         loadFile: "Carregar arquivo (.csv/.txt)",
-        chartTitle: "TÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­tulo do grÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡fico",
-        xLabel: "RÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³tulo X",
-        yLabel: "RÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³tulo Y",
+        chartTitle: "T\u00edtulo do gr\u00e1fico",
+        xLabel: "R\u00f3tulo X",
+        yLabel: "R\u00f3tulo Y",
         styleTextGroup: "Texto",
         styleLegendGroup: "Nomes dos espectros",
         styleColorsGroup: "Cores e linhas",
-        styleDisplayGroup: "ExibiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o",
-        titleFontSize: "Tamanho do tÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­tulo/condiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o (pt)",
-        axisTitleFontSize: "Tamanho dos tÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­tulos dos eixos (pt)",
-        tickFontSize: "Tamanho dos nÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âºmeros dos eixos (pt)",
-        mzLabelFontSize: "Tamanho dos rÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³tulos m/z (pt)",
+        styleDisplayGroup: "Exibi\u00e7\u00e3o",
+        titleFontSize: "Tamanho do t\u00edtulo/condi\u00e7\u00e3o (pt)",
+        axisTitleFontSize: "Tamanho dos t\u00edtulos dos eixos (pt)",
+        tickFontSize: "Tamanho dos n\u00fameros dos eixos (pt)",
+        mzLabelFontSize: "Tamanho dos r\u00f3tulos m/z (pt)",
         insideLegendFontSize: "Tamanho do nome interno (pt)",
-        panelLabelFontSize: "Tamanho das letras dos painÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©is (pt)",
+        panelLabelFontSize: "Tamanho das letras dos pain\u00e9is (pt)",
         peakColor: "Cor dos picos",
         formatNote: "Use _ para subscrito e ^ para sobrescrito: H_2O, M^+, SO_4^{2-}.",
-        peakColor2: "Cor dos picos (2ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âº)",
-        peakColor3: "Cor dos picos (3ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âº)",
-        peakColor4: "Cor dos picos (4ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âº)",
+        peakColor2: "Cor dos picos (2\u00ba)",
+        peakColor3: "Cor dos picos (3\u00ba)",
+        peakColor4: "Cor dos picos (4\u00ba)",
         backgroundColor: "Cor de fundo",
         textColor: "Cor do texto",
         gridColor: "Cor da grade",
@@ -1436,9 +1446,9 @@
         peakLineWidth: "Espessura dos picos do espectro (pt)",
         font: "Fonte",
         fontSize: "Tamanho base da fonte (pt)",
-        yOffset: "DistÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ncia do rÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³tulo Y (px)",
+        yOffset: "Dist\u00e2ncia do r\u00f3tulo Y (px)",
         showGrid: "Mostrar grade",
-        closeBox: "Fechar caixa do grÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡fico",
+        closeBox: "Fechar caixa do gr\u00e1fico",
         showDots: "Mostrar ponto no topo do pico",
         normalize: "Normalizar pelo pico base (100%)",
         yScale: "Escala Y (%)",
@@ -1447,46 +1457,46 @@
         yScale3: "Escala Y 3 (%)",
         yScale4: "Escala Y 4 (%)",
         decimals: "Casas decimais de m/z",
-        minMz: "m/z mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­nimo (todos; automÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡tico se vazio)",
-        maxMz: "m/z mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ximo (todos; automÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡tico se vazio)",
-        minMz1: "m/z mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­nimo 1",
-        maxMz1: "m/z mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ximo 1",
+        minMz: "m/z m\u00ednimo (todos; autom\u00e1tico se vazio)",
+        maxMz: "m/z m\u00e1ximo (todos; autom\u00e1tico se vazio)",
+        minMz1: "m/z m\u00ednimo 1",
+        maxMz1: "m/z m\u00e1ximo 1",
         xTickStep1: "Intervalo X 1",
-        minMz2: "m/z mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­nimo 2",
-        maxMz2: "m/z mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ximo 2",
+        minMz2: "m/z m\u00ednimo 2",
+        maxMz2: "m/z m\u00e1ximo 2",
         xTickStep2: "Intervalo X 2",
-        minMz3: "m/z mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­nimo 3",
-        maxMz3: "m/z mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ximo 3",
+        minMz3: "m/z m\u00ednimo 3",
+        maxMz3: "m/z m\u00e1ximo 3",
         xTickStep3: "Intervalo X 3",
-        minMz4: "m/z mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­nimo 4",
-        maxMz4: "m/z mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ximo 4",
+        minMz4: "m/z m\u00ednimo 4",
+        maxMz4: "m/z m\u00e1ximo 4",
         xTickStep4: "Intervalo X 4",
         threshold: "Limite para rotular (%)",
-        spectrumGap: "EspaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§amento entre espectros (%)",
+        spectrumGap: "Espa\u00e7amento entre espectros (%)",
         compositeLayoutGroup: "Layout composto",
         showSecondXAxis: "Mostrar eixo X no espectro 2",
-        groupGapAfter2: "EspaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§o extra apÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³s o espectro 2 (%)",
-        xLabelDistance: "DistÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ncia do rÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³tulo m/z (px)",
+        groupGapAfter2: "Espa\u00e7o extra ap\u00f3s o espectro 2 (%)",
+        xLabelDistance: "Dist\u00e2ncia do r\u00f3tulo m/z (px)",
         lockY: "Travar escalas Y de todos os espectros",
         lockX: "Travar eixos X de todos os espectros",
         labelPeaks: "Rotular picos principais",
-        clickMz: "RÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³tulos manuais de m/z",
-        clearSelection: "Limpar rÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³tulos manuais",
-        xTickStep: "Intervalo do eixo X (automatico se vazio)",
+        clickMz: "R\u00f3tulos manuais de m/z",
+        clearSelection: "Limpar r\u00f3tulos manuais",
+        xTickStep: "Intervalo do eixo X (autom\u00e1tico se vazio)",
         width: "Largura (px)",
         height: "Altura (px)",
-        scale: "Multiplicador de exportaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o",
-        previewExport: "Pre-visualizar no tamanho final",
-        finalSizePreviewNote: "Tamanho aproximado na tela; o tamanho fisico real depende do zoom do navegador e da escala do monitor.",
-        journalPresetGroup: "Preset de periÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³dico",
-        journalPreset: "Preset de periÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³dico",
-        figureType: "Conteudo da figura",
+        scale: "Multiplicador de exporta\u00e7\u00e3o",
+        previewExport: "Pr\u00e9-visualizar no tamanho final",
+        finalSizePreviewNote: "Tamanho aproximado na tela; o tamanho f\u00edsico real depende do zoom do navegador e da escala do monitor.",
+        journalPresetGroup: "Preset de peri\u00f3dico",
+        journalPreset: "Preset de peri\u00f3dico",
+        figureType: "Conte\u00fado da figura",
         figureTypeColor: "Colorida",
         figureTypeGray: "Escala de cinza",
         figureTypeLine: "Line art / preto e branco",
-        applyJournalPreset: "Aplicar preset de periÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³dico",
-        saveJournalPreset: "Salvar como preset de periÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³dico",
-        setDefaultJournal: "Definir como periÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³dico padrÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o",
+        applyJournalPreset: "Aplicar preset de peri\u00f3dico",
+        saveJournalPreset: "Salvar como preset de peri\u00f3dico",
+        setDefaultJournal: "Definir como peri\u00f3dico padr\u00e3o",
         figureStyleGroup: "Preset de estilo da figura",
         figureStylePreset: "Estilo da figura",
         presetName: "Nome do preset",
@@ -1494,18 +1504,18 @@
         saveFigureStyle: "Salvar estilo atual",
         deleteFigureStyle: "Apagar preset",
         resetToPreset: "Voltar ao preset",
-        publicationSizeGroup: "Tamanho de publicaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o e exportaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o",
-        exportFormat: "Formato de exportaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o",
-        rasterDpi: "ResoluÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o raster",
+        publicationSizeGroup: "Tamanho de publica\u00e7\u00e3o e exporta\u00e7\u00e3o",
+        exportFormat: "Formato de exporta\u00e7\u00e3o",
+        rasterDpi: "Resolu\u00e7\u00e3o raster",
         sizeUnit: "Unidade de tamanho",
         finalWidth: "Largura final (mm)",
         baseWidth: "Largura base (px)",
         baseHeight: "Altura base (px)",
         finalHeightMode: "Altura final",
         finalHeight: "Valor da altura final",
-        heightAuto: "AutomÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡tica",
+        heightAuto: "Autom\u00e1tica",
         heightCustom: "Personalizada",
-        advancedExportScale: "Multiplicador avanÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ado de exportaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o",
+        advancedExportScale: "Multiplicador avan\u00e7ado de exporta\u00e7\u00e3o",
         checkCompliance: "Verificar JASMS",
         projectName: "Nome do projeto",
         savedProjects: "Projetos salvos",
@@ -1517,17 +1527,17 @@
         noSavedProjects: "Nenhum projeto salvo ainda",
         generate: "Gerar espectro",
         download: "Baixar PNG",
-        footer: "Feito com Plotly.js ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· Todos os cÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lculos rodam no navegador",
-        generated: count => `Espectro gerado com ${count} picos.`,
-        empty: "Adicione pelo menos um par vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡lido de m/z e intensidade.",
-        parseError: "Algumas linhas nÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o puderam ser lidas e foram ignoradas.",
-        fileLoaded: "Arquivo carregado. Gere o espectro para atualizar o grÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡fico.",
-        projectSaved: name => `Projeto salvo: ${name}`,
-        projectLoaded: name => `Projeto aberto: ${name}`,
-        projectDeleted: name => `Projeto apagado: ${name}`,
+        footer: "Feito com Plotly.js \u00b7 Todos os c\u00e1lculos rodam no navegador",
+        generated: count => "Espectro gerado com " + count + " picos.",
+        empty: "Adicione pelo menos um par v\u00e1lido de m/z e intensidade.",
+        parseError: "Algumas linhas n\u00e3o puderam ser lidas e foram ignoradas.",
+        fileLoaded: "Arquivo carregado. Gere o espectro para atualizar o gr\u00e1fico.",
+        projectSaved: name => "Projeto salvo: " + name,
+        projectLoaded: name => "Projeto aberto: " + name,
+        projectDeleted: name => "Projeto apagado: " + name,
         projectMissing: "Escolha um projeto salvo primeiro.",
-        selectionCleared: "SeleÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â£o de pico limpa.",
-        selected: mz => `RÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³tulo manual adicionado: m/z ${mz}`
+        selectionCleared: "Sele\u00e7\u00e3o de pico limpa.",
+        selected: mz => "R\u00f3tulo manual adicionado: m/z " + mz
       }
     };
 
@@ -2816,10 +2826,10 @@
     function checkMinimumPt(items, label, id, minimum, kind) {
       const value = Number($(id)?.value);
       if (!Number.isFinite(value)) {
-        addComplianceItem(items, "warning", label, `${kind}: current value is invalid ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· minimum ${minimum} pt`);
+        addComplianceItem(items, "warning", label, kind + ": current value is invalid \u00b7 minimum " + minimum + " pt");
         return;
       }
-      addComplianceItem(items, value + 1e-9 >= minimum ? "pass" : "warning", label, `${kind}: ${value.toFixed(2)} pt ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· minimum ${minimum} pt`);
+      addComplianceItem(items, value + 1e-9 >= minimum ? "pass" : "warning", label, kind + ": " + value.toFixed(2) + " pt \u00b7 minimum " + minimum + " pt");
     }
 
     function checkJournalCompliance() {
@@ -2837,44 +2847,39 @@
       const spectra = getSpectra();
 
       if (!hasValidWidth) {
-        addComplianceItem(items, "warning", "Width", `Final width is invalid ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· maximum ${rules.widthMm.toFixed(1)} mm`);
+        addComplianceItem(items, "warning", "Width", "Final width is invalid \u00b7 maximum " + rules.widthMm.toFixed(1) + " mm");
       } else {
-        addComplianceItem(items, widthMm <= rules.widthMm + toleranceMm ? "pass" : "warning", "Width", `${widthMm.toFixed(1)} mm ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· maximum ${rules.widthMm.toFixed(1)} mm`);
+        addComplianceItem(items, widthMm <= rules.widthMm + toleranceMm ? "pass" : "warning", "Width", widthMm.toFixed(1) + " mm \u00b7 maximum " + rules.widthMm.toFixed(1) + " mm");
       }
 
       if (!hasValidBase) {
         addComplianceItem(items, "warning", "Height", "Base width and base height must be positive numbers to calculate final height.");
       } else {
-        addComplianceItem(items, heightMm <= rules.maxHeightMm + toleranceMm ? "pass" : "warning", "Height", `${heightMm.toFixed(1)} mm ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· maximum ${rules.maxHeightMm.toFixed(1)} mm`);
+        addComplianceItem(items, heightMm <= rules.maxHeightMm + toleranceMm ? "pass" : "warning", "Height", heightMm.toFixed(1) + " mm \u00b7 maximum " + rules.maxHeightMm.toFixed(1) + " mm");
       }
 
       const fontFamily = $("fontFamily")?.value || "";
       const recommendedFont = rules.fontFamily || "Arial";
-      addComplianceItem(
-        items,
-        normalizeFontFamily(fontFamily) === normalizeFontFamily(recommendedFont) ? "pass" : "warning",
-        "Font family",
-        `${fontFamily || "not set"} ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· recommended ${recommendedFont}`
-      );
+      addComplianceItem(items, normalizeFontFamily(fontFamily) === normalizeFontFamily(recommendedFont) ? "pass" : "warning", "Font family", (fontFamily || "not set") + " \u00b7 recommended " + recommendedFont);
 
       const fontIssues = [];
       applicableFontChecks(spectra).forEach(([label, id]) => {
         const value = Number($(id)?.value);
-        if (!Number.isFinite(value) || value < rules.minFontPt) fontIssues.push(`${label}: ${Number.isFinite(value) ? value.toFixed(2) : "invalid"} pt ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· minimum ${rules.minFontPt} pt`);
+        if (!Number.isFinite(value) || value < rules.minFontPt) fontIssues.push(label + ": " + (Number.isFinite(value) ? value.toFixed(2) : "invalid") + " pt \u00b7 minimum " + rules.minFontPt + " pt");
       });
       if (fontIssues.length) {
         fontIssues.forEach(issue => addComplianceItem(items, "warning", "Fonts", issue));
       } else {
-        addComplianceItem(items, "pass", "Fonts", `All applicable sizes >= ${rules.minFontPt} pt`);
+        addComplianceItem(items, "pass", "Fonts", "All applicable sizes >= " + rules.minFontPt + " pt");
       }
-      addComplianceItem(items, "na", "Panel labels", "Not applicable ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· panel letters are not currently rendered.");
+      addComplianceItem(items, "na", "Panel labels", "Not applicable \u00b7 panel letters are not currently rendered.");
 
       checkMinimumPt(items, "Plot box / axis line", "boxLineWidth", rules.minLinePt, "Line width");
       checkMinimumPt(items, "Spectrum peak line", "peakLineWidth", rules.minLinePt, "Line width");
       if ($("showGrid")?.checked) {
         checkMinimumPt(items, "Grid line", "gridLineWidth", rules.minLinePt, "Line width");
       } else {
-        addComplianceItem(items, "na", "Grid line", "Not applicable ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· gridlines are off.");
+        addComplianceItem(items, "na", "Grid line", "Not applicable \u00b7 gridlines are off.");
       }
 
       const format = $("exportFormat")?.value || "png";
@@ -2883,10 +2888,10 @@
       const minimumDpi = rules.recommendedDpi?.[figureContent] || rules.recommendedDpi?.color || 300;
       const dpi = Number($("rasterDpi")?.value) || 0;
       if (format === "svg") {
-        addComplianceItem(items, "na", "Raster resolution", "Not applicable ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· SVG is vector.");
-        addComplianceItem(items, "pass", "Format", "SVG ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· preferred vector format available in this app.");
+        addComplianceItem(items, "na", "Raster resolution", "Not applicable \u00b7 SVG is vector.");
+        addComplianceItem(items, "pass", "Format", "SVG \u00b7 preferred vector format available in this app.");
       } else {
-        addComplianceItem(items, dpi >= minimumDpi ? "pass" : "warning", "Raster resolution", `${dpi} dpi ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· minimum ${minimumDpi} dpi for ${contentLabels[figureContent] || figureContent}`);
+        addComplianceItem(items, dpi >= minimumDpi ? "pass" : "warning", "Raster resolution", dpi + " dpi \u00b7 minimum " + minimumDpi + " dpi for " + (contentLabels[figureContent] || figureContent));
         addComplianceItem(items, "warning", "Format", "PNG is allowed, but SVG is the preferred vector format available in this app.");
       }
 
@@ -2894,14 +2899,14 @@
       const passCount = items.filter(item => item.status === "pass").length;
       const unable = !hasValidWidth || !hasValidBase;
       const summary = unable
-        ? `JASMS check: Unable to complete check ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· ${passCount} passed ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· ${warningCount} warning${warningCount === 1 ? "" : "s"}`
-        : (warningCount ? `JASMS check: Warnings found ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· ${passCount} passed ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· ${warningCount} warning${warningCount === 1 ? "" : "s"}` : `JASMS check: Pass ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· ${passCount} passed ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· 0 warnings`);
+        ? "JASMS check: Unable to complete check \u00b7 " + passCount + " passed \u00b7 " + warningCount + " warning" + (warningCount === 1 ? "" : "s")
+        : (warningCount ? "JASMS check: Warnings found \u00b7 " + passCount + " passed \u00b7 " + warningCount + " warning" + (warningCount === 1 ? "" : "s") : "JASMS check: Pass \u00b7 " + passCount + " passed \u00b7 0 warnings");
       const checkedAt = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
       $("complianceResults").dataset.checked = "true";
       $("complianceResults").dataset.stale = "false";
       $("complianceResults").innerHTML = [
-        `<div class="compliance-summary"><strong>${summary}</strong><span>Checked ${checkedAt}</span></div>`,
-        ...items.map(item => `<div class="compliance-item ${item.status}"><strong>${complianceStatusLabel(item.status)} ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· ${item.label}</strong><span>${item.detail}</span></div>`)
+        "<div class=\"compliance-summary\"><strong>" + summary + "</strong><span>Checked " + checkedAt + "</span></div>",
+        ...items.map(item => "<div class=\"compliance-item " + item.status + "\"><strong>" + complianceStatusLabel(item.status) + " \u00b7 " + item.label + "</strong><span>" + item.detail + "</span></div>")
       ].join("");
     }
 
@@ -2919,9 +2924,10 @@
       panel.dataset.stale = "true";
       const note = document.createElement("div");
       note.className = "compliance-stale";
-      note.textContent = "Settings changed ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· run the check again";
+      note.textContent = "Settings changed \u00b7 run the check again";
       panel.prepend(note);
     }
+
     function normalizeLoadedExportFields(fields = {}) {
       const originalUnit = fields.sizeUnit;
       const loadedWidth = Number(fields.finalWidth);
