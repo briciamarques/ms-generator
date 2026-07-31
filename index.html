@@ -1973,10 +1973,11 @@
         plot.style.height = `${size.baseHeight}px`;
         plot.style.transform = `scale(${scale})`;
       } else {
+        const normalPlotHeight = Math.max(420, Math.min(size.baseHeight, 1800));
         stage.style.width = "";
         stage.style.height = "";
         plot.style.width = "";
-        plot.style.height = "";
+        plot.style.height = `${normalPlotHeight}px`;
         plot.style.transform = "";
       }
       if (resizePlot && window.Plotly && plot.data) Plotly.Plots.resize(plot);
@@ -2575,13 +2576,7 @@
         doubleClick: $("clickMz").checked || customAnnotationPlacement ? false : "reset"
       };
 
-      if ($("previewExport")?.checked) {
-        updateFinalSizePreview(false);
-      } else {
-        $("plot").style.width = "";
-        $("plot").style.height = "";
-        $("plot").style.transform = "";
-      }
+      updateFinalSizePreview(false);
       layout.autosize = true;
       $("plot").classList.toggle("inside-legend-rounded", $("insideLegendShape").value === "rounded");
 
