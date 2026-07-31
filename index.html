@@ -45,7 +45,7 @@
       align-items: center;
       gap: 10px;
       flex-wrap: wrap;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
 
     h1 {
@@ -53,6 +53,7 @@
       font-size: clamp(30px, 3vw, 42px);
       margin: 0;
       line-height: 1.05;
+      white-space: nowrap;
     }
 
     .format-help-button {
@@ -86,10 +87,17 @@
       color: var(--muted);
       font-size: 18px;
     }
+
+    header > div:first-child > p:not(.format-help-popover) {
+      font-size: 15px;
+      line-height: 1.25;
+      white-space: nowrap;
+    }
+
     header > div:first-child {
-      min-width: min(100%, 330px);
-      max-width: 430px;
-      flex: 0 1 430px;
+      min-width: min(100%, 430px);
+      max-width: none;
+      flex: 0 0 auto;
     }
 
     .header-tools {
@@ -681,6 +689,11 @@
         padding-top: 18px;
       }
 
+      h1,
+      header > div:first-child > p:not(.format-help-popover) {
+        white-space: normal;
+      }
+
       .header-tools {
         width: 100%;
         flex-direction: column;
@@ -1249,6 +1262,7 @@
               <select id="exportFormat">
                 <option value="png">PNG</option>
                 <option value="svg">SVG</option>
+                <option value="tiff">TIFF</option>
               </select>
             </div>
             <div class="field" id="rasterDpiField">
@@ -1509,7 +1523,7 @@
         newProject: "New project",
         noSavedProjects: "No saved projects yet",
         generate: "Generate spectrum",
-        download: "Download PNG",
+        download: "Download figure",
         footer: "Made with Plotly.js \u00b7 All calculations run in the browser",
         generated: count => `Spectrum generated with ${count} peaks.`,
         empty: "Add at least one valid pair of m/z and intensity values.",
@@ -1673,7 +1687,7 @@
         newProject: "Novo projeto",
         noSavedProjects: "Nenhum projeto salvo ainda",
         generate: "Gerar espectro",
-        download: "Baixar PNG",
+        download: "Baixar figura",
         footer: "Feito com Plotly.js \u00b7 Todos os c\u00e1lculos rodam no navegador",
         generated: count => "Espectro gerado com " + count + " picos.",
         empty: "Adicione pelo menos um par v\u00e1lido de m/z e intensidade.",
@@ -1974,8 +1988,9 @@
       const size = updateFinalSizePreview(false);
       const format = $("exportFormat")?.value || "png";
       const isSvg = format === "svg";
+      const isRaster = format === "png" || format === "tiff";
       $("rasterDpiField")?.toggleAttribute("hidden", isSvg);
-      $("exportScale").value = format === "png" ? String(size.scale) : "1";
+      $("exportScale").value = isRaster ? String(size.scale) : "1";
       if ($("finalHeight")) $("finalHeight").value = size.finalHeightMm.toFixed(1);
       const widthMm = size.finalWidthMm.toFixed(1);
       const heightMm = size.finalHeightMm.toFixed(1);
@@ -1983,7 +1998,8 @@
       if (isSvg) {
         $("calculatedOutput").textContent = `Output: SVG vector, ${widthMm} x ${heightMm} mm. SVG does not depend on raster DPI.${fontNote}`;
       } else {
-        $("calculatedOutput").textContent = `Output: ${size.outputWidth} x ${size.outputHeight} px at ${size.dpi} dpi. Final size: ${widthMm} x ${heightMm} mm.${fontNote}`;
+        const formatLabel = format === "tiff" ? "TIFF" : "PNG";
+        $("calculatedOutput").textContent = `Output: ${formatLabel} ${size.outputWidth} x ${size.outputHeight} px at ${size.dpi} dpi. Final size: ${widthMm} x ${heightMm} mm.${fontNote}`;
       }
     }
 
@@ -3330,7 +3346,11 @@
         addComplianceItem(items, "pass", "Format", "SVG \u00b7 preferred vector format available in this app.");
       } else {
         addComplianceItem(items, dpi >= minimumDpi ? "pass" : "warning", "Raster resolution", dpi + " dpi \u00b7 minimum " + minimumDpi + " dpi for " + (contentLabels[figureContent] || figureContent));
-        addComplianceItem(items, "warning", "Format", "PNG is allowed, but SVG is the preferred vector format available in this app.");
+        if (format === "tiff") {
+          addComplianceItem(items, "pass", "Format", "TIFF raster export is available; SVG remains the preferred vector format when allowed.");
+        } else {
+          addComplianceItem(items, "warning", "Format", "PNG is available, but TIFF or SVG is often preferred for journal submission.");
+        }
       }
 
       const warningCount = items.filter(item => item.status === "warning").length;
@@ -3677,23 +3697,111 @@
       return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(updatedSvg)}`;
     }
 
-    function downloadPng() {
+    function writeTiffEntry(view, offset, tag, type, count, valueOrOffset) {
+      view.setUint16(offset, tag, true);
+      view.setUint16(offset + 2, type, true);
+      view.setUint32(offset + 4, count, true);
+      if (type === 3 && count === 1) {
+        view.setUint16(offset + 8, valueOrOffset, true);
+        view.setUint16(offset + 10, 0, true);
+      } else {
+        view.setUint32(offset + 8, valueOrOffset, true);
+      }
+    }
+
+    function canvasToTiffBlob(canvas, dpi) {
+      const width = canvas.width;
+      const height = canvas.height;
+      const context = canvas.getContext("2d");
+      const rgba = context.getImageData(0, 0, width, height).data;
+      const pixelByteCount = width * height * 3;
+      const tagCount = 12;
+      const ifdOffset = 8;
+      const ifdByteCount = 2 + tagCount * 12 + 4;
+      const bitsOffset = ifdOffset + ifdByteCount;
+      const xResolutionOffset = bitsOffset + 6;
+      const yResolutionOffset = xResolutionOffset + 8;
+      const pixelOffset = yResolutionOffset + 8;
+      const buffer = new ArrayBuffer(pixelOffset + pixelByteCount);
+      const view = new DataView(buffer);
+      view.setUint8(0, 0x49);
+      view.setUint8(1, 0x49);
+      view.setUint16(2, 42, true);
+      view.setUint32(4, ifdOffset, true);
+      view.setUint16(ifdOffset, tagCount, true);
+      const entries = [
+        [256, 4, 1, width],
+        [257, 4, 1, height],
+        [258, 3, 3, bitsOffset],
+        [259, 3, 1, 1],
+        [262, 3, 1, 2],
+        [273, 4, 1, pixelOffset],
+        [277, 3, 1, 3],
+        [278, 4, 1, height],
+        [279, 4, 1, pixelByteCount],
+        [282, 5, 1, xResolutionOffset],
+        [283, 5, 1, yResolutionOffset],
+        [296, 3, 1, 2]
+      ];
+      entries.forEach((entry, index) => writeTiffEntry(view, ifdOffset + 2 + index * 12, ...entry));
+      view.setUint32(ifdOffset + 2 + tagCount * 12, 0, true);
+      [bitsOffset, bitsOffset + 2, bitsOffset + 4].forEach(offset => view.setUint16(offset, 8, true));
+      view.setUint32(xResolutionOffset, dpi, true);
+      view.setUint32(xResolutionOffset + 4, 1, true);
+      view.setUint32(yResolutionOffset, dpi, true);
+      view.setUint32(yResolutionOffset + 4, 1, true);
+      const rgb = new Uint8Array(buffer, pixelOffset, pixelByteCount);
+      for (let source = 0, target = 0; source < rgba.length; source += 4, target += 3) {
+        const alpha = rgba[source + 3] / 255;
+        rgb[target] = Math.round(rgba[source] * alpha + 255 * (1 - alpha));
+        rgb[target + 1] = Math.round(rgba[source + 1] * alpha + 255 * (1 - alpha));
+        rgb[target + 2] = Math.round(rgba[source + 2] * alpha + 255 * (1 - alpha));
+      }
+      return new Blob([buffer], { type: "image/tiff" });
+    }
+
+    function pngDataUrlToTiffUrl(url, size) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = image.naturalWidth;
+          canvas.height = image.naturalHeight;
+          const context = canvas.getContext("2d");
+          context.fillStyle = $("backgroundColor")?.value || "#ffffff";
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          context.drawImage(image, 0, 0);
+          resolve(URL.createObjectURL(canvasToTiffBlob(canvas, size.dpi)));
+        };
+        image.onerror = reject;
+        image.src = url;
+      });
+    }
+
+    function downloadFigure() {
       if (!lastPlot.data.length) renderPlot();
       updateCalculatedOutput();
       const size = getPublicationSize();
       const format = $("exportFormat").value;
+      const plotlyFormat = format === "tiff" ? "png" : format;
+      const isRaster = format === "png" || format === "tiff";
       Plotly.toImage("plot", {
-        format,
+        format: plotlyFormat,
         width: size.baseWidth,
         height: size.baseHeight,
-        scale: format === "png" ? size.scale : 1
+        scale: isRaster ? size.scale : 1
+      }).then(url => {
+        if (format === "tiff") return pngDataUrlToTiffUrl(url, size);
+        return format === "svg" ? svgDataUrlWithPhysicalSize(url, size) : url;
       }).then(url => {
         const link = document.createElement("a");
-        link.href = format === "svg" ? svgDataUrlWithPhysicalSize(url, size) : url;
-        link.download = `mass-spectrum.${format}`;
+        link.href = url;
+        link.download = `mass-spectrum.${format === "tiff" ? "tiff" : format}`;
         link.click();
+        if (format === "tiff") setTimeout(() => URL.revokeObjectURL(url), 1000);
       });
     }
+
 
     document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", () => setTab(tab.dataset.tab)));
     $("ptBtn").addEventListener("click", () => updateLanguage("pt"));
@@ -3740,7 +3848,7 @@
       });
     });
     $("generate").addEventListener("click", () => renderPlot());
-    $("download").addEventListener("click", downloadPng);
+    $("download").addEventListener("click", downloadFigure);
     $("applyJournalPreset").addEventListener("click", applyJournalPreset);
     $("applyFigureStyle").addEventListener("click", applyFigureStylePreset);
     $("saveFigureStyle").addEventListener("click", saveFigureStylePreset);
