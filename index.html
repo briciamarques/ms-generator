@@ -157,6 +157,57 @@
       min-width: 180px;
     }
 
+    .custom-annotation-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .custom-annotation-item {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdff;
+    }
+
+    .custom-annotation-meta {
+      min-width: 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .custom-annotation-meta strong {
+      display: block;
+      overflow-wrap: anywhere;
+      color: var(--ink);
+      font-size: 14px;
+    }
+
+    .custom-annotation-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .custom-annotation-actions button {
+      min-height: 32px;
+      padding: 0 8px;
+    }
+
+    .custom-annotation-waiting {
+      padding: 8px 10px;
+      border: 1px solid #bdd0f6;
+      border-radius: 8px;
+      background: var(--accent-soft);
+      color: #164397;
+      font-size: 13px;
+    }
+
     .language {
       display: flex;
       flex: 0 0 auto;
@@ -1113,6 +1164,54 @@
           <input type="checkbox" id="clickMz">
           <span data-i18n="clickMz">Show m/z when clicking a peak</span>
         </label>
+        <details class="settings-group custom-annotation-controls">
+          <summary data-i18n="customAnnotationsGroup">Custom annotations</summary>
+          <div class="group-body">
+            <div class="field">
+              <label for="customAnnotationText" data-i18n="customAnnotationText">Annotation text</label>
+              <input id="customAnnotationText" type="text" placeholder="y4, b12, Parent ion, *">
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="customAnnotationFragmentFormat" checked>
+              <span data-i18n="customAnnotationFragmentFormat">Format peptide fragments</span>
+            </label>
+            <div class="field-grid">
+              <div class="field">
+                <label for="customAnnotationMode" data-i18n="customAnnotationMode">Position mode</label>
+                <select id="customAnnotationMode">
+                  <option value="data" data-i18n="customAnnotationModeData">Attached to m/z</option>
+                  <option value="paper" data-i18n="customAnnotationModePaper">Fixed in plot</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="customAnnotationMz" data-i18n="customAnnotationMz">m/z override (optional)</label>
+                <input id="customAnnotationMz" type="number" step="any">
+              </div>
+              <div class="field">
+                <label for="customAnnotationFontSize" data-i18n="customAnnotationFontSize">Font size (pt)</label>
+                <input id="customAnnotationFontSize" type="number" min="1" step="0.1" value="8">
+              </div>
+              <div class="field">
+                <label for="customAnnotationColor" data-i18n="customAnnotationColor">Text color</label>
+                <input id="customAnnotationColor" type="color" value="#1c2430">
+              </div>
+              <div class="field">
+                <label for="customAnnotationAlign" data-i18n="customAnnotationAlign">Text alignment</label>
+                <select id="customAnnotationAlign">
+                  <option value="center" data-i18n="customAnnotationAlignCenter">Center</option>
+                  <option value="left" data-i18n="customAnnotationAlignLeft">Left</option>
+                  <option value="right" data-i18n="customAnnotationAlignRight">Right</option>
+                </select>
+              </div>
+            </div>
+            <div class="file-line">
+              <button type="button" id="placeCustomAnnotation" data-i18n="placeCustomAnnotation">Place annotation</button>
+              <button type="button" id="cancelCustomAnnotation" data-i18n="cancelCustomAnnotation" hidden>Cancel</button>
+            </div>
+            <p class="custom-annotation-waiting" id="customAnnotationPlacementStatus" hidden></p>
+            <div class="custom-annotation-list" id="customAnnotationList"></div>
+          </div>
+        </details>
         <button type="button" id="clearSelection" data-i18n="clearSelection">Clear peak selection</button>
         <button type="button" id="resetDefaults" data-i18n="resetDefaults">Reset defaults</button>
       </div>
@@ -1343,6 +1442,30 @@
         clickMz: "Manual m/z labels",
         clearSelection: "Clear manual labels",
         resetDefaults: "Reset defaults",
+        customAnnotationsGroup: "Custom annotations",
+        customAnnotationText: "Annotation text",
+        customAnnotationFragmentFormat: "Format peptide fragments",
+        customAnnotationMode: "Position mode",
+        customAnnotationModeData: "Attached to m/z",
+        customAnnotationModePaper: "Fixed in plot",
+        customAnnotationMz: "m/z override (optional)",
+        customAnnotationFontSize: "Font size (pt)",
+        customAnnotationColor: "Text color",
+        customAnnotationAlign: "Text alignment",
+        customAnnotationAlignCenter: "Center",
+        customAnnotationAlignLeft: "Left",
+        customAnnotationAlignRight: "Right",
+        placeCustomAnnotation: "Place annotation",
+        cancelCustomAnnotation: "Cancel",
+        customAnnotationEmpty: "No custom annotations yet.",
+        customAnnotationWaitingData: "Click a peak in the plot to place this annotation. Press Escape to cancel.",
+        customAnnotationWaitingPaper: "Click inside the plot area to place this annotation. Press Escape to cancel.",
+        customAnnotationMissingText: "Type annotation text first.",
+        customAnnotationPlaced: "Custom annotation placed.",
+        customAnnotationRepositioned: "Custom annotation repositioned.",
+        customAnnotationDeleted: "Custom annotation deleted.",
+        customAnnotationReposition: "Reposition",
+        customAnnotationDelete: "Delete",
         width: "Width (px)",
         height: "Height (px)",
         scale: "Export multiplier",
@@ -1482,6 +1605,30 @@
         labelPeaks: "Rotular picos principais",
         clickMz: "R\u00f3tulos manuais de m/z",
         clearSelection: "Limpar r\u00f3tulos manuais",
+        customAnnotationsGroup: "Anota\u00e7\u00f5es customizadas",
+        customAnnotationText: "Texto da anota\u00e7\u00e3o",
+        customAnnotationFragmentFormat: "Formatar fragmentos pept\u00eddicos",
+        customAnnotationMode: "Modo de posi\u00e7\u00e3o",
+        customAnnotationModeData: "Ligada ao m/z",
+        customAnnotationModePaper: "Fixa no plot",
+        customAnnotationMz: "m/z opcional",
+        customAnnotationFontSize: "Tamanho da fonte (pt)",
+        customAnnotationColor: "Cor do texto",
+        customAnnotationAlign: "Alinhamento do texto",
+        customAnnotationAlignCenter: "Centro",
+        customAnnotationAlignLeft: "Esquerda",
+        customAnnotationAlignRight: "Direita",
+        placeCustomAnnotation: "Posicionar anota\u00e7\u00e3o",
+        cancelCustomAnnotation: "Cancelar",
+        customAnnotationEmpty: "Nenhuma anota\u00e7\u00e3o customizada ainda.",
+        customAnnotationWaitingData: "Clique em um pico no gr\u00e1fico para posicionar esta anota\u00e7\u00e3o. Pressione Escape para cancelar.",
+        customAnnotationWaitingPaper: "Clique dentro da \u00e1rea do plot para posicionar esta anota\u00e7\u00e3o. Pressione Escape para cancelar.",
+        customAnnotationMissingText: "Digite o texto da anota\u00e7\u00e3o primeiro.",
+        customAnnotationPlaced: "Anota\u00e7\u00e3o customizada posicionada.",
+        customAnnotationRepositioned: "Anota\u00e7\u00e3o customizada reposicionada.",
+        customAnnotationDeleted: "Anota\u00e7\u00e3o customizada exclu\u00edda.",
+        customAnnotationReposition: "Reposicionar",
+        customAnnotationDelete: "Excluir",
         xTickStep: "Intervalo do eixo X (autom\u00e1tico se vazio)",
         width: "Largura (px)",
         height: "Altura (px)",
@@ -1555,12 +1702,16 @@
     let language = "en";
     let selectedPeaks = [];
     let labelEdits = {};
+    let customAnnotations = [];
+    let customAnnotationPlacement = null;
     let renderedAnnotationKeys = [];
     let lastPlot = { data: [], layout: {}, config: {} };
     let clickHandlerBound = false;
     let relayoutHandlerBound = false;
     let annotationClickHandlerBound = false;
     let annotationDblClickGuardBound = false;
+    let customAnnotationClickGuardBound = false;
+    let customAnnotationDoubleClickBlockUntil = 0;
     let lastAnnotationClick = { key: "", time: 0 };
     const PROJECT_STORAGE_KEY = "msGeneratorProjects";
     const JOURNAL_PRESETS_KEY = "msGeneratorJournalPresets";
@@ -1853,6 +2004,8 @@
       updateControlsToggleText();
       refreshProjectList();
       refreshPresetSelectors();
+      refreshCustomAnnotationList();
+      updateCustomAnnotationPlacementStatus();
       updateCalculatedOutput();
       renderPlot();
     }
@@ -2101,6 +2254,75 @@
       return labels.map(makeAnnotation);
     }
 
+    function escapePlotAnnotationText(text) {
+      return String(text || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function formatPeptideFragmentAnnotation(text, enabled) {
+      const original = String(text || "").trim();
+      if (!enabled) return original;
+      const match = original.match(/^([abcxyzABCXYZ])(\d+)$/);
+      if (!match) return original;
+      const subscriptDigits = { 0: "₀", 1: "₁", 2: "₂", 3: "₃", 4: "₄", 5: "₅", 6: "₆", 7: "₇", 8: "₈", 9: "₉" };
+      return match[1] + match[2].split("").map(digit => subscriptDigits[digit] || digit).join("");
+    }
+
+    function customAnnotationXAnchor(align) {
+      return ["left", "center", "right"].includes(align) ? align : "center";
+    }
+
+    function normalizeCustomAnnotation(annotation) {
+      if (!annotation || typeof annotation !== "object") return null;
+      const mode = annotation.mode === "paper" ? "paper" : "data";
+      const originalText = String(annotation.originalText ?? annotation.text ?? "").trim();
+      if (!originalText) return null;
+      const fragmentFormat = annotation.fragmentFormat !== false;
+      const text = String(annotation.text || formatPeptideFragmentAnnotation(originalText, fragmentFormat));
+      const fontSizePt = Number(annotation.fontSizePt);
+      const x = Number(annotation.x);
+      const y = Number(annotation.y);
+      if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+      return {
+        id: String(annotation.id || `custom-annotation-${Date.now()}-${Math.random().toString(36).slice(2)}`),
+        originalText,
+        text,
+        fragmentFormat,
+        mode,
+        x,
+        y,
+        xref: mode === "paper" ? "paper" : (annotation.xref || "x"),
+        yref: mode === "paper" ? "paper" : (annotation.yref || "y"),
+        fontSizePt: Number.isFinite(fontSizePt) && fontSizePt > 0 ? fontSizePt : 8,
+        color: annotation.color || $("textColor")?.value || "#1c2430",
+        align: ["left", "center", "right"].includes(annotation.align) ? annotation.align : "center"
+      };
+    }
+
+    function buildCustomAnnotations() {
+      return customAnnotations.map(normalizeCustomAnnotation).filter(Boolean).map(annotation => ({
+        x: annotation.x,
+        y: annotation.y,
+        xref: annotation.xref,
+        yref: annotation.yref,
+        text: escapePlotAnnotationText(annotation.text),
+        showarrow: false,
+        xanchor: customAnnotationXAnchor(annotation.align),
+        yanchor: "middle",
+        align: annotation.align,
+        font: {
+          family: $("fontFamily").value,
+          size: fontPtToPlotlyPx(annotation.fontSizePt),
+          color: annotation.color
+        },
+        bgcolor: "rgba(0,0,0,0)",
+        bordercolor: "rgba(0,0,0,0)",
+        borderpad: 2
+      }));
+    }
+
     function buildLayout(spectra, threshold, decimals) {
       const total = spectra.length;
       const baseFontPt = Number($("fontSize").value) || 8;
@@ -2171,7 +2393,10 @@
         margin: { l: leftAxisMargin, r: 24, t: topAxisMargin, b: bottomAxisMargin + externalLegendMargin },
         showlegend: total > 1 && legendMode === "legend",
         legend: { orientation: "h", x: 0, y: -0.16 },
-        annotations: buildManualAnnotations(spectra, threshold, decimals)
+        annotations: [
+          ...buildManualAnnotations(spectra, threshold, decimals),
+          ...buildCustomAnnotations()
+        ]
       };
 
       if (total > 1) {
@@ -2311,7 +2536,7 @@
           titleText: false
         },
         modeBarButtonsToRemove: ["lasso2d", "select2d"],
-        doubleClick: $("clickMz").checked ? false : "reset"
+        doubleClick: $("clickMz").checked || customAnnotationPlacement ? false : "reset"
       };
 
       if ($("previewExport")?.checked) {
@@ -2342,6 +2567,10 @@
           plotDiv.on("plotly_clickannotation", handleAnnotationClick);
           annotationClickHandlerBound = true;
         }
+        if (!customAnnotationClickGuardBound) {
+          plotDiv.addEventListener("click", handleCustomAnnotationNativeClick, true);
+          customAnnotationClickGuardBound = true;
+        }
         const peakCount = spectra.reduce((sum, spectrum) => sum + spectrum.peaks.length, 0);
         const skipped = spectra.reduce((sum, spectrum) => sum + spectrum.skipped, 0);
         status.textContent = statusMessage || `${t("generated")(peakCount)} ${skipped ? t("parseError") : ""}`.trim();
@@ -2369,6 +2598,7 @@
     }
 
     function handlePeakClick(event) {
+      if (customAnnotationPlacement && handleCustomAnnotationPlotClick(event)) return;
       if (!$("clickMz").checked || !event.points || !event.points[0]) return;
       const point = event.points[0];
       const mz = Number(point.customdata || point.x);
@@ -2394,6 +2624,168 @@
       }
       renderPlot(t("selected")(mz.toFixed(Number($("decimals").value) || 1)), { preserveRanges: true });
       $("status").textContent = t("selected")(mz.toFixed(Number($("decimals").value) || 1));
+    }
+
+    function createCustomAnnotationFromForm(position) {
+      const originalText = $("customAnnotationText").value.trim();
+      if (!originalText) return null;
+      const fragmentFormat = $("customAnnotationFragmentFormat").checked;
+      return normalizeCustomAnnotation({
+        id: `custom-annotation-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        originalText,
+        text: formatPeptideFragmentAnnotation(originalText, fragmentFormat),
+        fragmentFormat,
+        mode: position.mode,
+        x: position.x,
+        y: position.y,
+        xref: position.xref,
+        yref: position.yref,
+        fontSizePt: Number($("customAnnotationFontSize").value) || 8,
+        color: $("customAnnotationColor").value || $("textColor").value,
+        align: $("customAnnotationAlign").value || "center"
+      });
+    }
+
+    function customAnnotationModeLabel(mode) {
+      return mode === "paper" ? t("customAnnotationModePaper") : t("customAnnotationModeData");
+    }
+
+    function refreshCustomAnnotationList() {
+      const list = $("customAnnotationList");
+      if (!list) return;
+      list.innerHTML = "";
+      if (!customAnnotations.length) {
+        const empty = document.createElement("p");
+        empty.className = "project-note";
+        empty.textContent = t("customAnnotationEmpty");
+        list.appendChild(empty);
+        return;
+      }
+      customAnnotations.forEach(annotation => {
+        const item = document.createElement("div");
+        item.className = "custom-annotation-item";
+        const meta = document.createElement("div");
+        meta.className = "custom-annotation-meta";
+        const label = document.createElement("strong");
+        label.textContent = annotation.text;
+        const details = document.createElement("span");
+        details.textContent = `${customAnnotationModeLabel(annotation.mode)} \u00b7 ${annotation.fontSizePt} pt`;
+        meta.append(label, details);
+        const actions = document.createElement("div");
+        actions.className = "custom-annotation-actions";
+        const reposition = document.createElement("button");
+        reposition.type = "button";
+        reposition.dataset.action = "reposition";
+        reposition.dataset.id = annotation.id;
+        reposition.textContent = t("customAnnotationReposition");
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "danger";
+        remove.dataset.action = "delete";
+        remove.dataset.id = annotation.id;
+        remove.textContent = t("customAnnotationDelete");
+        actions.append(reposition, remove);
+        item.append(meta, actions);
+        list.appendChild(item);
+      });
+    }
+
+    function updateCustomAnnotationPlacementStatus() {
+      const status = $("customAnnotationPlacementStatus");
+      const cancel = $("cancelCustomAnnotation");
+      if (!status || !cancel) return;
+      const active = Boolean(customAnnotationPlacement);
+      status.hidden = !active;
+      cancel.hidden = !active;
+      if (!active) return;
+      status.textContent = customAnnotationPlacement.mode === "paper" ? t("customAnnotationWaitingPaper") : t("customAnnotationWaitingData");
+    }
+
+    function beginCustomAnnotationPlacement(action = "create", id = "") {
+      const existing = id ? customAnnotations.find(annotation => annotation.id === id) : null;
+      if (action === "create" && !$("customAnnotationText").value.trim()) {
+        $("status").textContent = t("customAnnotationMissingText");
+        return;
+      }
+      customAnnotationPlacement = { action, id, mode: existing?.mode || $("customAnnotationMode").value || "data" };
+      updateCustomAnnotationPlacementStatus();
+      renderPlot(undefined, { preserveRanges: true });
+    }
+
+    function cancelCustomAnnotationPlacement() {
+      if (!customAnnotationPlacement) return;
+      customAnnotationPlacement = null;
+      updateCustomAnnotationPlacementStatus();
+      renderPlot(undefined, { preserveRanges: true });
+    }
+
+    function finishCustomAnnotationPlacement(position) {
+      if (!customAnnotationPlacement || !position) return false;
+      const placement = customAnnotationPlacement;
+      if (placement.action === "reposition") {
+        customAnnotations = customAnnotations.map(annotation => annotation.id === placement.id
+          ? normalizeCustomAnnotation({ ...annotation, ...position, mode: position.mode || annotation.mode })
+          : annotation).filter(Boolean);
+        $("status").textContent = t("customAnnotationRepositioned");
+      } else {
+        const annotation = createCustomAnnotationFromForm(position);
+        if (!annotation) return false;
+        customAnnotations.push(annotation);
+        $("status").textContent = t("customAnnotationPlaced");
+      }
+      customAnnotationPlacement = null;
+      customAnnotationDoubleClickBlockUntil = Date.now() + 500;
+      refreshCustomAnnotationList();
+      updateCustomAnnotationPlacementStatus();
+      renderPlot(undefined, { preserveRanges: true });
+      return true;
+    }
+
+    function customAnnotationPositionFromPoint(point) {
+      if (!point) return null;
+      const typedMz = Number($("customAnnotationMz")?.value);
+      const x = Number.isFinite(typedMz) ? typedMz : Number(point.customdata || point.x);
+      const y = Number(point.y);
+      if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+      return { mode: "data", x, y, xref: point.fullData?.xaxis || "x", yref: point.fullData?.yaxis || "y" };
+    }
+
+    function handleCustomAnnotationPlotClick(event) {
+      if (!customAnnotationPlacement || customAnnotationPlacement.mode !== "data") return false;
+      return finishCustomAnnotationPlacement(customAnnotationPositionFromPoint(event?.points?.[0]));
+    }
+
+    function handleCustomAnnotationNativeClick(event) {
+      if (!customAnnotationPlacement || customAnnotationPlacement.mode !== "paper") return;
+      const plot = $("plot");
+      const fullLayout = plot?._fullLayout;
+      if (!plot || !fullLayout) return;
+      const rect = plot.getBoundingClientRect();
+      const scaleX = rect.width / Math.max(1, fullLayout.width || rect.width);
+      const scaleY = rect.height / Math.max(1, fullLayout.height || rect.height);
+      const xPx = (event.clientX - rect.left) / Math.max(scaleX, 0.0001);
+      const yPx = (event.clientY - rect.top) / Math.max(scaleY, 0.0001);
+      const margin = fullLayout.margin || { l: 0, r: 0, t: 0, b: 0 };
+      const plotWidth = Math.max(1, (fullLayout.width || rect.width) - margin.l - margin.r);
+      const plotHeight = Math.max(1, (fullLayout.height || rect.height) - margin.t - margin.b);
+      const insidePlot = xPx >= margin.l && xPx <= margin.l + plotWidth && yPx >= margin.t && yPx <= margin.t + plotHeight;
+      if (!insidePlot) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      finishCustomAnnotationPlacement({
+        mode: "paper",
+        x: Math.min(Math.max((xPx - margin.l) / plotWidth, 0), 1),
+        y: Math.min(Math.max(1 - ((yPx - margin.t) / plotHeight), 0), 1),
+        xref: "paper",
+        yref: "paper"
+      });
+    }
+
+    function deleteCustomAnnotation(id) {
+      customAnnotations = customAnnotations.filter(annotation => annotation.id !== id);
+      refreshCustomAnnotationList();
+      $("status").textContent = t("customAnnotationDeleted");
+      renderPlot(undefined, { preserveRanges: true });
     }
 
     function handleAnnotationClick(event) {
@@ -2436,7 +2828,9 @@
       });
       if (!annotationDblClickGuardBound) {
         plot.addEventListener("dblclick", event => {
-          if (!$("clickMz").checked || !isPointerInsideAnnotation(event)) return;
+          const shouldBlockCustomAnnotationDoubleClick = customAnnotationPlacement || Date.now() < customAnnotationDoubleClickBlockUntil;
+          const shouldBlockManualAnnotationDoubleClick = $("clickMz").checked && isPointerInsideAnnotation(event);
+          if (!shouldBlockCustomAnnotationDoubleClick && !shouldBlockManualAnnotationDoubleClick) return;
           event.preventDefault();
           event.stopImmediatePropagation();
         }, true);
@@ -3020,6 +3414,38 @@
       return changed;
     }
 
+    function readProjects() {
+      return readStorageArray(PROJECT_STORAGE_KEY);
+    }
+
+    function writeProjects(projects) {
+      localStorage.setItem(PROJECT_STORAGE_KEY, JSON.stringify(Array.isArray(projects) ? projects : []));
+      refreshProjectList();
+    }
+
+    function projectFromForm(name) {
+      const fields = {};
+      const checks = {};
+      document.querySelectorAll("input, textarea, select").forEach(element => {
+        if (!element.id || element.type === "file" || element.closest(".project-panel") || element.closest(".custom-annotation-controls")) return;
+        if (element.type === "checkbox") checks[element.id] = element.checked;
+        else fields[element.id] = element.value;
+      });
+      fields.fontUnit = "pt";
+      fields.lineUnit = "pt";
+      const selectedId = $("savedProjectSelect")?.value;
+      return {
+        id: selectedId || `project-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        name,
+        fields,
+        checks,
+        selectedPeaks: selectedPeaks.map(label => ({ ...label })),
+        labelEdits: { ...labelEdits },
+        customAnnotations: customAnnotations.map(annotation => ({ ...annotation })),
+        updatedAt: new Date().toISOString()
+      };
+    }
+
     function applyProject(project) {
       Object.entries(project.fields || {}).forEach(([id, value]) => {
         const element = $(id);
@@ -3029,6 +3455,10 @@
         } else {
           element.value = value ?? "";
         }
+      });
+      Object.entries(project.checks || {}).forEach(([id, value]) => {
+        const element = $(id);
+        if (element && element.type === "checkbox" && id !== "previewExport") element.checked = Boolean(value);
       });
       if ($("figureStylePreset") && (!$("figureStylePreset").value || !allFigureStylePresets().some(preset => preset.id === $("figureStylePreset").value))) {
         $("figureStylePreset").value = "custom";
@@ -3042,7 +3472,11 @@
       const migratedLineWidths = normalizeLoadedLineFields(project.fields || {});
       selectedPeaks = Array.isArray(project.selectedPeaks) ? project.selectedPeaks.map(label => ({ ...label })) : [];
       labelEdits = project.labelEdits && typeof project.labelEdits === "object" ? { ...project.labelEdits } : {};
+      customAnnotations = Array.isArray(project.customAnnotations) ? project.customAnnotations.map(normalizeCustomAnnotation).filter(Boolean) : [];
       renderedAnnotationKeys = [];
+      customAnnotationPlacement = null;
+      refreshCustomAnnotationList();
+      updateCustomAnnotationPlacementStatus();
       $("projectName").value = project.name || "";
       $("savedProjectSelect").value = project.id;
       syncSpectrumVisibility();
@@ -3216,7 +3650,11 @@
       $("previewExport").checked = false;
       selectedPeaks = [];
       labelEdits = {};
+      customAnnotations = [];
+      customAnnotationPlacement = null;
       renderedAnnotationKeys = [];
+      refreshCustomAnnotationList();
+      updateCustomAnnotationPlacementStatus();
       renderPlot();
     }
 
@@ -3341,6 +3779,17 @@
       updateProjectButtons();
     });
     $("resetDefaults").addEventListener("click", resetDefaults);
+    $("placeCustomAnnotation").addEventListener("click", () => beginCustomAnnotationPlacement("create"));
+    $("cancelCustomAnnotation").addEventListener("click", cancelCustomAnnotationPlacement);
+    $("customAnnotationList").addEventListener("click", event => {
+      const button = event.target.closest("button[data-action]");
+      if (!button) return;
+      if (button.dataset.action === "reposition") beginCustomAnnotationPlacement("reposition", button.dataset.id);
+      if (button.dataset.action === "delete") deleteCustomAnnotation(button.dataset.id);
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && customAnnotationPlacement) cancelCustomAnnotationPlacement();
+    });
     $("previewExport").addEventListener("change", () => {
       updateCalculatedOutput();
       renderPlot();
@@ -3363,7 +3812,7 @@
 
     document.querySelectorAll("input, textarea, select").forEach(input => {
       input.addEventListener("input", () => {
-        if (input.type !== "file" && !input.closest(".project-panel") && !input.closest("#panel-export")) renderPlot();
+        if (input.type !== "file" && !input.closest(".project-panel") && !input.closest("#panel-export") && !input.closest(".custom-annotation-controls")) renderPlot();
       });
     });
 
@@ -3393,6 +3842,7 @@
     refreshPresetSelectors();
     const savedDefaults = readDefaultPresets();
     syncXControlVisibility();
+    refreshCustomAnnotationList();
     updateCalculatedOutput();
     updateLanguage("en");
   </script>
