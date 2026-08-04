@@ -1177,6 +1177,24 @@
           <input type="checkbox" id="clickMz">
           <span data-i18n="clickMz">Show m/z when clicking a peak</span>
         </label>
+        <details class="settings-group">
+          <summary data-i18n="manualLabelConnectorGroup">Manual label connectors</summary>
+          <div class="group-body">
+            <div class="field-grid">
+              <div class="field">
+                <label for="manualLabelConnectorStyle" data-i18n="manualLabelConnectorStyle">Connector style</label>
+                <select id="manualLabelConnectorStyle">
+                  <option value="line" data-i18n="manualLabelConnectorLine">Line</option>
+                  <option value="arrow" data-i18n="manualLabelConnectorArrow">Arrow</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="manualLabelConnectorColor" data-i18n="manualLabelConnectorColor">Connector color</label>
+                <input id="manualLabelConnectorColor" type="color" value="#1c2430">
+              </div>
+            </div>
+          </div>
+        </details>
         <details class="settings-group custom-annotation-controls">
           <summary data-i18n="customAnnotationsGroup">Custom annotations</summary>
           <div class="group-body">
@@ -1454,6 +1472,11 @@
         lockX: "Lock X ranges of all spectra",
         labelPeaks: "Label main peaks",
         clickMz: "Manual m/z labels",
+        manualLabelConnectorGroup: "Manual label connectors",
+        manualLabelConnectorStyle: "Connector style",
+        manualLabelConnectorLine: "Line",
+        manualLabelConnectorArrow: "Arrow",
+        manualLabelConnectorColor: "Connector color",
         clearSelection: "Clear manual labels",
         resetDefaults: "Reset defaults",
         customAnnotationsGroup: "Custom annotations",
@@ -1472,7 +1495,7 @@
         placeCustomAnnotation: "Place annotation",
         cancelCustomAnnotation: "Cancel",
         customAnnotationEmpty: "No custom annotations yet.",
-        customAnnotationWaitingData: "Click a peak in the plot to place this annotation. Press Escape to cancel.",
+        customAnnotationWaitingData: "Click inside a spectrum plot to place this annotation. Press Escape to cancel.",
         customAnnotationWaitingPaper: "Click inside the plot area to place this annotation. Press Escape to cancel.",
         customAnnotationMissingText: "Type annotation text first.",
         customAnnotationPlaced: "Custom annotation placed.",
@@ -1618,6 +1641,11 @@
         lockX: "Travar eixos X de todos os espectros",
         labelPeaks: "Rotular picos principais",
         clickMz: "R\u00f3tulos manuais de m/z",
+        manualLabelConnectorGroup: "Conectores dos r\u00f3tulos manuais",
+        manualLabelConnectorStyle: "Estilo do conector",
+        manualLabelConnectorLine: "Linha",
+        manualLabelConnectorArrow: "Seta",
+        manualLabelConnectorColor: "Cor do conector",
         clearSelection: "Limpar r\u00f3tulos manuais",
         customAnnotationsGroup: "Anota\u00e7\u00f5es customizadas",
         customAnnotationText: "Texto da anota\u00e7\u00e3o",
@@ -1635,7 +1663,7 @@
         placeCustomAnnotation: "Posicionar anota\u00e7\u00e3o",
         cancelCustomAnnotation: "Cancelar",
         customAnnotationEmpty: "Nenhuma anota\u00e7\u00e3o customizada ainda.",
-        customAnnotationWaitingData: "Clique em um pico no gr\u00e1fico para posicionar esta anota\u00e7\u00e3o. Pressione Escape para cancelar.",
+        customAnnotationWaitingData: "Clique dentro de um plot de espectro para posicionar esta anota\u00e7\u00e3o. Pressione Escape para cancelar.",
         customAnnotationWaitingPaper: "Clique dentro da \u00e1rea do plot para posicionar esta anota\u00e7\u00e3o. Pressione Escape para cancelar.",
         customAnnotationMissingText: "Digite o texto da anota\u00e7\u00e3o primeiro.",
         customAnnotationPlaced: "Anota\u00e7\u00e3o customizada posicionada.",
@@ -2228,6 +2256,10 @@
 
     function makeAnnotation(label) {
       const hasConnector = Math.abs(Number(label.ax) || 0) >= 8;
+      const connectorStyle = $("manualLabelConnectorStyle")?.value || "line";
+      const connectorColor = $("manualLabelConnectorColor")?.value || $("textColor").value;
+      const useArrowConnector = hasConnector && connectorStyle === "arrow";
+      const connectorWidth = useArrowConnector ? 1.8 : 1.2;
       return {
         x: label.x,
         y: label.y,
@@ -2235,11 +2267,11 @@
         yref: label.yref,
         text: label.text,
         showarrow: true,
-        arrowhead: 0,
-        arrowside: "none",
-        arrowsize: 1,
-        arrowwidth: hasConnector ? 1.2 : 0,
-        arrowcolor: hasConnector ? $("textColor").value : "rgba(0,0,0,0)",
+        arrowhead: useArrowConnector ? 3 : 0,
+        arrowside: useArrowConnector ? "end" : "none",
+        arrowsize: useArrowConnector ? 1.45 : 1,
+        arrowwidth: hasConnector ? connectorWidth : 0,
+        arrowcolor: hasConnector ? connectorColor : "rgba(0,0,0,0)",
         ax: label.ax,
         ay: label.ay,
         font: {
@@ -2786,11 +2818,10 @@
       return finishCustomAnnotationPlacement(customAnnotationPositionFromPoint(event?.points?.[0]));
     }
 
-    function handleCustomAnnotationNativeClick(event) {
-      if (!customAnnotationPlacement || customAnnotationPlacement.mode !== "paper") return;
+    function customAnnotationClickGeometry(event) {
       const plot = $("plot");
       const fullLayout = plot?._fullLayout;
-      if (!plot || !fullLayout) return;
+      if (!plot || !fullLayout) return null;
       const rect = plot.getBoundingClientRect();
       const scaleX = rect.width / Math.max(1, fullLayout.width || rect.width);
       const scaleY = rect.height / Math.max(1, fullLayout.height || rect.height);
@@ -2800,16 +2831,70 @@
       const plotWidth = Math.max(1, (fullLayout.width || rect.width) - margin.l - margin.r);
       const plotHeight = Math.max(1, (fullLayout.height || rect.height) - margin.t - margin.b);
       const insidePlot = xPx >= margin.l && xPx <= margin.l + plotWidth && yPx >= margin.t && yPx <= margin.t + plotHeight;
-      if (!insidePlot) return;
+      if (!insidePlot) return null;
+      const paperX = Math.min(Math.max((xPx - margin.l) / plotWidth, 0), 1);
+      const paperY = Math.min(Math.max(1 - ((yPx - margin.t) / plotHeight), 0), 1);
+      return { fullLayout, paperX, paperY };
+    }
+
+    function axisRefFromLayoutKey(key, prefix) {
+      const baseKey = `${prefix}axis`;
+      return key === baseKey ? prefix : `${prefix}${key.replace(baseKey, "")}`;
+    }
+
+    function customAnnotationAxisRange(axis) {
+      if (!axis || !Array.isArray(axis.range)) return null;
+      const start = Number(axis.range[0]);
+      const end = Number(axis.range[1]);
+      return Number.isFinite(start) && Number.isFinite(end) ? [start, end] : null;
+    }
+
+    function customAnnotationAxisForPaper(fullLayout, prefix, paperValue, preferredSuffix = "") {
+      const preferredKey = `${prefix}axis${preferredSuffix}`;
+      if (fullLayout[preferredKey]) return { key: preferredKey, axis: fullLayout[preferredKey] };
+      const key = Object.keys(fullLayout).find(candidate => {
+        if (!new RegExp(`^${prefix}axis\\d*$`).test(candidate)) return false;
+        const domain = fullLayout[candidate]?.domain;
+        return Array.isArray(domain) && paperValue >= domain[0] - 0.0001 && paperValue <= domain[1] + 0.0001;
+      }) || `${prefix}axis`;
+      return { key, axis: fullLayout[key] };
+    }
+
+    function customAnnotationPaperPositionFromNativeClick(event) {
+      const geometry = customAnnotationClickGeometry(event);
+      if (!geometry) return null;
+      return { mode: "paper", x: geometry.paperX, y: geometry.paperY, xref: "paper", yref: "paper" };
+    }
+
+    function customAnnotationDataPositionFromNativeClick(event) {
+      const geometry = customAnnotationClickGeometry(event);
+      if (!geometry) return null;
+      const yChoice = customAnnotationAxisForPaper(geometry.fullLayout, "y", geometry.paperY);
+      const suffix = yChoice.key === "yaxis" ? "" : yChoice.key.replace("yaxis", "");
+      const xChoice = customAnnotationAxisForPaper(geometry.fullLayout, "x", geometry.paperX, suffix);
+      const xRange = customAnnotationAxisRange(xChoice.axis);
+      const yRange = customAnnotationAxisRange(yChoice.axis);
+      const xDomain = Array.isArray(xChoice.axis?.domain) ? xChoice.axis.domain : [0, 1];
+      const yDomain = Array.isArray(yChoice.axis?.domain) ? yChoice.axis.domain : [0, 1];
+      if (!xRange || !yRange || xDomain[1] === xDomain[0] || yDomain[1] === yDomain[0]) return null;
+      const xFraction = (geometry.paperX - xDomain[0]) / (xDomain[1] - xDomain[0]);
+      const yFraction = (geometry.paperY - yDomain[0]) / (yDomain[1] - yDomain[0]);
+      const typedMz = Number($("customAnnotationMz")?.value);
+      const x = Number.isFinite(typedMz) ? typedMz : xRange[0] + xFraction * (xRange[1] - xRange[0]);
+      const y = yRange[0] + yFraction * (yRange[1] - yRange[0]);
+      if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+      return { mode: "data", x, y, xref: axisRefFromLayoutKey(xChoice.key, "x"), yref: axisRefFromLayoutKey(yChoice.key, "y") };
+    }
+
+    function handleCustomAnnotationNativeClick(event) {
+      if (!customAnnotationPlacement) return;
+      const position = customAnnotationPlacement.mode === "paper"
+        ? customAnnotationPaperPositionFromNativeClick(event)
+        : customAnnotationDataPositionFromNativeClick(event);
+      if (!position) return;
       event.preventDefault();
       event.stopImmediatePropagation();
-      finishCustomAnnotationPlacement({
-        mode: "paper",
-        x: Math.min(Math.max((xPx - margin.l) / plotWidth, 0), 1),
-        y: Math.min(Math.max(1 - ((yPx - margin.t) / plotHeight), 0), 1),
-        xref: "paper",
-        yref: "paper"
-      });
+      finishCustomAnnotationPlacement(position);
     }
 
     function deleteCustomAnnotation(id) {
@@ -2890,6 +2975,7 @@
 
     function handleRelayout(update) {
       requestAnimationFrame(bringPlotBoxToFront);
+      restoreFixedYRangesAfterAutorange(update);
       let annotationMoved = false;
       Object.entries(update || {}).forEach(([key, value]) => {
         const match = key.match(/^annotations\[(\d+)\]\.(ax|ay|x|y)$/);
@@ -2906,6 +2992,27 @@
       });
       if (annotationMoved) {
         requestAnimationFrame(() => renderPlot(undefined, { preserveRanges: true }));
+      }
+    }
+
+    function restoreFixedYRangesAfterAutorange(update) {
+      const entries = Object.entries(update || {});
+      const yAutorangeAxes = entries
+        .filter(([key, value]) => /^yaxis\d*\.autorange$/.test(key) && value)
+        .map(([key]) => key.split(".")[0]);
+      if (!yAutorangeAxes.length) return;
+      const spectra = getSpectra();
+      const sharedYMax = Number($("yScale").value) || 100;
+      const relayoutUpdate = {};
+      yAutorangeAxes.forEach(axisName => {
+        const suffix = axisName === "yaxis" ? "" : axisName.replace("yaxis", "");
+        const index = suffix ? Number(suffix) - 1 : 0;
+        if (!Number.isInteger(index) || index < 0 || index >= spectra.length) return;
+        relayoutUpdate[`${axisName}.autorange`] = false;
+        relayoutUpdate[`${axisName}.range`] = [0, getYScale(index, sharedYMax)];
+      });
+      if (Object.keys(relayoutUpdate).length) {
+        requestAnimationFrame(() => Plotly.relayout($("plot"), relayoutUpdate).then(bringPlotBoxToFront));
       }
     }
 
@@ -3616,6 +3723,8 @@
         peakColor4: "#8a5cc2",
         backgroundColor: "#ffffff",
         textColor: "#1c2430",
+        manualLabelConnectorStyle: "line",
+        manualLabelConnectorColor: "#1c2430",
         gridColor: "#eceff3",
         boxLineWidth: "0.75",
         gridLineWidth: "0.5",
