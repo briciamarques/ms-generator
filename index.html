@@ -409,6 +409,13 @@
       font-size: 18px;
     }
 
+    .spec-output {
+      min-height: 220px;
+      font-size: 13px;
+      line-height: 1.45;
+      white-space: pre;
+    }
+
     .field-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -1315,6 +1322,18 @@
           <div class="compliance-results" id="complianceResults"></div>
         </details>
 
+        <details class="settings-group">
+          <summary data-i18n="styleSpecsGroup">Style, axes & peaks specs</summary>
+          <div class="group-body">
+            <p class="project-note" data-i18n="styleSpecsNote">Copy this text to keep a record of the settings used in this figure.</p>
+            <textarea id="styleSpecText" class="spec-output" readonly spellcheck="false"></textarea>
+            <div class="file-line">
+              <button type="button" class="secondary" id="copyStyleSpecs" data-i18n="copyStyleSpecs">Copy specs</button>
+              <button type="button" class="secondary" id="downloadStyleSpecs" data-i18n="downloadStyleSpecs">Download .txt</button>
+            </div>
+          </div>
+        </details>
+
         <div class="hidden-compat" aria-hidden="true">
           <select id="sizeUnit">
             <option value="mm">mm</option>
@@ -1537,6 +1556,13 @@
         heightCustom: "Custom",
         advancedExportScale: "Advanced export scale multiplier",
         checkCompliance: "Check JASMS compliance",
+        styleSpecsGroup: "Style, axes & peaks specs",
+        styleSpecsNote: "Copy this text to keep a record of the settings used in this figure.",
+        copyStyleSpecs: "Copy specs",
+        downloadStyleSpecs: "Download .txt",
+        styleSpecsCopied: "Style specs copied.",
+        styleSpecsDownloaded: "Style specs downloaded.",
+        styleSpecsCopyFailed: "Could not copy automatically. Select the text and copy it manually.",
         projectName: "Project name",
         savedProjects: "Saved projects",
         saveProject: "Save project",
@@ -1706,6 +1732,13 @@
         heightCustom: "Personalizada",
         advancedExportScale: "Multiplicador avan\u00e7ado de exporta\u00e7\u00e3o",
         checkCompliance: "Verificar JASMS",
+        styleSpecsGroup: "Especificações de estilo, eixos e picos",
+        styleSpecsNote: "Copie este texto para guardar um registro das configurações usadas nesta figura.",
+        copyStyleSpecs: "Copiar especificações",
+        downloadStyleSpecs: "Baixar .txt",
+        styleSpecsCopied: "Especificações copiadas.",
+        styleSpecsDownloaded: "Especificações baixadas.",
+        styleSpecsCopyFailed: "Não foi possível copiar automaticamente. Selecione o texto e copie manualmente.",
         projectName: "Nome do projeto",
         savedProjects: "Projetos salvos",
         saveProject: "Salvar projeto",
@@ -2591,6 +2624,7 @@
       const layout = buildLayout(spectra, threshold, decimals);
       applyAxisRanges(layout, preservedRanges);
       updateCalculatedOutput();
+      updateStyleSpecsText();
       const config = {
         responsive: true,
         displaylogo: false,
@@ -3498,6 +3532,163 @@
       delete panel.dataset.stale;
     }
 
+    function fieldValue(id, fallback = "") {
+      return $(id)?.value ?? fallback;
+    }
+
+    function checkValue(id) {
+      return $(id)?.checked ? "yes" : "no";
+    }
+
+    function selectText(id) {
+      const element = $(id);
+      return element?.selectedOptions?.[0]?.textContent || element?.value || "";
+    }
+
+    function emptyAsAuto(value) {
+      return String(value ?? "").trim() || "auto";
+    }
+
+    function styleSpecLine(label, value, unit = "") {
+      const suffix = unit ? ` ${unit}` : "";
+      return `${label}: ${value}${suffix}`;
+    }
+
+    function buildStyleSpecsText() {
+      const spectra = getSpectra();
+      const output = getPublicationSize();
+      const lines = [];
+      lines.push("Mass Spectrum Generator style specifications");
+      lines.push(`Generated: ${new Date().toLocaleString()}`);
+      lines.push("");
+      lines.push("Project");
+      lines.push(styleSpecLine("Project name", fieldValue("projectName") || fieldValue("chartTitle") || t("newProject")));
+      lines.push(styleSpecLine("Journal preset", selectText("journalPreset") || "Custom"));
+      lines.push(styleSpecLine("Figure style", selectText("figureStylePreset") || "Custom"));
+      lines.push("");
+      lines.push("Publication/export size");
+      lines.push(styleSpecLine("Final width", fieldValue("finalWidth"), "mm"));
+      lines.push(styleSpecLine("Base width", fieldValue("exportWidth"), "px"));
+      lines.push(styleSpecLine("Base height", fieldValue("exportHeight"), "px"));
+      lines.push(styleSpecLine("Export format", selectText("exportFormat")));
+      if (fieldValue("exportFormat") !== "svg") lines.push(styleSpecLine("Raster resolution", fieldValue("rasterDpi"), "dpi"));
+      lines.push(styleSpecLine("Calculated output", `${output.outputWidth} x ${output.outputHeight} px`));
+      lines.push("");
+      lines.push("Text");
+      lines.push(styleSpecLine("Chart title", fieldValue("chartTitle")));
+      lines.push(styleSpecLine("X label", fieldValue("xLabel")));
+      lines.push(styleSpecLine("Y label", fieldValue("yLabel")));
+      lines.push(styleSpecLine("Font family", fieldValue("fontFamily")));
+      lines.push(styleSpecLine("Base font size", fieldValue("fontSize"), "pt"));
+      lines.push(styleSpecLine("Title/condition font size", fieldValue("titleFontSize"), "pt"));
+      lines.push(styleSpecLine("Axis title font size", fieldValue("axisTitleFontSize"), "pt"));
+      lines.push(styleSpecLine("Tick label font size", fieldValue("tickFontSize"), "pt"));
+      lines.push(styleSpecLine("Peak m/z label font size", fieldValue("mzLabelFontSize"), "pt"));
+      lines.push(styleSpecLine("Panel label font size", fieldValue("panelLabelFontSize"), "pt"));
+      lines.push(styleSpecLine("Y label distance", fieldValue("yOffset"), "px"));
+      lines.push("");
+      lines.push("Spectrum names / legend");
+      lines.push(styleSpecLine("Display mode", selectText("legendMode")));
+      lines.push(styleSpecLine("Inside name X position", fieldValue("insideLegendX"), "%"));
+      lines.push(styleSpecLine("Inside name Y position", fieldValue("insideLegendY"), "%"));
+      lines.push(styleSpecLine("Inside name font size", fieldValue("insideLegendFontSize"), "pt"));
+      lines.push(styleSpecLine("Inside name text color", fieldValue("insideLegendTextColor")));
+      lines.push(styleSpecLine("Inside name box color", fieldValue("insideLegendBoxColor")));
+      lines.push(styleSpecLine("Inside name border color", fieldValue("insideLegendBorderColor")));
+      lines.push(styleSpecLine("Inside name border width", fieldValue("insideLegendBorderWidth"), "px"));
+      lines.push(styleSpecLine("Inside name box shape", selectText("insideLegendShape")));
+      lines.push("");
+      lines.push("Colors and lines");
+      lines.push(styleSpecLine("Peak color 1", fieldValue("peakColor1")));
+      lines.push(styleSpecLine("Peak color 2", fieldValue("peakColor2")));
+      lines.push(styleSpecLine("Peak color 3", fieldValue("peakColor3")));
+      lines.push(styleSpecLine("Peak color 4", fieldValue("peakColor4")));
+      lines.push(styleSpecLine("Background color", fieldValue("backgroundColor")));
+      lines.push(styleSpecLine("Text color", fieldValue("textColor")));
+      lines.push(styleSpecLine("Grid color", fieldValue("gridColor")));
+      lines.push(styleSpecLine("Plot box line width", fieldValue("boxLineWidth"), "pt"));
+      lines.push(styleSpecLine("Grid line width", fieldValue("gridLineWidth"), "pt"));
+      lines.push(styleSpecLine("Peak line width", fieldValue("peakLineWidth"), "pt"));
+      lines.push("");
+      lines.push("Axes and peaks");
+      lines.push(styleSpecLine("Normalize", checkValue("normalize")));
+      lines.push(styleSpecLine("Lock Y scales", checkValue("lockY")));
+      lines.push(styleSpecLine("Y scale all", fieldValue("yScale"), "%"));
+      lines.push(styleSpecLine("Y scale 1", fieldValue("yScale1"), "%"));
+      lines.push(styleSpecLine("Y scale 2", fieldValue("yScale2"), "%"));
+      lines.push(styleSpecLine("Y scale 3", fieldValue("yScale3"), "%"));
+      lines.push(styleSpecLine("Y scale 4", fieldValue("yScale4"), "%"));
+      lines.push(styleSpecLine("m/z decimal places", fieldValue("decimals")));
+      lines.push(styleSpecLine("Lock X ranges", checkValue("lockX")));
+      lines.push(styleSpecLine("Min m/z all", emptyAsAuto(fieldValue("minMz"))));
+      lines.push(styleSpecLine("Max m/z all", emptyAsAuto(fieldValue("maxMz"))));
+      lines.push(styleSpecLine("X tick interval all", emptyAsAuto(fieldValue("xTickStep"))));
+      [1, 2, 3, 4].forEach(index => {
+        lines.push(styleSpecLine(`Min m/z ${index}`, emptyAsAuto(fieldValue(`minMz${index}`))));
+        lines.push(styleSpecLine(`Max m/z ${index}`, emptyAsAuto(fieldValue(`maxMz${index}`))));
+        lines.push(styleSpecLine(`X tick interval ${index}`, emptyAsAuto(fieldValue(`xTickStep${index}`))));
+      });
+      lines.push(styleSpecLine("Label threshold", fieldValue("threshold"), "%"));
+      lines.push(styleSpecLine("Spectra spacing", fieldValue("spectrumGap"), "%"));
+      lines.push(styleSpecLine("Show X axis on spectrum 2", checkValue("showSecondXAxis")));
+      lines.push(styleSpecLine("Extra gap after spectrum 2", fieldValue("groupGapAfter2"), "%"));
+      lines.push(styleSpecLine("m/z label distance", fieldValue("xLabelDistance"), "px"));
+      lines.push(styleSpecLine("Label main peaks", checkValue("labelPeaks")));
+      lines.push(styleSpecLine("Manual m/z labels", checkValue("clickMz")));
+      lines.push(styleSpecLine("Manual connector style", selectText("manualLabelConnectorStyle")));
+      lines.push(styleSpecLine("Manual connector color", fieldValue("manualLabelConnectorColor")));
+      lines.push(styleSpecLine("Manual labels saved", selectedPeaks.length));
+      lines.push(styleSpecLine("Edited labels", Object.keys(labelEdits || {}).length));
+      lines.push(styleSpecLine("Custom annotations", customAnnotations.length));
+      lines.push("");
+      lines.push("Displayed spectra");
+      spectra.forEach((spectrum, index) => {
+        lines.push(styleSpecLine(`Spectrum ${index + 1}`, `${spectrum.name} (${spectrum.peaks.length} peaks)`));
+      });
+      return lines.join("\n");
+    }
+
+    function updateStyleSpecsText() {
+      const output = $("styleSpecText");
+      if (!output) return;
+      output.value = buildStyleSpecsText();
+    }
+
+    function copyStyleSpecs() {
+      updateStyleSpecsText();
+      const text = $("styleSpecText")?.value || "";
+      const fallbackCopy = () => {
+        const output = $("styleSpecText");
+        output?.focus();
+        output?.select();
+        return document.execCommand?.("copy");
+      };
+      if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(text)
+          .then(() => { $("status").textContent = t("styleSpecsCopied"); })
+          .catch(() => {
+            const copied = fallbackCopy();
+            $("status").textContent = copied ? t("styleSpecsCopied") : t("styleSpecsCopyFailed");
+          });
+        return;
+      }
+      const copied = fallbackCopy();
+      $("status").textContent = copied ? t("styleSpecsCopied") : t("styleSpecsCopyFailed");
+    }
+
+    function downloadStyleSpecs() {
+      updateStyleSpecsText();
+      const blob = new Blob([$("styleSpecText")?.value || ""], { type: "text/plain;charset=utf-8" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "mass-spectrum-style-specs.txt";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+      $("status").textContent = t("styleSpecsDownloaded");
+    }
+
     function markComplianceStale() {
       const panel = $("complianceResults");
       if (!panel?.dataset.checked || panel.dataset.stale === "true") return;
@@ -3973,6 +4164,8 @@
     });
     $("generate").addEventListener("click", () => renderPlot());
     $("download").addEventListener("click", downloadFigure);
+    $("copyStyleSpecs").addEventListener("click", copyStyleSpecs);
+    $("downloadStyleSpecs").addEventListener("click", downloadStyleSpecs);
     $("applyJournalPreset").addEventListener("click", applyJournalPreset);
     $("applyFigureStyle").addEventListener("click", applyFigureStylePreset);
     $("saveFigureStyle").addEventListener("click", saveFigureStylePreset);
@@ -3996,7 +4189,10 @@
       });
     });
     ["exportFormat", "rasterDpi", "figureType"].forEach(id => {
-      $(id).addEventListener("input", updateCalculatedOutput);
+      $(id).addEventListener("input", () => {
+        updateCalculatedOutput();
+        updateStyleSpecsText();
+      });
     });
     ["finalWidth", "exportWidth", "exportHeight", "fontFamily", "fontSize", "titleFontSize", "axisTitleFontSize", "tickFontSize", "mzLabelFontSize", "insideLegendFontSize", "boxLineWidth", "gridLineWidth", "peakLineWidth", "showGrid", "chartTitle", "labelPeaks", "legendMode", "rasterDpi", "exportFormat", "figureType"].forEach(id => {
       if ($(id)) $(id).addEventListener("input", markComplianceStale);
@@ -4044,7 +4240,11 @@
 
     document.querySelectorAll("input, textarea, select").forEach(input => {
       input.addEventListener("input", () => {
+        if (input.id !== "styleSpecText") updateStyleSpecsText();
         if (input.type !== "file" && !input.closest(".project-panel") && !input.closest("#panel-export") && !input.closest(".custom-annotation-controls")) renderPlot();
+      });
+      input.addEventListener("change", () => {
+        if (input.id !== "styleSpecText") updateStyleSpecsText();
       });
     });
 
@@ -4076,6 +4276,7 @@
     syncXControlVisibility();
     refreshCustomAnnotationList();
     updateCalculatedOutput();
+    updateStyleSpecsText();
     updateLanguage("en");
   </script>
 </body>
