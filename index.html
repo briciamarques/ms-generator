@@ -477,6 +477,18 @@
       margin-top: 12px;
     }
 
+    .spectrum-tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0 0 10px;
+    }
+
+    .spectrum-tools button {
+      min-height: 32px;
+      padding: 0 9px;
+    }
+
     .actions {
       display: flex;
       flex: 0 0 auto;
@@ -801,6 +813,12 @@
           <span data-i18n="secondSpectrum">Add a second spectrum below</span>
         </label>
 
+        <div class="spectrum-tools" data-spectrum-tools="1">
+          <button type="button" class="secondary" data-spectrum-action="up" data-spectrum-index="1" data-i18n="moveSpectrumUp">Move up</button>
+          <button type="button" class="secondary" data-spectrum-action="down" data-spectrum-index="1" data-i18n="moveSpectrumDown">Move down</button>
+          <button type="button" class="secondary danger" data-spectrum-action="remove" data-spectrum-index="1" data-i18n="removeSpectrum">Remove</button>
+        </div>
+
         <div class="field">
           <label for="spectrumName1" data-i18n="spectrumName1">Spectrum 1 name</label>
           <input id="spectrumName1" type="text" value="Spectrum 1">
@@ -816,6 +834,11 @@
             <input type="checkbox" id="thirdSpectrum">
             <span data-i18n="thirdSpectrum">Add a third spectrum below</span>
           </label>
+          <div class="spectrum-tools" data-spectrum-tools="2">
+            <button type="button" class="secondary" data-spectrum-action="up" data-spectrum-index="2" data-i18n="moveSpectrumUp">Move up</button>
+            <button type="button" class="secondary" data-spectrum-action="down" data-spectrum-index="2" data-i18n="moveSpectrumDown">Move down</button>
+            <button type="button" class="secondary danger" data-spectrum-action="remove" data-spectrum-index="2" data-i18n="removeSpectrum">Remove</button>
+          </div>
           <div class="field">
             <label for="spectrumName2" data-i18n="spectrumName2">Spectrum 2 name</label>
             <input id="spectrumName2" type="text" value="Spectrum 2">
@@ -831,6 +854,11 @@
             <input type="checkbox" id="fourthSpectrum">
             <span data-i18n="fourthSpectrum">Add a fourth spectrum below</span>
           </label>
+          <div class="spectrum-tools" data-spectrum-tools="3">
+            <button type="button" class="secondary" data-spectrum-action="up" data-spectrum-index="3" data-i18n="moveSpectrumUp">Move up</button>
+            <button type="button" class="secondary" data-spectrum-action="down" data-spectrum-index="3" data-i18n="moveSpectrumDown">Move down</button>
+            <button type="button" class="secondary danger" data-spectrum-action="remove" data-spectrum-index="3" data-i18n="removeSpectrum">Remove</button>
+          </div>
           <div class="field">
             <label for="spectrumName3" data-i18n="spectrumName3">Spectrum 3 name</label>
             <input id="spectrumName3" type="text" value="Spectrum 3">
@@ -842,6 +870,11 @@
         </div>
 
         <div id="spectrum4" class="spectrum-block hidden">
+          <div class="spectrum-tools" data-spectrum-tools="4">
+            <button type="button" class="secondary" data-spectrum-action="up" data-spectrum-index="4" data-i18n="moveSpectrumUp">Move up</button>
+            <button type="button" class="secondary" data-spectrum-action="down" data-spectrum-index="4" data-i18n="moveSpectrumDown">Move down</button>
+            <button type="button" class="secondary danger" data-spectrum-action="remove" data-spectrum-index="4" data-i18n="removeSpectrum">Remove</button>
+          </div>
           <div class="field">
             <label for="spectrumName4" data-i18n="spectrumName4">Spectrum 4 name</label>
             <input id="spectrumName4" type="text" value="Spectrum 4">
@@ -1421,6 +1454,11 @@
         loadExample: "Load example",
         clear: "Clear",
         loadFile: "Load file (.csv/.txt)",
+        moveSpectrumUp: "Move up",
+        moveSpectrumDown: "Move down",
+        removeSpectrum: "Remove",
+        spectrumMoved: "Spectrum order updated.",
+        spectrumRemoved: "Spectrum removed.",
         chartTitle: "Chart title",
         xLabel: "X label",
         yLabel: "Y label",
@@ -1606,6 +1644,11 @@
         loadExample: "Carregar exemplo",
         clear: "Limpar",
         loadFile: "Carregar arquivo (.csv/.txt)",
+        moveSpectrumUp: "Subir",
+        moveSpectrumDown: "Descer",
+        removeSpectrum: "Remover",
+        spectrumMoved: "Ordem dos espectros atualizada.",
+        spectrumRemoved: "Espectro removido.",
         chartTitle: "T\u00edtulo do gr\u00e1fico",
         xLabel: "R\u00f3tulo X",
         yLabel: "R\u00f3tulo Y",
@@ -2151,6 +2194,12 @@
 
     function getAxisId(prefix, index) {
       return index === 0 ? prefix : `${prefix}${index + 1}`;
+    }
+
+    function axisIndexFromRef(ref, prefix) {
+      if (ref === prefix) return 0;
+      const match = String(ref || "").match(new RegExp(`^${prefix}(\\d+)$`));
+      return match ? Number(match[1]) - 1 : null;
     }
 
     function getMzDecimals() {
@@ -3134,10 +3183,142 @@
       document.querySelectorAll(".panel").forEach(panel => panel.classList.toggle("active", panel.id === `panel-${name}`));
     }
 
+    function activeSpectrumCount() {
+      if (!$("secondSpectrum").checked) return 1;
+      if (!$("thirdSpectrum").checked) return 2;
+      if (!$("fourthSpectrum").checked) return 3;
+      return 4;
+    }
+
+    function setActiveSpectrumCount(count) {
+      const safeCount = Math.min(Math.max(Number(count) || 1, 1), 4);
+      $("secondSpectrum").checked = safeCount >= 2;
+      $("thirdSpectrum").checked = safeCount >= 3;
+      $("fourthSpectrum").checked = safeCount >= 4;
+    }
+
+    function updateSpectrumActionButtons() {
+      const count = activeSpectrumCount();
+      document.querySelectorAll("[data-spectrum-action]").forEach(button => {
+        const index = Number(button.dataset.spectrumIndex) - 1;
+        const action = button.dataset.spectrumAction;
+        button.disabled = index >= count
+          || (action === "up" && index === 0)
+          || (action === "down" && index >= count - 1)
+          || (action === "remove" && count <= 1);
+      });
+    }
+
     function syncSpectrumVisibility() {
       $("spectrum2").classList.toggle("hidden", !$("secondSpectrum").checked);
       $("spectrum3").classList.toggle("hidden", !$("secondSpectrum").checked || !$("thirdSpectrum").checked);
       $("spectrum4").classList.toggle("hidden", !$("secondSpectrum").checked || !$("thirdSpectrum").checked || !$("fourthSpectrum").checked);
+      updateSpectrumActionButtons();
+    }
+
+    function defaultSpectrumSlot(index) {
+      const defaultColors = ["#1f4e8b", "#c94e4e", "#2c8f63", "#8a5cc2"];
+      return { name: `Spectrum ${index + 1}`, data: "", color: defaultColors[index] || "#1f4e8b", yScale: "110", minMz: "", maxMz: "", xTickStep: "" };
+    }
+
+    function readSpectrumSlot(index) {
+      const number = index + 1;
+      return {
+        name: fieldValue(`spectrumName${number}`, `Spectrum ${number}`),
+        data: fieldValue(`data${number}`),
+        color: fieldValue(`peakColor${number}`),
+        yScale: fieldValue(`yScale${number}`, fieldValue("yScale", "110")),
+        minMz: fieldValue(`minMz${number}`),
+        maxMz: fieldValue(`maxMz${number}`),
+        xTickStep: fieldValue(`xTickStep${number}`)
+      };
+    }
+
+    function writeSpectrumSlot(index, slot) {
+      const number = index + 1;
+      const fallback = defaultSpectrumSlot(index);
+      if ($(`spectrumName${number}`)) $(`spectrumName${number}`).value = slot?.name ?? fallback.name;
+      if ($(`data${number}`)) $(`data${number}`).value = slot?.data ?? fallback.data;
+      if ($(`peakColor${number}`)) $(`peakColor${number}`).value = slot?.color || fallback.color;
+      if ($(`yScale${number}`)) $(`yScale${number}`).value = slot?.yScale || fallback.yScale;
+      if ($(`minMz${number}`)) $(`minMz${number}`).value = slot?.minMz ?? fallback.minMz;
+      if ($(`maxMz${number}`)) $(`maxMz${number}`).value = slot?.maxMz ?? fallback.maxMz;
+      if ($(`xTickStep${number}`)) $(`xTickStep${number}`).value = slot?.xTickStep ?? fallback.xTickStep;
+    }
+
+    function remapAxisRefByOrder(ref, prefix, oldToNew) {
+      const oldIndex = axisIndexFromRef(ref, prefix);
+      if (oldIndex === null) return ref;
+      const newIndex = oldToNew[oldIndex];
+      return Number.isInteger(newIndex) ? getAxisId(prefix, newIndex) : null;
+    }
+
+    function remapLabelsByOrder(oldToNew) {
+      selectedPeaks = selectedPeaks.map(label => {
+        const xref = remapAxisRefByOrder(label.xref, "x", oldToNew);
+        const yref = remapAxisRefByOrder(label.yref, "y", oldToNew);
+        if (!xref || !yref) return null;
+        return { ...label, xref, yref, key: labelKey(xref, yref, label.x) };
+      }).filter(Boolean);
+      const nextEdits = {};
+      Object.entries(labelEdits || {}).forEach(([key, edit]) => {
+        const [xref, yref, mz] = key.split("|");
+        const nextXref = remapAxisRefByOrder(xref, "x", oldToNew);
+        const nextYref = remapAxisRefByOrder(yref, "y", oldToNew);
+        if (!nextXref || !nextYref) return;
+        nextEdits[labelKey(nextXref, nextYref, mz)] = edit;
+      });
+      labelEdits = nextEdits;
+      customAnnotations = customAnnotations.map(annotation => {
+        if (annotation.mode === "paper") return annotation;
+        const xref = remapAxisRefByOrder(annotation.xref, "x", oldToNew);
+        const yref = remapAxisRefByOrder(annotation.yref, "y", oldToNew);
+        return xref && yref ? { ...annotation, xref, yref } : null;
+      }).filter(Boolean);
+      renderedAnnotationKeys = [];
+      refreshCustomAnnotationList();
+    }
+
+    function applySpectrumOrder(order, statusMessage) {
+      const previousSlots = [0, 1, 2, 3].map(readSpectrumSlot);
+      const oldToNew = {};
+      order.forEach((oldIndex, newIndex) => { oldToNew[oldIndex] = newIndex; });
+      order.forEach((oldIndex, newIndex) => writeSpectrumSlot(newIndex, previousSlots[oldIndex]));
+      for (let index = order.length; index < 4; index += 1) writeSpectrumSlot(index, defaultSpectrumSlot(index));
+      setActiveSpectrumCount(order.length);
+      remapLabelsByOrder(oldToNew);
+      customAnnotationPlacement = null;
+      updateCustomAnnotationPlacementStatus();
+      syncSpectrumVisibility();
+      clearComplianceResults();
+      updateStyleSpecsText();
+      renderPlot(statusMessage);
+    }
+
+    function moveSpectrum(index, direction) {
+      const count = activeSpectrumCount();
+      if (index < 0 || index >= count) return;
+      const target = index + direction;
+      if (target < 0 || target >= count) return;
+      const order = Array.from({ length: count }, (_, slotIndex) => slotIndex);
+      [order[index], order[target]] = [order[target], order[index]];
+      applySpectrumOrder(order, t("spectrumMoved"));
+    }
+
+    function removeSpectrumAt(index) {
+      const count = activeSpectrumCount();
+      if (count <= 1 || index < 0 || index >= count) return;
+      const order = Array.from({ length: count }, (_, slotIndex) => slotIndex).filter(slotIndex => slotIndex !== index);
+      applySpectrumOrder(order, t("spectrumRemoved"));
+    }
+
+    function handleSpectrumAction(event) {
+      const button = event.target.closest("[data-spectrum-action]");
+      if (!button) return;
+      const index = Number(button.dataset.spectrumIndex) - 1;
+      if (button.dataset.spectrumAction === "up") moveSpectrum(index, -1);
+      if (button.dataset.spectrumAction === "down") moveSpectrum(index, 1);
+      if (button.dataset.spectrumAction === "remove") removeSpectrumAt(index);
     }
 
     function allJournalPresets() {
@@ -4127,6 +4308,7 @@
       popover.hidden = isOpen;
       $("formatHelpButton").setAttribute("aria-expanded", String(!isOpen));
     });
+    $("panel-data").addEventListener("click", handleSpectrumAction);
     $("secondSpectrum").addEventListener("change", () => {
       syncSpectrumVisibility();
       renderPlot();
