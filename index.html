@@ -1239,7 +1239,7 @@
             </div>
             <label class="toggle">
               <input type="checkbox" id="manualMzLabelColorMode">
-              <span data-i18n="manualMzLabelColorMode">Color clicked m/z labels</span>
+              <span data-i18n="manualMzLabelColorMode">Color clicked label text</span>
             </label>
             <div class="file-line">
               <button type="button" class="secondary" id="resetManualMzLabelColors" data-i18n="resetManualMzLabelColors">Reset label colors</button>
@@ -1546,7 +1546,7 @@
         manualLabelConnectorArrow: "Arrow",
         manualLabelConnectorColor: "Connector color",
         manualMzLabelColor: "Clicked m/z label color",
-        manualMzLabelColorMode: "Color clicked m/z labels",
+        manualMzLabelColorMode: "Color clicked label text",
         resetManualMzLabelColors: "Reset label colors",
         manualMzLabelColorApplied: "m/z label color updated.",
         manualMzLabelColorsReset: "m/z label colors reset.",
@@ -1733,7 +1733,7 @@
         manualLabelConnectorArrow: "Seta",
         manualLabelConnectorColor: "Cor do conector",
         manualMzLabelColor: "Cor do r\u00f3tulo m/z clicado",
-        manualMzLabelColorMode: "Colorir r\u00f3tulos m/z clicados",
+        manualMzLabelColorMode: "Colorir texto do r\u00f3tulo clicado",
         resetManualMzLabelColors: "Restaurar cores dos r\u00f3tulos",
         manualMzLabelColorApplied: "Cor do r\u00f3tulo m/z atualizada.",
         manualMzLabelColorsReset: "Cores dos r\u00f3tulos m/z restauradas.",
@@ -2767,8 +2767,27 @@
       labelEdits[key] = { ...edit, hidden: !edit.hidden };
     }
 
+    function clearLabelColor(key) {
+      selectedPeaks = selectedPeaks.map(label => {
+        if (label.key !== key) return label;
+        const next = { ...label };
+        delete next.color;
+        return next;
+      });
+      const cleaned = removeColorFromEdit(labelEdits[key]);
+      if (cleaned) labelEdits[key] = cleaned;
+      else delete labelEdits[key];
+    }
+
     function setLabelColor(key, color = $("manualMzLabelColor")?.value || $("textColor").value) {
       if (!key) return;
+      const selectedLabel = selectedPeaks.find(label => label.key === key);
+      const currentColor = labelEdits[key]?.color || selectedLabel?.color || "";
+      if (currentColor.toLowerCase() === String(color).toLowerCase()) {
+        clearLabelColor(key);
+        renderPlot(t("manualMzLabelColorsReset"), { preserveRanges: true });
+        return;
+      }
       labelEdits[key] = { ...(labelEdits[key] || {}), color, hidden: false };
       selectedPeaks = selectedPeaks.map(label => label.key === key ? { ...label, color } : label);
       renderPlot(t("manualMzLabelColorApplied"), { preserveRanges: true });
@@ -2807,25 +2826,6 @@
       const xref = point.fullData?.xaxis || "x";
       const yref = point.fullData?.yaxis || "y";
       const key = labelKey(xref, yref, mz);
-      if ($("manualMzLabelColorMode")?.checked) {
-        if (isDefaultLabelPeak(y) || selectedPeaks.some(label => label.key === key)) {
-          setLabelColor(key);
-        } else {
-          selectedPeaks.push({
-            key,
-            x: mz,
-            y,
-            xref,
-            yref,
-            text: formatMzLabel(mz),
-            color: $("manualMzLabelColor")?.value || $("textColor").value,
-            ax: 0,
-            ay: -28
-          });
-          renderPlot(t("selected")(formatMzLabel(mz)), { preserveRanges: true });
-        }
-        return;
-      }
       if (isDefaultLabelPeak(y) || selectedPeaks.some(label => label.key === key)) {
         toggleLabelVisibility(key);
       } else {
@@ -2836,7 +2836,6 @@
           xref,
           yref,
           text: formatMzLabel(mz),
-          color: $("manualMzLabelColorMode")?.checked ? ($("manualMzLabelColor")?.value || $("textColor").value) : undefined,
           ax: 0,
           ay: -28
         });
@@ -3897,7 +3896,7 @@
       lines.push(styleSpecLine("Manual connector style", selectText("manualLabelConnectorStyle")));
       lines.push(styleSpecLine("Manual connector color", fieldValue("manualLabelConnectorColor")));
       lines.push(styleSpecLine("Clicked m/z label color", fieldValue("manualMzLabelColor")));
-      lines.push(styleSpecLine("Color clicked m/z labels", checkValue("manualMzLabelColorMode")));
+      lines.push(styleSpecLine("Color clicked label text", checkValue("manualMzLabelColorMode")));
       lines.push(styleSpecLine("Manual labels saved", selectedPeaks.length));
       lines.push(styleSpecLine("Edited labels", Object.keys(labelEdits || {}).length));
       lines.push(styleSpecLine("Custom annotations", customAnnotations.length));
