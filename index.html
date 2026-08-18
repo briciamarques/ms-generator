@@ -1232,6 +1232,17 @@
                 <label for="manualLabelConnectorColor" data-i18n="manualLabelConnectorColor">Connector color</label>
                 <input id="manualLabelConnectorColor" type="color" value="#1c2430">
               </div>
+              <div class="field">
+                <label for="manualMzLabelColor" data-i18n="manualMzLabelColor">Clicked m/z label color</label>
+                <input id="manualMzLabelColor" type="color" value="#7b3fc7">
+              </div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="manualMzLabelColorMode">
+              <span data-i18n="manualMzLabelColorMode">Color clicked m/z labels</span>
+            </label>
+            <div class="file-line">
+              <button type="button" class="secondary" id="resetManualMzLabelColors" data-i18n="resetManualMzLabelColors">Reset label colors</button>
             </div>
           </div>
         </details>
@@ -1534,6 +1545,11 @@
         manualLabelConnectorLine: "Line",
         manualLabelConnectorArrow: "Arrow",
         manualLabelConnectorColor: "Connector color",
+        manualMzLabelColor: "Clicked m/z label color",
+        manualMzLabelColorMode: "Color clicked m/z labels",
+        resetManualMzLabelColors: "Reset label colors",
+        manualMzLabelColorApplied: "m/z label color updated.",
+        manualMzLabelColorsReset: "m/z label colors reset.",
         clearSelection: "Clear manual labels",
         resetDefaults: "Reset defaults",
         customAnnotationsGroup: "Custom annotations",
@@ -1715,6 +1731,11 @@
         manualLabelConnectorLine: "Linha",
         manualLabelConnectorArrow: "Seta",
         manualLabelConnectorColor: "Cor do conector",
+        manualMzLabelColor: "Cor do r\u00f3tulo m/z clicado",
+        manualMzLabelColorMode: "Colorir r\u00f3tulos m/z clicados",
+        resetManualMzLabelColors: "Restaurar cores dos r\u00f3tulos",
+        manualMzLabelColorApplied: "Cor do r\u00f3tulo m/z atualizada.",
+        manualMzLabelColorsReset: "Cores dos r\u00f3tulos m/z restauradas.",
         clearSelection: "Limpar r\u00f3tulos manuais",
         customAnnotationsGroup: "Anota\u00e7\u00f5es customizadas",
         customAnnotationText: "Texto da anota\u00e7\u00e3o",
@@ -2332,6 +2353,7 @@
         y: edit.y ?? label.y,
         ax: edit.ax ?? label.ax,
         ay: edit.ay ?? label.ay,
+        color: edit.color || label.color || $("textColor").value,
         hidden: Boolean(edit.hidden)
       };
     }
@@ -2359,7 +2381,7 @@
         font: {
           family: $("fontFamily").value,
           size: fontPtToPlotlyPx(Number($("mzLabelFontSize").value) || Number($("fontSize").value) || 7.5),
-          color: $("textColor").value
+          color: label.color || $("textColor").value
         },
         bgcolor: $("backgroundColor").value,
         bordercolor: "rgba(0,0,0,0)",
@@ -2743,6 +2765,35 @@
       labelEdits[key] = { ...edit, hidden: !edit.hidden };
     }
 
+    function setLabelColor(key, color = $("manualMzLabelColor")?.value || $("textColor").value) {
+      if (!key) return;
+      labelEdits[key] = { ...(labelEdits[key] || {}), color, hidden: false };
+      selectedPeaks = selectedPeaks.map(label => label.key === key ? { ...label, color } : label);
+      renderPlot(t("manualMzLabelColorApplied"), { preserveRanges: true });
+    }
+
+    function removeColorFromEdit(edit) {
+      if (!edit || typeof edit !== "object") return edit;
+      const next = { ...edit };
+      delete next.color;
+      return Object.keys(next).length ? next : null;
+    }
+
+    function resetManualMzLabelColors() {
+      selectedPeaks = selectedPeaks.map(label => {
+        const next = { ...label };
+        delete next.color;
+        return next;
+      });
+      const nextEdits = {};
+      Object.entries(labelEdits || {}).forEach(([key, edit]) => {
+        const cleaned = removeColorFromEdit(edit);
+        if (cleaned) nextEdits[key] = cleaned;
+      });
+      labelEdits = nextEdits;
+      renderPlot(t("manualMzLabelColorsReset"), { preserveRanges: true });
+    }
+
     function handlePeakClick(event) {
       if (customAnnotationPlacement && handleCustomAnnotationPlotClick(event)) return;
       if (!$("clickMz").checked || !event.points || !event.points[0]) return;
@@ -2754,6 +2805,25 @@
       const xref = point.fullData?.xaxis || "x";
       const yref = point.fullData?.yaxis || "y";
       const key = labelKey(xref, yref, mz);
+      if ($("manualMzLabelColorMode")?.checked) {
+        if (isDefaultLabelPeak(y) || selectedPeaks.some(label => label.key === key)) {
+          setLabelColor(key);
+        } else {
+          selectedPeaks.push({
+            key,
+            x: mz,
+            y,
+            xref,
+            yref,
+            text: formatMzLabel(mz),
+            color: $("manualMzLabelColor")?.value || $("textColor").value,
+            ax: 0,
+            ay: -28
+          });
+          renderPlot(t("selected")(formatMzLabel(mz)), { preserveRanges: true });
+        }
+        return;
+      }
       if (isDefaultLabelPeak(y) || selectedPeaks.some(label => label.key === key)) {
         toggleLabelVisibility(key);
       } else {
@@ -2764,6 +2834,7 @@
           xref,
           yref,
           text: formatMzLabel(mz),
+          color: $("manualMzLabelColorMode")?.checked ? ($("manualMzLabelColor")?.value || $("textColor").value) : undefined,
           ax: 0,
           ay: -28
         });
@@ -2993,6 +3064,11 @@
       const key = Number.isFinite(index) ? renderedAnnotationKeys[index] : "";
       if (!key) return;
       const now = Date.now();
+      if ($("manualMzLabelColorMode")?.checked) {
+        setLabelColor(key);
+        lastAnnotationClick = { key: "", time: 0 };
+        return;
+      }
       if (lastAnnotationClick.key !== key || now - lastAnnotationClick.time > 450) {
         lastAnnotationClick = { key, time: now };
         return;
@@ -3039,7 +3115,7 @@
       if (plot.dataset.annotationRemovalBound === "true") return;
       plot.dataset.annotationRemovalBound = "true";
       document.addEventListener("click", event => {
-        if (!$("clickMz").checked) return;
+        if (!$("clickMz").checked || $("manualMzLabelColorMode")?.checked) return;
         const annotations = Array.from(document.querySelectorAll("#plot .annotation"));
         const annotation = isPointerInsideAnnotation(event);
         if (!annotation) return;
@@ -3818,6 +3894,8 @@
       lines.push(styleSpecLine("Manual m/z labels", checkValue("clickMz")));
       lines.push(styleSpecLine("Manual connector style", selectText("manualLabelConnectorStyle")));
       lines.push(styleSpecLine("Manual connector color", fieldValue("manualLabelConnectorColor")));
+      lines.push(styleSpecLine("Clicked m/z label color", fieldValue("manualMzLabelColor")));
+      lines.push(styleSpecLine("Color clicked m/z labels", checkValue("manualMzLabelColorMode")));
       lines.push(styleSpecLine("Manual labels saved", selectedPeaks.length));
       lines.push(styleSpecLine("Edited labels", Object.keys(labelEdits || {}).length));
       lines.push(styleSpecLine("Custom annotations", customAnnotations.length));
@@ -4097,6 +4175,7 @@
         textColor: "#1c2430",
         manualLabelConnectorStyle: "line",
         manualLabelConnectorColor: "#1c2430",
+        manualMzLabelColor: "#7b3fc7",
         gridColor: "#eceff3",
         boxLineWidth: "0.75",
         gridLineWidth: "0.5",
@@ -4163,6 +4242,7 @@
       syncXControlVisibility();
       $("labelPeaks").checked = true;
       $("clickMz").checked = false;
+      $("manualMzLabelColorMode").checked = false;
       $("previewExport").checked = false;
       selectedPeaks = [];
       labelEdits = {};
@@ -4419,6 +4499,7 @@
       renderedAnnotationKeys = [];
       renderPlot(t("selectionCleared"), { preserveRanges: true });
     });
+    $("resetManualMzLabelColors").addEventListener("click", resetManualMzLabelColors);
 
     document.querySelectorAll("input, textarea, select").forEach(input => {
       input.addEventListener("input", () => {
