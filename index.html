@@ -2412,13 +2412,27 @@
     }
 
     function buildManualAnnotations(spectra, threshold, decimals) {
-      const labels = [
-        ...getDefaultLabelCandidates(spectra, threshold, decimals),
-        ...selectedPeaks.map(label => ({
-          ...label,
-          text: Number.isFinite(Number(label.x)) ? formatMzLabel(label.x, decimals) : label.text
-        }))
-      ].map(applyLabelEdit).filter(label => !label.hidden);
+      const currentPeaks = new Map();
+      spectra.forEach((spectrum, index) => {
+        const xref = getAxisId("x", index);
+        const yref = getAxisId("y", index);
+        normalizePeaks(spectrum.peaks).forEach(peak => {
+          currentPeaks.set(labelKey(xref, yref, peak.mz), peak);
+        });
+      });
+      const labelsByKey = new Map();
+      [...getDefaultLabelCandidates(spectra, threshold, decimals), ...selectedPeaks].forEach(label => {
+        const peak = currentPeaks.get(label.key);
+        if (!peak) return;
+        // Keep text offsets and styling, but always anchor to the current peak tip.
+        labelsByKey.set(label.key, {
+          ...applyLabelEdit(label),
+          x: peak.mz,
+          y: peak.y,
+          text: formatMzLabel(peak.mz, decimals)
+        });
+      });
+      const labels = [...labelsByKey.values()].filter(label => !label.hidden);
       renderedAnnotationKeys = labels.map(label => label.key);
       return labels.map(makeAnnotation);
     }
