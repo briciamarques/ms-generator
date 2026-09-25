@@ -22,6 +22,16 @@
       box-sizing: border-box;
     }
 
+    .spectrum-list { display: grid; gap: 3px; max-height: 228px; overflow-y: auto; margin-bottom: 10px; }
+    .spectrum-row { display: grid; grid-template-columns: 24px 20px minmax(0, 1fr); align-items: center; gap: 6px; padding: 3px 6px; border-left: 3px solid transparent; }
+    .spectrum-row.active { border-left-color: var(--accent); background: var(--accent-soft); }
+    .spectrum-row input[type="checkbox"] { width: 18px; height: 18px; margin: 0; }
+    .spectrum-swatch { width: 14px; height: 14px; border: 1px solid var(--line); }
+    .spectrum-row button { min-width: 0; min-height: 32px; padding: 4px; border: 0; background: transparent; color: var(--ink); text-align: left; overflow-wrap: anywhere; }
+    .spectrum-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .spectrum-actions button { min-height: 34px; padding: 5px 9px; }
+    .spectrum-editor-heading { margin: 8px 0; font-size: 14px; font-weight: bold; overflow-wrap: anywhere; }
+
     body {
       margin: 0;
       background: var(--page);
@@ -808,81 +818,22 @@
       </nav>
 
       <div class="panel active" id="panel-data">
-        <label class="toggle">
-          <input type="checkbox" id="secondSpectrum">
-          <span data-i18n="secondSpectrum">Add a second spectrum below</span>
-        </label>
-
-        <div class="spectrum-tools" data-spectrum-tools="1">
-          <button type="button" class="secondary" data-spectrum-action="up" data-spectrum-index="1" data-i18n="moveSpectrumUp">Move up</button>
-          <button type="button" class="secondary" data-spectrum-action="down" data-spectrum-index="1" data-i18n="moveSpectrumDown">Move down</button>
-          <button type="button" class="secondary danger" data-spectrum-action="remove" data-spectrum-index="1" data-i18n="removeSpectrum">Remove</button>
+        <div id="spectrumList" class="spectrum-list" aria-label="Spectra"></div>
+        <div class="spectrum-actions">
+          <button type="button" class="secondary" id="addSpectrum" data-i18n="addSpectrum">Add spectrum</button>
+          <button type="button" class="secondary" id="spectrumUp" title="Move up" aria-label="Move up">&#8593;</button>
+          <button type="button" class="secondary" id="spectrumDown" title="Move down" aria-label="Move down">&#8595;</button>
+          <button type="button" class="secondary danger" id="removeSpectrum" data-i18n="removeSpectrum">Remove</button>
+          <button type="button" class="secondary" id="fitSpectrumHeight" data-i18n="fitSpectrumHeight">Fit figure height</button>
         </div>
-
+        <p class="spectrum-editor-heading" id="spectrumEditorHeading"></p>
         <div class="field">
-          <label for="spectrumName1" data-i18n="spectrumName1">Spectrum 1 name</label>
-          <input id="spectrumName1" type="text" value="Spectrum 1">
+          <label for="activeSpectrumName" data-i18n="spectrumName">Spectrum name</label>
+          <input id="activeSpectrumName" type="text">
         </div>
-
         <div class="field">
-          <label for="data1" data-i18n="dataLabel">Data (m/z, intensity)</label>
-          <textarea id="data1" spellcheck="false"></textarea>
-        </div>
-
-        <div id="spectrum2" class="spectrum-block hidden">
-          <label class="toggle">
-            <input type="checkbox" id="thirdSpectrum">
-            <span data-i18n="thirdSpectrum">Add a third spectrum below</span>
-          </label>
-          <div class="spectrum-tools" data-spectrum-tools="2">
-            <button type="button" class="secondary" data-spectrum-action="up" data-spectrum-index="2" data-i18n="moveSpectrumUp">Move up</button>
-            <button type="button" class="secondary" data-spectrum-action="down" data-spectrum-index="2" data-i18n="moveSpectrumDown">Move down</button>
-            <button type="button" class="secondary danger" data-spectrum-action="remove" data-spectrum-index="2" data-i18n="removeSpectrum">Remove</button>
-          </div>
-          <div class="field">
-            <label for="spectrumName2" data-i18n="spectrumName2">Spectrum 2 name</label>
-            <input id="spectrumName2" type="text" value="Spectrum 2">
-          </div>
-          <div class="field">
-            <label for="data2" data-i18n="dataLabel2">Data 2 (m/z, intensity)</label>
-            <textarea id="data2" spellcheck="false"></textarea>
-          </div>
-        </div>
-
-        <div id="spectrum3" class="spectrum-block hidden">
-          <label class="toggle">
-            <input type="checkbox" id="fourthSpectrum">
-            <span data-i18n="fourthSpectrum">Add a fourth spectrum below</span>
-          </label>
-          <div class="spectrum-tools" data-spectrum-tools="3">
-            <button type="button" class="secondary" data-spectrum-action="up" data-spectrum-index="3" data-i18n="moveSpectrumUp">Move up</button>
-            <button type="button" class="secondary" data-spectrum-action="down" data-spectrum-index="3" data-i18n="moveSpectrumDown">Move down</button>
-            <button type="button" class="secondary danger" data-spectrum-action="remove" data-spectrum-index="3" data-i18n="removeSpectrum">Remove</button>
-          </div>
-          <div class="field">
-            <label for="spectrumName3" data-i18n="spectrumName3">Spectrum 3 name</label>
-            <input id="spectrumName3" type="text" value="Spectrum 3">
-          </div>
-          <div class="field">
-            <label for="data3" data-i18n="dataLabel3">Data 3 (m/z, intensity)</label>
-            <textarea id="data3" spellcheck="false"></textarea>
-          </div>
-        </div>
-
-        <div id="spectrum4" class="spectrum-block hidden">
-          <div class="spectrum-tools" data-spectrum-tools="4">
-            <button type="button" class="secondary" data-spectrum-action="up" data-spectrum-index="4" data-i18n="moveSpectrumUp">Move up</button>
-            <button type="button" class="secondary" data-spectrum-action="down" data-spectrum-index="4" data-i18n="moveSpectrumDown">Move down</button>
-            <button type="button" class="secondary danger" data-spectrum-action="remove" data-spectrum-index="4" data-i18n="removeSpectrum">Remove</button>
-          </div>
-          <div class="field">
-            <label for="spectrumName4" data-i18n="spectrumName4">Spectrum 4 name</label>
-            <input id="spectrumName4" type="text" value="Spectrum 4">
-          </div>
-          <div class="field">
-            <label for="data4" data-i18n="dataLabel4">Data 4 (m/z, intensity)</label>
-            <textarea id="data4" spellcheck="false"></textarea>
-          </div>
+          <label for="activeSpectrumData" data-i18n="dataLabel">Data (m/z, intensity)</label>
+          <textarea id="activeSpectrumData" spellcheck="false"></textarea>
         </div>
 
         <div class="file-line">
@@ -1024,20 +975,12 @@
           <summary data-i18n="styleColorsGroup">Colors and lines</summary>
           <div class="field-grid">
             <div class="field">
-              <label for="peakColor1" data-i18n="peakColor">Peak color</label>
-              <input id="peakColor1" type="color" value="#1f4e8b">
+              <label for="styleSpectrumSelect" data-i18n="editingSpectrum">Editing spectrum</label>
+              <select id="styleSpectrumSelect" data-spectrum-selector></select>
             </div>
             <div class="field">
-              <label for="peakColor2" data-i18n="peakColor2">Peak color (2nd)</label>
-              <input id="peakColor2" type="color" value="#c94e4e">
-            </div>
-            <div class="field">
-              <label for="peakColor3" data-i18n="peakColor3">Peak color (3rd)</label>
-              <input id="peakColor3" type="color" value="#2c8f63">
-            </div>
-            <div class="field">
-              <label for="peakColor4" data-i18n="peakColor4">Peak color (4th)</label>
-              <input id="peakColor4" type="color" value="#8a5cc2">
+              <label for="activeSpectrumColor" data-i18n="peakColor">Peak color</label>
+              <input id="activeSpectrumColor" type="color" value="#1f4e8b">
             </div>
             <div class="field">
               <label for="backgroundColor" data-i18n="backgroundColor">Background color</label>
@@ -1096,20 +1039,12 @@
             <input id="yScale" type="number" min="1" value="110">
           </div>
           <div class="field">
-            <label for="yScale1" data-i18n="yScale1">Y scale 1 (%)</label>
-            <input id="yScale1" type="number" min="1" value="110">
+            <label for="axesSpectrumSelect" data-i18n="editingSpectrum">Editing spectrum</label>
+            <select id="axesSpectrumSelect" data-spectrum-selector></select>
           </div>
           <div class="field">
-            <label for="yScale2" data-i18n="yScale2">Y scale 2 (%)</label>
-            <input id="yScale2" type="number" min="1" value="110">
-          </div>
-          <div class="field">
-            <label for="yScale3" data-i18n="yScale3">Y scale 3 (%)</label>
-            <input id="yScale3" type="number" min="1" value="110">
-          </div>
-          <div class="field">
-            <label for="yScale4" data-i18n="yScale4">Y scale 4 (%)</label>
-            <input id="yScale4" type="number" min="1" value="110">
+            <label for="activeSpectrumYScale" data-i18n="individualYScale">Individual Y scale</label>
+            <input id="activeSpectrumYScale" type="number" min="0.000001" step="any" value="110">
           </div>
           <div class="field">
             <label for="decimals" data-i18n="decimals">m/z decimal places</label>
@@ -1128,52 +1063,16 @@
             <input id="xTickStep" type="number" min="0" step="any">
           </div>
           <div class="field x-individual-field">
-            <label for="minMz1" data-i18n="minMz1">Min m/z 1</label>
-            <input id="minMz1" type="number" step="any">
+            <label for="activeSpectrumMinMz" data-i18n="individualMinMz">Spectrum min m/z</label>
+            <input id="activeSpectrumMinMz" type="number" step="any">
           </div>
           <div class="field x-individual-field">
-            <label for="maxMz1" data-i18n="maxMz1">Max m/z 1</label>
-            <input id="maxMz1" type="number" step="any">
+            <label for="activeSpectrumMaxMz" data-i18n="individualMaxMz">Spectrum max m/z</label>
+            <input id="activeSpectrumMaxMz" type="number" step="any">
           </div>
           <div class="field x-individual-field">
-            <label for="xTickStep1" data-i18n="xTickStep1">X tick interval 1</label>
-            <input id="xTickStep1" type="number" min="0" step="any">
-          </div>
-          <div class="field x-individual-field">
-            <label for="minMz2" data-i18n="minMz2">Min m/z 2</label>
-            <input id="minMz2" type="number" step="any">
-          </div>
-          <div class="field x-individual-field">
-            <label for="maxMz2" data-i18n="maxMz2">Max m/z 2</label>
-            <input id="maxMz2" type="number" step="any">
-          </div>
-          <div class="field x-individual-field">
-            <label for="xTickStep2" data-i18n="xTickStep2">X tick interval 2</label>
-            <input id="xTickStep2" type="number" min="0" step="any">
-          </div>
-          <div class="field x-individual-field">
-            <label for="minMz3" data-i18n="minMz3">Min m/z 3</label>
-            <input id="minMz3" type="number" step="any">
-          </div>
-          <div class="field x-individual-field">
-            <label for="maxMz3" data-i18n="maxMz3">Max m/z 3</label>
-            <input id="maxMz3" type="number" step="any">
-          </div>
-          <div class="field x-individual-field">
-            <label for="xTickStep3" data-i18n="xTickStep3">X tick interval 3</label>
-            <input id="xTickStep3" type="number" min="0" step="any">
-          </div>
-          <div class="field x-individual-field">
-            <label for="minMz4" data-i18n="minMz4">Min m/z 4</label>
-            <input id="minMz4" type="number" step="any">
-          </div>
-          <div class="field x-individual-field">
-            <label for="maxMz4" data-i18n="maxMz4">Max m/z 4</label>
-            <input id="maxMz4" type="number" step="any">
-          </div>
-          <div class="field x-individual-field">
-            <label for="xTickStep4" data-i18n="xTickStep4">X tick interval 4</label>
-            <input id="xTickStep4" type="number" min="0" step="any">
+            <label for="activeSpectrumXTickStep" data-i18n="individualXTickStep">Spectrum X tick interval</label>
+            <input id="activeSpectrumXTickStep" type="number" min="0" step="any">
           </div>
           <div class="field">
             <label for="threshold" data-i18n="threshold">Label threshold (%)</label>
@@ -1829,6 +1728,23 @@
       }
     };
 
+    Object.assign(translations.en, {
+      addSpectrum: "Add spectrum", fitSpectrumHeight: "Fit figure height",
+      spectrumName: "Spectrum name", editingSpectrum: "Editing spectrum",
+      individualYScale: "Individual Y scale (empty = shared)", visibleSpectrum: "Show spectrum",
+      individualMinMz: "Spectrum min m/z", individualMaxMz: "Spectrum max m/z", individualXTickStep: "Spectrum X tick interval",
+      removeSpectrumConfirm: "Remove this spectrum and its annotations?",
+      projectStorageFull: "Could not save. Browser storage may be full; your current figure is still open."
+    });
+    Object.assign(translations.pt, {
+      addSpectrum: "Adicionar espectro", fitSpectrumHeight: "Ajustar altura da figura",
+      spectrumName: "Nome do espectro", editingSpectrum: "Espectro em edi\u00e7\u00e3o",
+      individualYScale: "Escala Y individual (vazio = geral)", visibleSpectrum: "Mostrar espectro",
+      individualMinMz: "m/z m\u00ednimo do espectro", individualMaxMz: "m/z m\u00e1ximo do espectro", individualXTickStep: "Intervalo X do espectro",
+      removeSpectrumConfirm: "Remover este espectro e suas anota\u00e7\u00f5es?",
+      projectStorageFull: "N\u00e3o foi poss\u00edvel salvar. O armazenamento do navegador pode estar cheio; sua figura continua aberta."
+    });
+
     const $ = id => document.getElementById(id);
     function updateControlsToggleText() {
       const collapsed = document.body.classList.contains("controls-collapsed");
@@ -1841,6 +1757,9 @@
     }
 
     let language = "en";
+    let spectrumSlots = [];
+    let activeSpectrumId = "";
+    const parsedSpectrumCache = new WeakMap();
     let selectedPeaks = [];
     let labelEdits = {};
     let customAnnotations = [];
@@ -2100,7 +2019,7 @@
         plot.style.height = `${size.baseHeight}px`;
         plot.style.transform = `scale(${scale})`;
       } else {
-        const normalPlotHeight = Math.max(420, Math.min(size.baseHeight, 1800));
+        const normalPlotHeight = Math.max(420, size.baseHeight);
         stage.style.width = "";
         stage.style.height = "";
         plot.style.width = "";
@@ -2146,6 +2065,7 @@
         $("resetDefaults").textContent = nextLanguage === "pt" ? "Restaurar padroes" : "Reset defaults";
       }
       updateControlsToggleText();
+      refreshSpectrumControls();
       refreshProjectList();
       refreshPresetSelectors();
       refreshCustomAnnotationList();
@@ -2178,24 +2098,20 @@
     }
 
     function getSpectra() {
-      const entries = [
-        { text: $("data1").value, color: $("peakColor1").value, name: $("spectrumName1").value || "Spectrum 1" }
-      ];
-      if ($("secondSpectrum").checked) {
-        entries.push({ text: $("data2").value, color: $("peakColor2").value, name: $("spectrumName2").value || "Spectrum 2" });
-      }
-      if ($("secondSpectrum").checked && $("thirdSpectrum").checked) {
-        entries.push({ text: $("data3").value, color: $("peakColor3").value, name: $("spectrumName3").value || "Spectrum 3" });
-      }
-      if ($("secondSpectrum").checked && $("thirdSpectrum").checked && $("fourthSpectrum").checked) {
-        entries.push({ text: $("data4").value, color: $("peakColor4").value, name: $("spectrumName4").value || "Spectrum 4" });
-      }
-      return entries.map(entry => ({ ...entry, ...parseSpectrum(entry.text) })).filter(entry => entry.peaks.length);
+      return spectrumSlots.filter(slot => slot.visible)
+        .map(slot => {
+          let cached = parsedSpectrumCache.get(slot);
+          if (!cached || cached.data !== slot.data) {
+            cached = { data: slot.data, parsed: parseSpectrum(slot.data) };
+            parsedSpectrumCache.set(slot, cached);
+          }
+          return { ...slot, ...cached.parsed };
+        }).filter(slot => slot.peaks.length);
     }
 
     function normalizePeaks(peaks) {
       if (!$("normalize").checked) return peaks.map(p => ({ ...p, y: p.intensity }));
-      const max = Math.max(...peaks.map(p => p.intensity), 1);
+      const max = peaks.reduce((max, peak) => Math.max(max, peak.intensity), 1);
       return peaks.map(p => ({ ...p, y: (p.intensity / max) * 100 }));
     }
 
@@ -2308,8 +2224,7 @@
 
     function getYScale(index, sharedMax) {
       if ($("lockY").checked) return sharedMax;
-      const input = $(`yScale${index + 1}`);
-      const value = input ? Number(input.value) : sharedMax;
+      const value = Number(getSpectra()[index]?.yScale);
       return Number.isFinite(value) && value > 0 ? value : sharedMax;
     }
 
@@ -2344,7 +2259,8 @@
     }
 
     function labelKey(xref, yref, mz) {
-      return `${xref}|${yref}|${Number(mz).toFixed(6)}`;
+      const spectrum = getSpectra()[axisIndexFromRef(yref, "y")];
+      return `${spectrum?.id || yref}|${Number(mz).toFixed(6)}`;
     }
 
     function applyLabelEdit(label) {
@@ -2399,7 +2315,7 @@
         return normalizePeaks(spectrum.peaks)
           .filter(peak => peak.y >= threshold)
           .map(peak => ({
-            key: labelKey(xref, yref, peak.mz),
+            key: `${spectrum.id}|${Number(peak.mz).toFixed(6)}`,
             x: peak.mz,
             y: peak.y,
             xref,
@@ -2417,7 +2333,7 @@
         const xref = getAxisId("x", index);
         const yref = getAxisId("y", index);
         normalizePeaks(spectrum.peaks).forEach(peak => {
-          currentPeaks.set(labelKey(xref, yref, peak.mz), peak);
+          currentPeaks.set(`${spectrum.id}|${Number(peak.mz).toFixed(6)}`, { ...peak, xref, yref });
         });
       });
       const labelsByKey = new Map();
@@ -2429,6 +2345,8 @@
           ...applyLabelEdit(label),
           x: peak.mz,
           y: peak.y,
+          xref: peak.xref,
+          yref: peak.yref,
           text: formatMzLabel(peak.mz, decimals)
         });
       });
@@ -2474,6 +2392,7 @@
         text,
         fragmentFormat,
         mode,
+        spectrumId: mode === "paper" ? null : (annotation.spectrumId || getSpectra()[axisIndexFromRef(annotation.yref || "y", "y")]?.id),
         x,
         y,
         xref: mode === "paper" ? "paper" : (annotation.xref || "x"),
@@ -2485,11 +2404,15 @@
     }
 
     function buildCustomAnnotations() {
-      return customAnnotations.map(normalizeCustomAnnotation).filter(Boolean).map(annotation => ({
+      const spectra = getSpectra();
+      return customAnnotations.map(normalizeCustomAnnotation).filter(Boolean).flatMap(annotation => {
+        const index = spectra.findIndex(spectrum => spectrum.id === annotation.spectrumId);
+        if (annotation.mode !== "paper" && index < 0) return [];
+        return [{
         x: annotation.x,
         y: annotation.y,
-        xref: annotation.xref,
-        yref: annotation.yref,
+        xref: annotation.mode === "paper" ? "paper" : getAxisId("x", index),
+        yref: annotation.mode === "paper" ? "paper" : getAxisId("y", index),
         text: escapePlotAnnotationText(annotation.text),
         showarrow: false,
         xanchor: customAnnotationXAnchor(annotation.align),
@@ -2503,7 +2426,8 @@
         bgcolor: "rgba(0,0,0,0)",
         bordercolor: "rgba(0,0,0,0)",
         borderpad: 2
-      }));
+      }];
+      });
     }
 
     function buildLayout(spectra, threshold, decimals) {
@@ -2518,7 +2442,7 @@
       const yMax = Number($("yScale").value) || 100;
       const gapPercent = Number($("spectrumGap").value);
       const cleanGapPercent = Number.isFinite(gapPercent) ? Math.min(Math.max(gapPercent, 0), 30) : 8;
-      const spectrumGap = cleanGapPercent / 100;
+      const spectrumGap = cleanGapPercent / 100 / Math.max(1, total / 4);
       const groupGapPercent = Number($("groupGapAfter2").value);
       const cleanGroupGapPercent = total >= 3 && Number.isFinite(groupGapPercent) ? Math.min(Math.max(groupGapPercent, 0), 30) : 0;
       const groupGap = cleanGroupGapPercent / 100;
@@ -2531,11 +2455,16 @@
       const minimumAxisTitleStandoff = Math.ceil(Math.max(12, axisTitleFontSize * 0.45, tickFontSize * 0.35));
       const xTitleStandoff = Math.max(xLabelDistance, minimumAxisTitleStandoff);
       const yTitleStandoff = Math.max(yLabelDistance, minimumAxisTitleStandoff);
-      const leftAxisMargin = Math.ceil(Math.max(total > 1 ? 88 : 64, tickFontSize * 1.8 + axisTitleFontSize + yTitleStandoff + 18));
+      const longestYTick = Math.max(...spectra.map((spectrum, index) => {
+        const ticks = getYAxisTicks(getYScale(index, yMax), index, compactStack);
+        return Math.max(...ticks.ticktext.map(text => text.length));
+      }));
+      const yTickWidth = tickFontSize * Math.max(1.8, longestYTick * 0.65);
+      const leftAxisMargin = Math.ceil(Math.max(total > 1 ? 88 : 64, yTickWidth + axisTitleFontSize + yTitleStandoff + 18));
       const plotAreaWidthForPaper = Math.max(1, (Number($("exportWidth")?.value) || 1200) - leftAxisMargin - 24);
       const sharedYTitleOffset = Math.min(
         Math.max(24, leftAxisMargin - axisTitleFontSize * 0.35),
-        Math.max(48, tickFontSize * 1.8 + yTitleStandoff + axisTitleFontSize * 0.5)
+        Math.max(48, yTickWidth + yTitleStandoff + axisTitleFontSize * 0.5)
       );
       const sharedYTitleX = -(sharedYTitleOffset / plotAreaWidthForPaper);
       const bottomAxisMargin = Math.ceil(Math.max(58, tickFontSize + axisTitleFontSize + xTitleStandoff + 18));
@@ -2545,9 +2474,10 @@
       const minMz = numberValue("minMz");
       const maxMz = numberValue("maxMz");
       const xTickStep = numberValue("xTickStep");
-      const getXMin = index => lockX ? minMz : numberValue(`minMz${index + 1}`);
-      const getXMax = index => lockX ? maxMz : numberValue(`maxMz${index + 1}`);
-      const getXTickStep = index => lockX ? xTickStep : numberValue(`xTickStep${index + 1}`);
+      const spectrumNumber = (index, field) => String(spectra[index][field] ?? "").trim() === "" ? NaN : Number(spectra[index][field]);
+      const getXMin = index => lockX ? minMz : spectrumNumber(index, "minMz");
+      const getXMax = index => lockX ? maxMz : spectrumNumber(index, "maxMz");
+      const getXTickStep = index => lockX ? xTickStep : spectrumNumber(index, "xTickStep");
       const gridLineWidth = linePtToPlotlyPx(Number($("gridLineWidth").value) || 0.5);
       const boxLineWidth = linePtToPlotlyPx(Number($("boxLineWidth").value) || 0.75);
       const legendMode = $("legendMode").value;
@@ -2615,7 +2545,7 @@
         const isBottomAxis = i === total - 1;
         const showsXAxisLabels = !lockX || isBottomAxis || (showSecondXAxis && i === 1);
         const showsXAxisTitle = isBottomAxis || (showSecondXAxis && i === 1);
-        const gapBeforeAxis = i === 0 ? null : (i === 2 ? cleanGroupGapPercent : cleanGapPercent);
+        const gapBeforeAxis = i === 0 ? null : cleanGapPercent + (i === 2 ? cleanGroupGapPercent : 0);
         const xAxisMirror = $("closeBox").checked && (i === 0 || gapBeforeAxis > 0);
         layout[xAxisName] = {
           ...axisCommon,
@@ -2700,6 +2630,10 @@
       const status = $("status");
       if (!spectra.length) {
         Plotly.purge("plot");
+        clickHandlerBound = false;
+        relayoutHandlerBound = false;
+        annotationClickHandlerBound = false;
+        lastPlot = { data: [], layout: {}, config: {} };
         status.textContent = t("empty");
         return;
       }
@@ -2954,6 +2888,7 @@
     function finishCustomAnnotationPlacement(position) {
       if (!customAnnotationPlacement || !position) return false;
       const placement = customAnnotationPlacement;
+      position.spectrumId = position.mode === "paper" ? null : getSpectra()[axisIndexFromRef(position.yref || "y", "y")]?.id;
       if (placement.action === "reposition") {
         customAnnotations = customAnnotations.map(annotation => annotation.id === placement.id
           ? normalizeCustomAnnotation({ ...annotation, ...position, mode: position.mode || annotation.mode })
@@ -3274,142 +3209,180 @@
       document.querySelectorAll(".panel").forEach(panel => panel.classList.toggle("active", panel.id === `panel-${name}`));
     }
 
-    function activeSpectrumCount() {
-      if (!$("secondSpectrum").checked) return 1;
-      if (!$("thirdSpectrum").checked) return 2;
-      if (!$("fourthSpectrum").checked) return 3;
-      return 4;
-    }
-
-    function setActiveSpectrumCount(count) {
-      const safeCount = Math.min(Math.max(Number(count) || 1, 1), 4);
-      $("secondSpectrum").checked = safeCount >= 2;
-      $("thirdSpectrum").checked = safeCount >= 3;
-      $("fourthSpectrum").checked = safeCount >= 4;
-    }
-
-    function updateSpectrumActionButtons() {
-      const count = activeSpectrumCount();
-      document.querySelectorAll("[data-spectrum-action]").forEach(button => {
-        const index = Number(button.dataset.spectrumIndex) - 1;
-        const action = button.dataset.spectrumAction;
-        button.disabled = index >= count
-          || (action === "up" && index === 0)
-          || (action === "down" && index >= count - 1)
-          || (action === "remove" && count <= 1);
-      });
-    }
-
-    function syncSpectrumVisibility() {
-      $("spectrum2").classList.toggle("hidden", !$("secondSpectrum").checked);
-      $("spectrum3").classList.toggle("hidden", !$("secondSpectrum").checked || !$("thirdSpectrum").checked);
-      $("spectrum4").classList.toggle("hidden", !$("secondSpectrum").checked || !$("thirdSpectrum").checked || !$("fourthSpectrum").checked);
-      updateSpectrumActionButtons();
-    }
+    const SPECTRUM_EDITOR_FIELDS = {
+      activeSpectrumName: "name", activeSpectrumData: "data", activeSpectrumColor: "color",
+      activeSpectrumYScale: "yScale", activeSpectrumMinMz: "minMz",
+      activeSpectrumMaxMz: "maxMz", activeSpectrumXTickStep: "xTickStep"
+    };
 
     function defaultSpectrumSlot(index) {
-      const defaultColors = ["#1f4e8b", "#c94e4e", "#2c8f63", "#8a5cc2"];
-      return { name: `Spectrum ${index + 1}`, data: "", color: defaultColors[index] || "#1f4e8b", yScale: "110", minMz: "", maxMz: "", xTickStep: "" };
-    }
-
-    function readSpectrumSlot(index) {
-      const number = index + 1;
+      const colors = ["#1f4e8b", "#c94e4e", "#2c8f63", "#8a5cc2"];
       return {
-        name: fieldValue(`spectrumName${number}`, `Spectrum ${number}`),
-        data: fieldValue(`data${number}`),
-        color: fieldValue(`peakColor${number}`),
-        yScale: fieldValue(`yScale${number}`, fieldValue("yScale", "110")),
-        minMz: fieldValue(`minMz${number}`),
-        maxMz: fieldValue(`maxMz${number}`),
-        xTickStep: fieldValue(`xTickStep${number}`)
+        id: `spectrum-${crypto.randomUUID()}`, visible: true,
+        name: `Spectrum ${index + 1}`, data: "", color: colors[index % colors.length],
+        yScale: "", minMz: "", maxMz: "", xTickStep: ""
       };
     }
 
-    function writeSpectrumSlot(index, slot) {
-      const number = index + 1;
-      const fallback = defaultSpectrumSlot(index);
-      if ($(`spectrumName${number}`)) $(`spectrumName${number}`).value = slot?.name ?? fallback.name;
-      if ($(`data${number}`)) $(`data${number}`).value = slot?.data ?? fallback.data;
-      if ($(`peakColor${number}`)) $(`peakColor${number}`).value = slot?.color || fallback.color;
-      if ($(`yScale${number}`)) $(`yScale${number}`).value = slot?.yScale || fallback.yScale;
-      if ($(`minMz${number}`)) $(`minMz${number}`).value = slot?.minMz ?? fallback.minMz;
-      if ($(`maxMz${number}`)) $(`maxMz${number}`).value = slot?.maxMz ?? fallback.maxMz;
-      if ($(`xTickStep${number}`)) $(`xTickStep${number}`).value = slot?.xTickStep ?? fallback.xTickStep;
+    function activeSpectrum() {
+      return spectrumSlots.find(slot => slot.id === activeSpectrumId) || spectrumSlots[0];
     }
 
-    function remapAxisRefByOrder(ref, prefix, oldToNew) {
-      const oldIndex = axisIndexFromRef(ref, prefix);
-      if (oldIndex === null) return ref;
-      const newIndex = oldToNew[oldIndex];
-      return Number.isInteger(newIndex) ? getAxisId(prefix, newIndex) : null;
-    }
-
-    function remapLabelsByOrder(oldToNew) {
-      selectedPeaks = selectedPeaks.map(label => {
-        const xref = remapAxisRefByOrder(label.xref, "x", oldToNew);
-        const yref = remapAxisRefByOrder(label.yref, "y", oldToNew);
-        if (!xref || !yref) return null;
-        return { ...label, xref, yref, key: labelKey(xref, yref, label.x) };
-      }).filter(Boolean);
-      const nextEdits = {};
-      Object.entries(labelEdits || {}).forEach(([key, edit]) => {
-        const [xref, yref, mz] = key.split("|");
-        const nextXref = remapAxisRefByOrder(xref, "x", oldToNew);
-        const nextYref = remapAxisRefByOrder(yref, "y", oldToNew);
-        if (!nextXref || !nextYref) return;
-        nextEdits[labelKey(nextXref, nextYref, mz)] = edit;
+    function refreshSpectrumControls(loadEditor = true) {
+      const active = activeSpectrum();
+      if (!active) return;
+      activeSpectrumId = active.id;
+      const list = $("spectrumList");
+      const scrollTop = list.scrollTop;
+      list.replaceChildren();
+      spectrumSlots.forEach((slot, index) => {
+        const row = document.createElement("div");
+        row.className = "spectrum-row" + (slot.id === active.id ? " active" : "");
+        const visible = document.createElement("input");
+        visible.type = "checkbox";
+        visible.checked = slot.visible;
+        visible.setAttribute("aria-label", `${t("visibleSpectrum")}: ${slot.name}`);
+        visible.addEventListener("change", () => {
+          slot.visible = visible.checked;
+          customAnnotationPlacement = null;
+          updateCustomAnnotationPlacementStatus();
+          renderPlot();
+        });
+        const swatch = document.createElement("span");
+        swatch.className = "spectrum-swatch";
+        swatch.style.backgroundColor = slot.color;
+        const select = document.createElement("button");
+        select.type = "button";
+        select.textContent = `${index + 1}. ${slot.name || "Spectrum"}`;
+        select.setAttribute("aria-pressed", String(slot.id === active.id));
+        select.addEventListener("click", () => {
+          activeSpectrumId = slot.id;
+          refreshSpectrumControls();
+        });
+        row.append(visible, swatch, select);
+        list.appendChild(row);
       });
-      labelEdits = nextEdits;
-      customAnnotations = customAnnotations.map(annotation => {
-        if (annotation.mode === "paper") return annotation;
-        const xref = remapAxisRefByOrder(annotation.xref, "x", oldToNew);
-        const yref = remapAxisRefByOrder(annotation.yref, "y", oldToNew);
-        return xref && yref ? { ...annotation, xref, yref } : null;
-      }).filter(Boolean);
-      renderedAnnotationKeys = [];
-      refreshCustomAnnotationList();
+      list.scrollTop = scrollTop;
+      document.querySelectorAll("[data-spectrum-selector]").forEach(select => {
+        select.replaceChildren(...spectrumSlots.map((slot, index) => {
+          const option = document.createElement("option");
+          option.value = slot.id;
+          option.textContent = `${index + 1}. ${slot.name || "Spectrum"}`;
+          return option;
+        }));
+        select.value = active.id;
+      });
+      const index = spectrumSlots.indexOf(active);
+      $("spectrumUp").disabled = index === 0;
+      $("spectrumDown").disabled = index === spectrumSlots.length - 1;
+      $("removeSpectrum").disabled = spectrumSlots.length <= 1;
+      $("spectrumUp").title = t("moveSpectrumUp");
+      $("spectrumDown").title = t("moveSpectrumDown");
+      $("spectrumUp").setAttribute("aria-label", t("moveSpectrumUp"));
+      $("spectrumDown").setAttribute("aria-label", t("moveSpectrumDown"));
+      $("spectrumEditorHeading").textContent = `${index + 1} / ${spectrumSlots.length} \u00b7 ${active.name}`;
+      if (loadEditor) Object.entries(SPECTRUM_EDITOR_FIELDS).forEach(([id, field]) => {
+        $(id).value = active[field];
+      });
+      $("activeSpectrumYScale").disabled = $("lockY").checked;
     }
 
-    function applySpectrumOrder(order, statusMessage) {
-      const previousSlots = [0, 1, 2, 3].map(readSpectrumSlot);
-      const oldToNew = {};
-      order.forEach((oldIndex, newIndex) => { oldToNew[oldIndex] = newIndex; });
-      order.forEach((oldIndex, newIndex) => writeSpectrumSlot(newIndex, previousSlots[oldIndex]));
-      for (let index = order.length; index < 4; index += 1) writeSpectrumSlot(index, defaultSpectrumSlot(index));
-      setActiveSpectrumCount(order.length);
-      remapLabelsByOrder(oldToNew);
-      customAnnotationPlacement = null;
-      updateCustomAnnotationPlacementStatus();
-      syncSpectrumVisibility();
-      clearComplianceResults();
+    function addSpectrum() {
+      const slot = defaultSpectrumSlot(spectrumSlots.length);
+      spectrumSlots.push(slot);
+      activeSpectrumId = slot.id;
+      refreshSpectrumControls();
+      $("spectrumList").scrollTop = $("spectrumList").scrollHeight;
+      $("activeSpectrumData").focus();
       updateStyleSpecsText();
-      renderPlot(statusMessage);
+    }
+
+    function fitSpectrumHeight() {
+      const count = Math.max(1, getSpectra().length);
+      const fontSize = fontPtToPlotlyPx(Number($("tickFontSize").value) || 8);
+      const gap = Math.min(Math.max(Number($("spectrumGap").value) || 0, 0), 30) / 100 / Math.max(1, count / 4);
+      const groupGap = count >= 3 ? Math.min(Math.max(Number($("groupGapAfter2").value) || 0, 0), 30) / 100 : 0;
+      const available = 1 - Math.min((count - 1) * gap + groupGap, 0.88);
+      $("exportHeight").value = String(Math.ceil(Math.max(700, count * Math.max(140, fontSize * 8) / available + 140)));
+      markComplianceStale();
+      updateCalculatedOutput();
+      renderPlot();
     }
 
     function moveSpectrum(index, direction) {
-      const count = activeSpectrumCount();
-      if (index < 0 || index >= count) return;
       const target = index + direction;
-      if (target < 0 || target >= count) return;
-      const order = Array.from({ length: count }, (_, slotIndex) => slotIndex);
-      [order[index], order[target]] = [order[target], order[index]];
-      applySpectrumOrder(order, t("spectrumMoved"));
+      if (index < 0 || target < 0 || target >= spectrumSlots.length) return;
+      [spectrumSlots[index], spectrumSlots[target]] = [spectrumSlots[target], spectrumSlots[index]];
+      customAnnotationPlacement = null;
+      updateCustomAnnotationPlacementStatus();
+      refreshSpectrumControls();
+      renderPlot(t("spectrumMoved"));
     }
 
     function removeSpectrumAt(index) {
-      const count = activeSpectrumCount();
-      if (count <= 1 || index < 0 || index >= count) return;
-      const order = Array.from({ length: count }, (_, slotIndex) => slotIndex).filter(slotIndex => slotIndex !== index);
-      applySpectrumOrder(order, t("spectrumRemoved"));
+      if (spectrumSlots.length <= 1 || !spectrumSlots[index]) return;
+      if (!window.confirm(t("removeSpectrumConfirm"))) return;
+      const [removed] = spectrumSlots.splice(index, 1);
+      selectedPeaks = selectedPeaks.filter(label => !label.key.startsWith(removed.id + "|"));
+      labelEdits = Object.fromEntries(Object.entries(labelEdits).filter(([key]) => !key.startsWith(removed.id + "|")));
+      customAnnotations = customAnnotations.filter(annotation => annotation.spectrumId !== removed.id);
+      activeSpectrumId = spectrumSlots[Math.min(index, spectrumSlots.length - 1)].id;
+      customAnnotationPlacement = null;
+      refreshCustomAnnotationList();
+      updateCustomAnnotationPlacementStatus();
+      refreshSpectrumControls();
+      renderPlot(t("spectrumRemoved"));
     }
 
-    function handleSpectrumAction(event) {
-      const button = event.target.closest("[data-spectrum-action]");
-      if (!button) return;
-      const index = Number(button.dataset.spectrumIndex) - 1;
-      if (button.dataset.spectrumAction === "up") moveSpectrum(index, -1);
-      if (button.dataset.spectrumAction === "down") moveSpectrum(index, 1);
-      if (button.dataset.spectrumAction === "remove") removeSpectrumAt(index);
+    function legacySpectrumField(id) {
+      const match = id.match(/^(spectrumName|data|peakColor|yScale|minMz|maxMz|xTickStep)([1-9]\d*)$/);
+      if (!match) return null;
+      const fields = { spectrumName: "name", data: "data", peakColor: "color", yScale: "yScale", minMz: "minMz", maxMz: "maxMz", xTickStep: "xTickStep" };
+      const slot = spectrumSlots[Number(match[2]) - 1];
+      return slot ? { slot, field: fields[match[1]] } : null;
+    }
+
+    function loadProjectSpectra(project) {
+      const fields = project.fields || {};
+      if (Array.isArray(project.spectra) && project.spectra.length) {
+        const ids = new Set();
+        spectrumSlots = project.spectra.map((saved, index) => {
+          const slot = { ...defaultSpectrumSlot(index), ...saved };
+          if (typeof slot.id !== "string" || !slot.id.startsWith("spectrum-") || slot.id.includes("|") || ids.has(slot.id)) slot.id = defaultSpectrumSlot(index).id;
+          ids.add(slot.id);
+          ["name", "data", "color", "yScale", "minMz", "maxMz", "xTickStep"].forEach(field => slot[field] = String(slot[field] ?? ""));
+          slot.visible = saved.visible !== false;
+          return slot;
+        });
+      } else {
+        const checks = project.checks || {};
+        const enabled = [true, Boolean(checks.secondSpectrum), Boolean(checks.secondSpectrum && checks.thirdSpectrum), Boolean(checks.secondSpectrum && checks.thirdSpectrum && checks.fourthSpectrum)];
+        // Preserve populated inactive slots from old projects as hidden spectra.
+        const count = Math.max(1, ...enabled.map((on, i) => on || String(fields[`data${i + 1}`] || "").trim() ? i + 1 : 0));
+        spectrumSlots = Array.from({ length: count }, (_, index) => {
+          const slot = defaultSpectrumSlot(index);
+          slot.visible = enabled[index];
+          const n = index + 1;
+          Object.entries({ name: "spectrumName", data: "data", color: "peakColor", yScale: "yScale", minMz: "minMz", maxMz: "maxMz", xTickStep: "xTickStep" }).forEach(([field, prefix]) => {
+            if (fields[prefix + n] != null) slot[field] = String(fields[prefix + n]);
+          });
+          return slot;
+        });
+      }
+      activeSpectrumId = spectrumSlots.some(slot => slot.id === project.activeSpectrumId) ? project.activeSpectrumId : spectrumSlots[0].id;
+    }
+
+    function migrateLegacyLabelKeys() {
+      const plotted = getSpectra();
+      const migrateKey = key => {
+        const match = String(key).match(/^x\d*\|y(\d*)\|(.+)$/);
+        if (!match) return key;
+        const index = match[1] ? Number(match[1]) - 1 : 0;
+        const slot = plotted[index] || spectrumSlots[index];
+        return slot ? `${slot.id}|${Number(match[2]).toFixed(6)}` : key;
+      };
+      selectedPeaks = selectedPeaks.map(label => ({ ...label, key: migrateKey(label.key) }));
+      labelEdits = Object.fromEntries(Object.entries(labelEdits).map(([key, edit]) => [migrateKey(key), edit]));
     }
 
     function allJournalPresets() {
@@ -3438,6 +3411,9 @@
       const fields = {};
       CUSTOM_FIGURE_STYLE_FIELD_IDS.forEach(id => {
         if (preset.fields && Object.prototype.hasOwnProperty.call(preset.fields, id)) fields[id] = String(preset.fields[id]);
+      });
+      Object.entries(preset.fields || {}).forEach(([id, value]) => {
+        if (/^yScale[1-9]\d*$/.test(id)) fields[id] = String(value);
       });
       const checks = {};
       FIGURE_STYLE_CHECK_IDS.forEach(id => {
@@ -3588,8 +3564,9 @@
     function collectCurrentFigureStyleFields() {
       const fields = {};
       CUSTOM_FIGURE_STYLE_FIELD_IDS.forEach(id => {
-        if ($(id)) fields[id] = $(id).value;
+        if ($(id) || legacySpectrumField(id)) fields[id] = fieldValue(id);
       });
+      spectrumSlots.forEach((slot, index) => { fields[`yScale${index + 1}`] = slot.yScale; });
       const checks = {};
       FIGURE_STYLE_CHECK_IDS.forEach(id => {
         if ($(id)) checks[id] = $(id).checked;
@@ -3667,7 +3644,12 @@
     function applyFieldsAndChecks(fields, checks = {}) {
       Object.entries(fields || {}).forEach(([id, value]) => {
         if ($(id)) $(id).value = value;
+        else {
+          const legacy = legacySpectrumField(id);
+          if (legacy) legacy.slot[legacy.field] = String(value);
+        }
       });
+      refreshSpectrumControls();
       Object.entries(checks || {}).forEach(([id, value]) => {
         if ($(id)) $(id).checked = Boolean(value);
       });
@@ -3805,7 +3787,8 @@
     }
 
     function fieldValue(id, fallback = "") {
-      return $(id)?.value ?? fallback;
+      const legacy = legacySpectrumField(id);
+      return $(id)?.value ?? (legacy ? legacy.slot[legacy.field] : fallback);
     }
 
     function checkValue(id) {
@@ -3871,10 +3854,9 @@
       lines.push(styleSpecLine("Inside name box shape", selectText("insideLegendShape")));
       lines.push("");
       lines.push("Colors and lines");
-      lines.push(styleSpecLine("Peak color 1", fieldValue("peakColor1")));
-      lines.push(styleSpecLine("Peak color 2", fieldValue("peakColor2")));
-      lines.push(styleSpecLine("Peak color 3", fieldValue("peakColor3")));
-      lines.push(styleSpecLine("Peak color 4", fieldValue("peakColor4")));
+      spectrumSlots.forEach((slot, index) => {
+        lines.push(styleSpecLine(`Peak color ${index + 1} (${slot.name})`, slot.color));
+      });
       lines.push(styleSpecLine("Background color", fieldValue("backgroundColor")));
       lines.push(styleSpecLine("Text color", fieldValue("textColor")));
       lines.push(styleSpecLine("Grid color", fieldValue("gridColor")));
@@ -3886,16 +3868,16 @@
       lines.push(styleSpecLine("Normalize", checkValue("normalize")));
       lines.push(styleSpecLine("Lock Y scales", checkValue("lockY")));
       lines.push(styleSpecLine("Y scale all", fieldValue("yScale"), "%"));
-      lines.push(styleSpecLine("Y scale 1", fieldValue("yScale1"), "%"));
-      lines.push(styleSpecLine("Y scale 2", fieldValue("yScale2"), "%"));
-      lines.push(styleSpecLine("Y scale 3", fieldValue("yScale3"), "%"));
-      lines.push(styleSpecLine("Y scale 4", fieldValue("yScale4"), "%"));
+      spectrumSlots.forEach((slot, index) => {
+        lines.push(styleSpecLine(`Y scale ${index + 1} (${slot.name})`, slot.yScale, $("normalize").checked ? "%" : ""));
+      });
       lines.push(styleSpecLine("m/z decimal places", fieldValue("decimals")));
       lines.push(styleSpecLine("Lock X ranges", checkValue("lockX")));
       lines.push(styleSpecLine("Min m/z all", emptyAsAuto(fieldValue("minMz"))));
       lines.push(styleSpecLine("Max m/z all", emptyAsAuto(fieldValue("maxMz"))));
       lines.push(styleSpecLine("X tick interval all", emptyAsAuto(fieldValue("xTickStep"))));
-      [1, 2, 3, 4].forEach(index => {
+      spectrumSlots.forEach((slot, slotIndex) => {
+        const index = slotIndex + 1;
         lines.push(styleSpecLine(`Min m/z ${index}`, emptyAsAuto(fieldValue(`minMz${index}`))));
         lines.push(styleSpecLine(`Max m/z ${index}`, emptyAsAuto(fieldValue(`maxMz${index}`))));
         lines.push(styleSpecLine(`X tick interval ${index}`, emptyAsAuto(fieldValue(`xTickStep${index}`))));
@@ -4034,7 +4016,7 @@
       const fields = {};
       const checks = {};
       document.querySelectorAll("input, textarea, select").forEach(element => {
-        if (!element.id || element.type === "file" || element.closest(".project-panel") || element.closest(".custom-annotation-controls")) return;
+        if (!element.id || element.type === "file" || element.closest(".project-panel") || element.closest(".custom-annotation-controls") || SPECTRUM_EDITOR_FIELDS[element.id] || element.matches("[data-spectrum-selector]")) return;
         if (element.type === "checkbox") checks[element.id] = element.checked;
         else fields[element.id] = element.value;
       });
@@ -4045,6 +4027,9 @@
         name,
         fields,
         checks,
+        spectrumSchemaVersion: 2,
+        spectra: spectrumSlots.map(slot => ({ ...slot })),
+        activeSpectrumId,
         selectedPeaks: selectedPeaks.map(label => ({ ...label })),
         labelEdits: { ...labelEdits },
         customAnnotations: customAnnotations.map(annotation => ({ ...annotation })),
@@ -4053,6 +4038,7 @@
     }
 
     function applyProject(project) {
+      loadProjectSpectra(project);
       Object.entries(project.fields || {}).forEach(([id, value]) => {
         const element = $(id);
         if (!element || element.type === "file" || id === "previewExport") return;
@@ -4075,9 +4061,10 @@
       }
       normalizeLoadedExportFields(project.fields || {});
       normalizeLoadedFontFields(project.fields || {});
-      const migratedLineWidths = normalizeLoadedLineFields(project.fields || {});
+      normalizeLoadedLineFields(project.fields || {});
       selectedPeaks = Array.isArray(project.selectedPeaks) ? project.selectedPeaks.map(label => ({ ...label })) : [];
       labelEdits = project.labelEdits && typeof project.labelEdits === "object" ? { ...project.labelEdits } : {};
+      migrateLegacyLabelKeys();
       customAnnotations = Array.isArray(project.customAnnotations) ? project.customAnnotations.map(normalizeCustomAnnotation).filter(Boolean) : [];
       renderedAnnotationKeys = [];
       customAnnotationPlacement = null;
@@ -4085,14 +4072,10 @@
       updateCustomAnnotationPlacementStatus();
       $("projectName").value = project.name || "";
       $("savedProjectSelect").value = project.id;
-      syncSpectrumVisibility();
+      refreshSpectrumControls();
       syncXControlVisibility();
       updateProjectButtons();
-      if (migratedLineWidths) {
-        project.fields = projectFromForm(project.name || t("newProject")).fields;
-        const projects = readProjects().map(item => item.id === project.id ? { ...project, updatedAt: new Date().toISOString() } : item);
-        writeProjects(projects);
-      }
+      // Unit and spectrum migrations remain in memory until the user saves.
       clearComplianceResults();
       renderPlot(t("projectLoaded")(project.name || t("newProject")));
     }
@@ -4134,7 +4117,12 @@
       const project = projectFromForm(name, isSameProjectName ? selectedProject.id : "");
       const projects = existingProjects.filter(item => item.id !== project.id);
       projects.unshift(project);
-      writeProjects(projects);
+      try {
+        writeProjects(projects);
+      } catch (error) {
+        $("status").textContent = t("projectStorageFull");
+        return;
+      }
       $("savedProjectSelect").value = project.id;
       $("projectName").value = project.name;
       updateProjectButtons();
@@ -4247,6 +4235,11 @@
       Object.entries(defaults).forEach(([id, value]) => {
         if ($(id)) $(id).value = value;
       });
+      spectrumSlots.forEach((slot, index) => {
+        const defaults = defaultSpectrumSlot(index);
+        Object.assign(slot, { name: defaults.name, color: defaults.color, yScale: "", minMz: "", maxMz: "", xTickStep: "" });
+      });
+      refreshSpectrumControls();
       $("showGrid").checked = false;
       $("closeBox").checked = true;
       $("showDots").checked = false;
@@ -4370,6 +4363,10 @@
     }
 
     function downloadFigure() {
+      if (!getSpectra().length) {
+        $("status").textContent = t("empty");
+        return;
+      }
       if (!lastPlot.data.length) renderPlot();
       updateCalculatedOutput();
       const size = getPublicationSize();
@@ -4403,41 +4400,48 @@
       popover.hidden = isOpen;
       $("formatHelpButton").setAttribute("aria-expanded", String(!isOpen));
     });
-    $("panel-data").addEventListener("click", handleSpectrumAction);
-    $("secondSpectrum").addEventListener("change", () => {
-      syncSpectrumVisibility();
-      renderPlot();
+    $("addSpectrum").addEventListener("click", addSpectrum);
+    $("spectrumUp").addEventListener("click", () => moveSpectrum(spectrumSlots.indexOf(activeSpectrum()), -1));
+    $("spectrumDown").addEventListener("click", () => moveSpectrum(spectrumSlots.indexOf(activeSpectrum()), 1));
+    $("removeSpectrum").addEventListener("click", () => removeSpectrumAt(spectrumSlots.indexOf(activeSpectrum())));
+    $("fitSpectrumHeight").addEventListener("click", fitSpectrumHeight);
+    document.querySelectorAll("[data-spectrum-selector]").forEach(select => {
+      select.addEventListener("change", () => {
+        activeSpectrumId = select.value;
+        refreshSpectrumControls();
+      });
     });
-    $("thirdSpectrum").addEventListener("change", () => {
-      syncSpectrumVisibility();
-      renderPlot();
+    Object.entries(SPECTRUM_EDITOR_FIELDS).forEach(([id, field]) => {
+      $(id).addEventListener("input", () => {
+        const slot = activeSpectrum();
+        if (!slot) return;
+        slot[field] = $(id).value;
+        if (field === "name" || field === "color") refreshSpectrumControls(false);
+        if (field === "yScale") markFigureStyleCustom();
+      });
     });
-    $("fourthSpectrum").addEventListener("change", () => {
-      syncSpectrumVisibility();
-      renderPlot();
-    });
+    $("lockY").addEventListener("change", () => refreshSpectrumControls());
     $("loadExample").addEventListener("click", () => {
-      $("data1").value = exampleData;
+      activeSpectrum().data = exampleData;
+      refreshSpectrumControls();
       renderPlot();
     });
     $("clearData").addEventListener("click", () => {
-      $("data1").value = "";
-      $("data2").value = "";
-      $("data3").value = "";
-      $("data4").value = "";
+      activeSpectrum().data = "";
+      refreshSpectrumControls();
       renderPlot();
     });
     $("chooseFile").addEventListener("click", () => $("fileInput").click());
-    $("fileInput").addEventListener("change", event => {
+    $("fileInput").addEventListener("change", async event => {
       const file = event.target.files[0];
-      if (!file) return;
-      file.text().then(text => {
-        const target = $("secondSpectrum").checked
-          ? ($("thirdSpectrum").checked ? ($("fourthSpectrum").checked ? $("data4") : $("data3")) : $("data2"))
-          : $("data1");
-        target.value = text;
-        $("status").textContent = t("fileLoaded");
-      });
+      const target = activeSpectrum();
+      if (!file || !target) return;
+      const text = await file.text();
+      if (!spectrumSlots.includes(target)) return;
+      target.data = text;
+      refreshSpectrumControls();
+      renderPlot(t("fileLoaded"));
+      event.target.value = "";
     });
     $("generate").addEventListener("click", () => renderPlot());
     $("download").addEventListener("click", downloadFigure);
@@ -4518,6 +4522,7 @@
 
     document.querySelectorAll("input, textarea, select").forEach(input => {
       input.addEventListener("input", () => {
+        if (input.matches("[data-spectrum-selector]")) return;
         if (input.id !== "styleSpecText") updateStyleSpecsText();
         if (input.type !== "file" && !input.closest(".project-panel") && !input.closest("#panel-export") && !input.closest(".custom-annotation-controls")) renderPlot();
       });
@@ -4526,29 +4531,9 @@
       });
     });
 
-    $("data1").placeholder = "One pair per line. Accepted separators: comma, semicolon, tab or space.\n\nExample:\n50.1, 12\n77.0, 45\n91.1, 100\n105.0, 38\n120.2, 8";
-    $("data1").value = exampleData;
-    $("data2").value = `229.171734 2.1
-243.188475 18.8
-256.227004 42.5
-323.233414 72.9
-341.297180 38.1
-377.124113 100
-405.025543 11.7`;
-    $("data3").value = `230.2 16
-255.9 35
-287.4 21
-312.1 66
-359.7 52
-393.5 100
-421.4 24`;
-    $("data4").value = `231.0 9
-248.6 27
-276.2 44
-305.8 58
-338.4 100
-376.9 72
-409.2 31`;
+    spectrumSlots = [{ ...defaultSpectrumSlot(0), data: exampleData }];
+    activeSpectrumId = spectrumSlots[0].id;
+    refreshSpectrumControls();
     refreshPresetSelectors();
     const savedDefaults = readDefaultPresets();
     syncXControlVisibility();
