@@ -1039,6 +1039,14 @@
             <input id="yScale" type="number" min="1" value="110">
           </div>
           <div class="field">
+            <label for="yTickStep" data-i18n="yTickStep">Intensity tick interval (auto if empty)</label>
+            <input id="yTickStep" type="number" min="0.000001" step="any" placeholder="Auto">
+          </div>
+          <div class="field">
+            <label for="yTickMax" data-i18n="yTickMax">Show intensity ticks up to (empty = axis limit)</label>
+            <input id="yTickMax" type="number" min="0" step="any" value="100">
+          </div>
+          <div class="field">
             <label for="axesSpectrumSelect" data-i18n="editingSpectrum">Editing spectrum</label>
             <select id="axesSpectrumSelect" data-spectrum-selector></select>
           </div>
@@ -1439,6 +1447,8 @@
         lockX: "Lock X ranges of all spectra",
         labelPeaks: "Label main peaks",
         clickMz: "Manual m/z labels",
+        yTickStep: "Intensity tick interval (auto if empty)",
+        yTickMax: "Show intensity ticks up to (empty = axis limit)",
         manualLabelConnectorGroup: "Manual label connectors",
         manualLabelConnectorStyle: "Connector style",
         manualLabelConnectorLine: "Line",
@@ -1626,6 +1636,8 @@
         lockX: "Travar eixos X de todos os espectros",
         labelPeaks: "Rotular picos principais",
         clickMz: "R\u00f3tulos manuais de m/z",
+        yTickStep: "Intervalo da intensidade (automático se vazio)",
+        yTickMax: "Mostrar intensidade até (vazio = limite do eixo)",
         manualLabelConnectorGroup: "Conectores dos r\u00f3tulos manuais",
         manualLabelConnectorStyle: "Estilo do conector",
         manualLabelConnectorLine: "Linha",
@@ -1808,6 +1820,8 @@
       "backgroundColor",
       "decimals",
       "yScale",
+      "yTickStep",
+      "yTickMax",
       "yScale1",
       "yScale2",
       "yScale3",
@@ -1832,6 +1846,8 @@
       "backgroundColor",
       "decimals",
       "yScale",
+      "yTickStep",
+      "yTickMax",
       "yScale1",
       "yScale2",
       "yScale3",
@@ -2194,31 +2210,6 @@
         });
       }
 
-      if ($("labelPeaks").checked && !$("clickMz").checked) {
-        const labelX = [];
-        const labelY = [];
-        const labelText = [];
-        normalized.forEach(peak => {
-          if (peak.y >= threshold) {
-            labelX.push(peak.mz);
-            labelY.push(peak.y);
-            labelText.push(formatMzLabel(peak.mz, decimals));
-          }
-        });
-        traces.push({
-          type: "scatter",
-          mode: "text",
-          x: labelX,
-          y: labelY,
-          text: labelText,
-          textposition: "top center",
-          textfont: { color: $("textColor").value, size: fontPtToPlotlyPx(Number($("mzLabelFontSize").value) || Number($("fontSize").value) || 7.5) },
-          hoverinfo: "skip",
-          showlegend: false,
-          xaxis: xAxisId,
-          yaxis: yAxisId
-        });
-      }
       return traces;
     }
 
@@ -2244,18 +2235,30 @@
 
     function getYAxisTicks(max, index, compactStack) {
       const safeMax = Number.isFinite(max) && max > 0 ? max : 1;
-      const step = safeMax <= 140 ? niceTickStep(safeMax) : Math.ceil(safeMax / 5 / 10) * 10;
+      const requestedMax = numberValue("yTickMax");
+      const tickMax = Number.isFinite(requestedMax) && requestedMax >= 0
+        ? Math.min(requestedMax, safeMax) : safeMax;
+      const requestedStep = numberValue("yTickStep");
+      const manualStep = Number.isFinite(requestedStep) && requestedStep > 0;
+      const step = manualStep ? requestedStep : niceTickStep(tickMax);
       const ticks = [];
-      for (let value = 0; value < safeMax; value += step) {
-        ticks.push(Number(value.toFixed(10)));
+      // Bound work even for an accidentally tiny interval.
+      const count = Math.min(1000, Math.floor(tickMax / step + 1e-9) + 1);
+      for (let i = 0; i < count; i += 1) {
+        ticks.push(Number((i * step).toPrecision(12)));
       }
       const previousTick = ticks[ticks.length - 1];
-      const showMaxTick = !Number.isFinite(previousTick) || safeMax - previousTick >= step * 0.45;
-      if (showMaxTick) ticks.push(safeMax);
+      if (!manualStep && tickMax - previousTick >= step * 0.45) ticks.push(tickMax);
       return {
+        tickmode: "array",
         tickvals: ticks,
         ticktext: ticks.map(value => compactStack && index > 0 && value === safeMax ? "" : formatTickLabel(value))
       };
+    }
+
+    function defaultLabelOffset() {
+      const size = fontPtToPlotlyPx(Number($("mzLabelFontSize").value) || Number($("fontSize").value) || 7.5);
+      return -(size * 0.75 + 3);
     }
 
     function labelKey(xref, yref, mz) {
@@ -2301,14 +2304,14 @@
           size: fontPtToPlotlyPx(Number($("mzLabelFontSize").value) || Number($("fontSize").value) || 7.5),
           color: label.color || $("textColor").value
         },
-        bgcolor: $("backgroundColor").value,
+        bgcolor: "rgba(0,0,0,0)",
         bordercolor: "rgba(0,0,0,0)",
-        borderpad: 2
+        borderpad: 0
       };
     }
 
     function getDefaultLabelCandidates(spectra, threshold, decimals) {
-      if (!$("clickMz").checked || !$("labelPeaks").checked) return [];
+      if (!$("labelPeaks").checked) return [];
       return spectra.flatMap((spectrum, index) => {
         const xref = getAxisId("x", index);
         const yref = getAxisId("y", index);
@@ -2322,7 +2325,7 @@
             yref,
             text: formatMzLabel(peak.mz, decimals),
             ax: 0,
-            ay: -28
+            ay: defaultLabelOffset()
           }));
       });
     }
@@ -2785,7 +2788,7 @@
           yref,
           text: formatMzLabel(mz),
           ax: 0,
-          ay: -28
+          ay: defaultLabelOffset()
         });
       }
       renderPlot(t("selected")(formatMzLabel(mz)), { preserveRanges: true });
@@ -3875,6 +3878,8 @@
       lines.push(styleSpecLine("Lock X ranges", checkValue("lockX")));
       lines.push(styleSpecLine("Min m/z all", emptyAsAuto(fieldValue("minMz"))));
       lines.push(styleSpecLine("Max m/z all", emptyAsAuto(fieldValue("maxMz"))));
+      lines.push(styleSpecLine("Intensity tick interval", emptyAsAuto(fieldValue("yTickStep"))));
+      lines.push(styleSpecLine("Intensity ticks up to", fieldValue("yTickMax") || "Axis limit"));
       lines.push(styleSpecLine("X tick interval all", emptyAsAuto(fieldValue("xTickStep"))));
       spectrumSlots.forEach((slot, slotIndex) => {
         const index = slotIndex + 1;
@@ -4038,6 +4043,9 @@
     }
 
     function applyProject(project) {
+      // Older projects retain their original axis ticks.
+      $("yTickStep").value = "";
+      $("yTickMax").value = "";
       loadProjectSpectra(project);
       Object.entries(project.fields || {}).forEach(([id, value]) => {
         const element = $(id);
@@ -4155,6 +4163,8 @@
 
     function resetDefaults() {
       const defaults = {
+        yTickStep: "",
+        yTickMax: "100",
         chartTitle: "Mass Spectrum",
         xLabel: "<i>m/z</i>",
         yLabel: "Relative intensity (%)",
@@ -4524,7 +4534,7 @@
       input.addEventListener("input", () => {
         if (input.matches("[data-spectrum-selector]")) return;
         if (input.id !== "styleSpecText") updateStyleSpecsText();
-        if (input.type !== "file" && !input.closest(".project-panel") && !input.closest("#panel-export") && !input.closest(".custom-annotation-controls")) renderPlot();
+        if (input.type !== "file" && !input.closest(".project-panel") && !input.closest("#panel-export") && !input.closest(".custom-annotation-controls")) renderPlot(undefined, { preserveRanges: input.id === "clickMz" });
       });
       input.addEventListener("change", () => {
         if (input.id !== "styleSpecText") updateStyleSpecsText();
