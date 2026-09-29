@@ -798,6 +798,15 @@
             <button type="button" class="secondary" id="loadProject" data-i18n="loadProject">Open project</button>
             <button type="button" class="secondary" id="deleteProject" data-i18n="deleteProject">Delete project</button>
           </div>
+          <div class="project-grid">
+            <div class="field">
+              <label for="settingsSourceProject" data-i18n="settingsSourceProject">Copy settings from</label>
+              <select id="settingsSourceProject"></select>
+            </div>
+            <div class="field">
+              <button type="button" class="secondary" id="copyProjectSettings" data-i18n="copyProjectSettings">Copy settings</button>
+            </div>
+          </div>
           <p class="project-note" data-i18n="projectNote">Projects are saved in this browser on this computer.</p>
         </div>
       <div class="language" role="group" aria-label="Language">
@@ -1535,6 +1544,10 @@
         savedProjects: "Saved projects",
         saveProject: "Save project",
         loadProject: "Open project",
+        settingsSourceProject: "Copy settings from",
+        copyProjectSettings: "Copy settings",
+        chooseSettingsSource: "Choose a source project",
+        settingsCopied: name => "Settings copied from " + name + ". Current data and annotations kept. Save the project to keep these settings.",
         deleteProject: "Delete project",
         projectNote: "Projects are saved in this browser on this computer.",
         newProject: "New project",
@@ -1725,6 +1738,10 @@
         savedProjects: "Projetos salvos",
         saveProject: "Salvar projeto",
         loadProject: "Abrir projeto",
+        settingsSourceProject: "Copiar configurações de",
+        copyProjectSettings: "Copiar configurações",
+        chooseSettingsSource: "Escolha o projeto de origem",
+        settingsCopied: name => "Configurações copiadas de " + name + ". Dados e anotações atuais mantidos. Salve o projeto para guardar as configurações.",
         deleteProject: "Apagar projeto",
         projectNote: "Os projetos ficam salvos neste navegador deste computador.",
         newProject: "Novo projeto",
@@ -4096,7 +4113,7 @@
       };
     }
 
-    function applyProject(project) {
+    function applyProject(project, statusMessage) {
       // Older projects retain their original axis ticks.
       $("yTickStep").value = "";
       $("yTickMax").value = "";
@@ -4140,7 +4157,53 @@
       updateProjectButtons();
       // Unit and spectrum migrations remain in memory until the user saves.
       clearComplianceResults();
-      renderPlot(t("projectLoaded")(project.name || t("newProject")));
+      renderPlot(statusMessage || t("projectLoaded")(project.name || t("newProject")));
+    }
+
+    function projectWithCopiedSettings(current, source, settingIds) {
+      const result = {
+        ...current,
+        fields: { ...current.fields },
+        checks: { ...current.checks },
+        spectra: current.spectra.map(slot => ({ ...slot }))
+      };
+      // Supply historical defaults for controls absent from older projects.
+      const sourceFields = { yTickStep: "", yTickMax: "", mzLabelDistance: "3", ...source.fields };
+      settingIds.forEach(id => {
+        if (Object.prototype.hasOwnProperty.call(sourceFields, id)) result.fields[id] = sourceFields[id];
+        if (Object.prototype.hasOwnProperty.call(source.checks || {}, id)) result.checks[id] = source.checks[id];
+      });
+      // These flags must follow the copied values so old units are converted once.
+      ["fontUnit", "lineUnit", "sizeUnit"].forEach(id => {
+        delete result.fields[id];
+        if (sourceFields[id] != null) result.fields[id] = sourceFields[id];
+      });
+      const spectrumSettings = { color: "peakColor", yScale: "yScale", minMz: "minMz", maxMz: "maxMz", xTickStep: "xTickStep" };
+      result.spectra.forEach((slot, index) => {
+        const saved = source.spectra?.[index];
+        Object.entries(spectrumSettings).forEach(([field, legacyPrefix]) => {
+          const value = saved ? saved[field] : sourceFields[legacyPrefix + (index + 1)];
+          if (value != null) slot[field] = String(value);
+        });
+      });
+      return result;
+    }
+
+    function copyProjectSettings() {
+      const source = readProjects().find(project => project.id === $("settingsSourceProject").value);
+      if (!source) return;
+      const current = projectFromForm($("projectName").value);
+      current.id = $("savedProjectSelect").value;
+      const settingIds = [];
+      document.querySelectorAll("#panel-style input, #panel-style select, #panel-axes input, #panel-axes select, #panel-export input, #panel-export select").forEach(element => {
+        if (!element.id || element.type === "file" || element.closest(".custom-annotation-controls") ||
+            SPECTRUM_EDITOR_FIELDS[element.id] || element.matches("[data-spectrum-selector]") ||
+            ["chartTitle", "previewExport", "styleSpecText"].includes(element.id)) return;
+        settingIds.push(element.id);
+      });
+      // Keep project identity, spectrum content, and molecule-specific annotations.
+      const copied = projectWithCopiedSettings(current, source, settingIds);
+      applyProject(copied, t("settingsCopied")(source.name || t("newProject")));
     }
 
     function refreshProjectList() {
@@ -4160,6 +4223,20 @@
         select.appendChild(option);
       });
       select.value = projects.some(project => project.id === current) ? current : "";
+      const sourceSelect = $("settingsSourceProject");
+      const sourceId = sourceSelect.value;
+      sourceSelect.innerHTML = "";
+      const sourcePlaceholder = document.createElement("option");
+      sourcePlaceholder.value = "";
+      sourcePlaceholder.textContent = t("chooseSettingsSource");
+      sourceSelect.appendChild(sourcePlaceholder);
+      projects.forEach(project => {
+        const option = document.createElement("option");
+        option.value = project.id;
+        option.textContent = project.name || t("newProject");
+        sourceSelect.appendChild(option);
+      });
+      sourceSelect.value = projects.some(project => project.id === sourceId) ? sourceId : "";
       updateProjectButtons();
     }
 
@@ -4168,6 +4245,7 @@
       const hasSelection = Boolean($("savedProjectSelect").value);
       $("loadProject").disabled = !hasSelection;
       $("deleteProject").disabled = !hasSelection;
+      $("copyProjectSettings").disabled = !$("settingsSourceProject").value;
     }
 
     function saveProject() {
@@ -4547,6 +4625,8 @@
     });
     $("saveProject").addEventListener("click", saveProject);
     $("loadProject").addEventListener("click", loadProject);
+    $("copyProjectSettings").addEventListener("click", copyProjectSettings);
+    $("settingsSourceProject").addEventListener("change", updateProjectButtons);
     $("deleteProject").addEventListener("click", deleteProject);
     $("savedProjectSelect").addEventListener("change", () => {
       const project = readProjects().find(item => item.id === $("savedProjectSelect").value);
