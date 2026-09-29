@@ -1084,8 +1084,7 @@
           </div>
           <div class="field">
             <label for="mzLabelDistance" data-i18n="mzLabelDistance">Peak m/z label distance (px)</label>
-            <input id="mzLabelDistance" type="number" min="0" step="1" value="3">
-            <span class="hint" data-i18n="mzLabelDistanceHelp">Smaller values move all peak labels closer; larger values move them away. Individual adjustments are preserved.</span>
+            <input id="mzLabelDistance" type="number" step="1" value="3">
           </div>
           <div class="field">
             <label for="threshold" data-i18n="threshold">Label threshold (%)</label>
@@ -1453,7 +1452,6 @@
         labelPeaks: "Label main peaks",
         clickMz: "Manual m/z labels",
         mzLabelDistance: "Peak m/z label distance (px)",
-        mzLabelDistanceHelp: "Smaller values move all peak labels closer; larger values move them away. Individual adjustments are preserved.",
         yTickStep: "Intensity tick interval (auto if empty)",
         yTickMax: "Show intensity ticks up to (empty = axis limit)",
         manualLabelConnectorGroup: "Manual label connectors",
@@ -1644,7 +1642,6 @@
         labelPeaks: "Rotular picos principais",
         clickMz: "R\u00f3tulos manuais de m/z",
         mzLabelDistance: "Distância dos rótulos m/z aos picos (px)",
-        mzLabelDistanceHelp: "Valores menores aproximam todos os rótulos; maiores afastam. Ajustes individuais são preservados.",
         yTickStep: "Intervalo da intensidade (automático se vazio)",
         yTickMax: "Mostrar intensidade até (vazio = limite do eixo)",
         manualLabelConnectorGroup: "Conectores dos r\u00f3tulos manuais",
@@ -2269,7 +2266,7 @@
 
     function mzLabelDistanceAdjustment() {
       const value = numberValue("mzLabelDistance");
-      return (Number.isFinite(value) ? Math.max(0, value) : 3) - 3;
+      return (Number.isFinite(value) ? value : 3) - 3;
     }
 
     function defaultLabelOffset() {
