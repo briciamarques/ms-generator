@@ -1083,6 +1083,11 @@
             <input id="activeSpectrumXTickStep" type="number" min="0" step="any">
           </div>
           <div class="field">
+            <label for="mzLabelDistance" data-i18n="mzLabelDistance">Peak m/z label distance (px)</label>
+            <input id="mzLabelDistance" type="number" min="0" step="1" value="3">
+            <span class="hint" data-i18n="mzLabelDistanceHelp">Smaller values move all peak labels closer; larger values move them away. Individual adjustments are preserved.</span>
+          </div>
+          <div class="field">
             <label for="threshold" data-i18n="threshold">Label threshold (%)</label>
             <input id="threshold" type="number" min="0" max="100" value="10">
           </div>
@@ -1447,6 +1452,8 @@
         lockX: "Lock X ranges of all spectra",
         labelPeaks: "Label main peaks",
         clickMz: "Manual m/z labels",
+        mzLabelDistance: "Peak m/z label distance (px)",
+        mzLabelDistanceHelp: "Smaller values move all peak labels closer; larger values move them away. Individual adjustments are preserved.",
         yTickStep: "Intensity tick interval (auto if empty)",
         yTickMax: "Show intensity ticks up to (empty = axis limit)",
         manualLabelConnectorGroup: "Manual label connectors",
@@ -1636,6 +1643,8 @@
         lockX: "Travar eixos X de todos os espectros",
         labelPeaks: "Rotular picos principais",
         clickMz: "R\u00f3tulos manuais de m/z",
+        mzLabelDistance: "Distância dos rótulos m/z aos picos (px)",
+        mzLabelDistanceHelp: "Valores menores aproximam todos os rótulos; maiores afastam. Ajustes individuais são preservados.",
         yTickStep: "Intervalo da intensidade (automático se vazio)",
         yTickMax: "Mostrar intensidade até (vazio = limite do eixo)",
         manualLabelConnectorGroup: "Conectores dos r\u00f3tulos manuais",
@@ -1822,6 +1831,7 @@
       "yScale",
       "yTickStep",
       "yTickMax",
+      "mzLabelDistance",
       "yScale1",
       "yScale2",
       "yScale3",
@@ -1848,6 +1858,7 @@
       "yScale",
       "yTickStep",
       "yTickMax",
+      "mzLabelDistance",
       "yScale1",
       "yScale2",
       "yScale3",
@@ -2256,6 +2267,11 @@
       };
     }
 
+    function mzLabelDistanceAdjustment() {
+      const value = numberValue("mzLabelDistance");
+      return (Number.isFinite(value) ? Math.max(0, value) : 3) - 3;
+    }
+
     function defaultLabelOffset() {
       const size = fontPtToPlotlyPx(Number($("mzLabelFontSize").value) || Number($("fontSize").value) || 7.5);
       return -(size * 0.75 + 3);
@@ -2298,7 +2314,7 @@
         arrowwidth: hasConnector ? connectorWidth : 0,
         arrowcolor: hasConnector ? connectorColor : "rgba(0,0,0,0)",
         ax: label.ax,
-        ay: label.ay,
+        ay: label.ay - mzLabelDistanceAdjustment(),
         font: {
           family: $("fontFamily").value,
           size: fontPtToPlotlyPx(Number($("mzLabelFontSize").value) || Number($("fontSize").value) || 7.5),
@@ -3098,7 +3114,8 @@
         if (!keyForAnnotation) return;
         labelEdits[keyForAnnotation] = {
           ...(labelEdits[keyForAnnotation] || {}),
-          [prop]: value
+          // Store the individual offset independently of the collective distance.
+          [prop]: prop === "ay" ? Number(value) + mzLabelDistanceAdjustment() : value
         };
         annotationMoved = true;
       });
@@ -3891,7 +3908,8 @@
       lines.push(styleSpecLine("Spectra spacing", fieldValue("spectrumGap"), "%"));
       lines.push(styleSpecLine("Show X axis on spectrum 2", checkValue("showSecondXAxis")));
       lines.push(styleSpecLine("Extra gap after spectrum 2", fieldValue("groupGapAfter2"), "%"));
-      lines.push(styleSpecLine("m/z label distance", fieldValue("xLabelDistance"), "px"));
+      lines.push(styleSpecLine("Peak m/z label distance", fieldValue("mzLabelDistance"), "px"));
+      lines.push(styleSpecLine("X axis title distance", fieldValue("xLabelDistance"), "px"));
       lines.push(styleSpecLine("Label main peaks", checkValue("labelPeaks")));
       lines.push(styleSpecLine("Manual m/z labels", checkValue("clickMz")));
       lines.push(styleSpecLine("Manual connector style", selectText("manualLabelConnectorStyle")));
@@ -4046,6 +4064,7 @@
       // Older projects retain their original axis ticks.
       $("yTickStep").value = "";
       $("yTickMax").value = "";
+      $("mzLabelDistance").value = "3";
       loadProjectSpectra(project);
       Object.entries(project.fields || {}).forEach(([id, value]) => {
         const element = $(id);
@@ -4165,6 +4184,7 @@
       const defaults = {
         yTickStep: "",
         yTickMax: "100",
+        mzLabelDistance: "3",
         chartTitle: "Mass Spectrum",
         xLabel: "<i>m/z</i>",
         yLabel: "Relative intensity (%)",
@@ -4534,7 +4554,7 @@
       input.addEventListener("input", () => {
         if (input.matches("[data-spectrum-selector]")) return;
         if (input.id !== "styleSpecText") updateStyleSpecsText();
-        if (input.type !== "file" && !input.closest(".project-panel") && !input.closest("#panel-export") && !input.closest(".custom-annotation-controls")) renderPlot(undefined, { preserveRanges: input.id === "clickMz" });
+        if (input.type !== "file" && !input.closest(".project-panel") && !input.closest("#panel-export") && !input.closest(".custom-annotation-controls")) renderPlot(undefined, { preserveRanges: input.id === "clickMz" || input.id === "mzLabelDistance" });
       });
       input.addEventListener("change", () => {
         if (input.id !== "styleSpecText") updateStyleSpecsText();
