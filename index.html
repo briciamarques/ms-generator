@@ -2248,10 +2248,12 @@
         ? Math.min(requestedMax, safeMax) : safeMax;
       const requestedStep = numberValue("yTickStep");
       const manualStep = Number.isFinite(requestedStep) && requestedStep > 0;
-      const step = manualStep ? requestedStep : niceTickStep(tickMax);
+      let step = manualStep ? requestedStep : niceTickStep(tickMax);
+      // Keep at most 50 ticks per panel, spanning the entire range.
+      // While typing "50", the temporary value "5" must remain inexpensive.
+      if (tickMax / step > 49) step = niceTickStep(tickMax);
       const ticks = [];
-      // Bound work even for an accidentally tiny interval.
-      const count = Math.min(1000, Math.floor(tickMax / step + 1e-9) + 1);
+      const count = Math.min(50, Math.floor(tickMax / step + 1e-9) + 1);
       for (let i = 0; i < count; i += 1) {
         ticks.push(Number((i * step).toPrecision(12)));
       }
@@ -2349,13 +2351,15 @@
         const xref = getAxisId("x", index);
         const yref = getAxisId("y", index);
         normalizePeaks(spectrum.peaks).forEach(peak => {
-          currentPeaks.set(`${spectrum.id}|${Number(peak.mz).toFixed(6)}`, { ...peak, xref, yref });
+          currentPeaks.set(`${spectrum.id}|${Number(peak.mz).toFixed(6)}`, { ...peak, xref, yref, yMax: getYScale(index, Number($("yScale").value) || 100) });
         });
       });
       const labelsByKey = new Map();
       [...getDefaultLabelCandidates(spectra, threshold, decimals), ...selectedPeaks].forEach(label => {
         const peak = currentPeaks.get(label.key);
-        if (!peak) return;
+        // Annotations are not clipped like traces. Skip off-scale peak tips,
+        // especially raw intensities after disabling normalization.
+        if (!peak || peak.y < 0 || peak.y > peak.yMax) return;
         // Keep text offsets and styling, but always anchor to the current peak tip.
         labelsByKey.set(label.key, {
           ...applyLabelEdit(label),
@@ -2641,7 +2645,42 @@
       });
     }
 
+    let plotRenderBusy = false;
+    let pendingPlotRender = null;
+    let plotInputTimer = null;
+
+    function schedulePlotRender(options = {}) {
+      clearTimeout(plotInputTimer);
+      plotInputTimer = setTimeout(() => renderPlot(undefined, options), 180);
+    }
+
     function renderPlot(statusMessage, options = {}) {
+      clearTimeout(plotInputTimer);
+      pendingPlotRender = { statusMessage, options };
+      if (plotRenderBusy) return;
+      const request = pendingPlotRender;
+      pendingPlotRender = null;
+      plotRenderBusy = true;
+      return renderPlotNow(request.statusMessage, request.options).catch(error => {
+        console.error("Spectrum render failed", error);
+        $("status").textContent = language === "pt"
+          ? "Não foi possível atualizar o gráfico. Ajuste os valores e tente novamente."
+          : "Could not update the plot. Adjust the values and try again.";
+      }).finally(() => {
+        plotRenderBusy = false;
+        if (pendingPlotRender) {
+          // Yield to the browser before drawing the latest requested state.
+          setTimeout(() => {
+            if (pendingPlotRender && !plotRenderBusy) {
+              const next = pendingPlotRender;
+              renderPlot(next.statusMessage, next.options);
+            }
+          }, 0);
+        }
+      });
+    }
+
+    async function renderPlotNow(statusMessage, options = {}) {
       const spectra = getSpectra();
       const status = $("status");
       if (!spectra.length) {
@@ -2683,7 +2722,7 @@
       layout.autosize = true;
       $("plot").classList.toggle("inside-legend-rounded", $("insideLegendShape").value === "rounded");
 
-      Plotly.react("plot", data, layout, config).then(plotDiv => {
+      await Plotly.react("plot", data, layout, config).then(plotDiv => {
         updateFinalSizePreview(false);
         Plotly.Plots.resize(plotDiv);
         bringPlotBoxToFront();
@@ -4551,7 +4590,7 @@
       input.addEventListener("input", () => {
         if (input.matches("[data-spectrum-selector]")) return;
         if (input.id !== "styleSpecText") updateStyleSpecsText();
-        if (input.type !== "file" && !input.closest(".project-panel") && !input.closest("#panel-export") && !input.closest(".custom-annotation-controls")) renderPlot(undefined, { preserveRanges: input.id === "clickMz" || input.id === "mzLabelDistance" });
+        if (input.type !== "file" && !input.closest(".project-panel") && !input.closest("#panel-export") && !input.closest(".custom-annotation-controls")) schedulePlotRender({ preserveRanges: input.id === "clickMz" || input.id === "mzLabelDistance" });
       });
       input.addEventListener("change", () => {
         if (input.id !== "styleSpecText") updateStyleSpecsText();
