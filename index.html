@@ -946,6 +946,14 @@
               <input id="insideLegendY" type="number" min="0" max="100" value="92">
             </div>
             <div class="field">
+              <label for="namePositionSpectrum" data-i18n="editingSpectrum">Editing spectrum</label>
+              <select id="namePositionSpectrum" data-spectrum-selector></select>
+            </div>
+            <div class="field">
+              <button type="button" class="secondary" id="resetNamePosition" data-i18n="resetNamePosition">Reset this name to X/Y</button>
+              <button type="button" class="secondary" id="resetAllNamePositions" data-i18n="resetAllNamePositions">Reset all names to X/Y</button>
+            </div>
+            <div class="field">
               <label for="insideLegendFontSize" data-i18n="insideLegendFontSize">Inside name font size (pt)</label>
               <input id="insideLegendFontSize" type="number" min="1" max="44" step="0.1" value="8">
             </div>
@@ -1402,6 +1410,8 @@
         tickFontSize: "Tick label font size (pt)",
         mzLabelFontSize: "Peak m/z label font size (pt)",
         insideLegendFontSize: "Inside name font size (pt)",
+        resetNamePosition: "Reset this name to X/Y",
+        resetAllNamePositions: "Reset all names to X/Y",
         panelLabelFontSize: "Panel label font size (pt)",
         legendMode: "Spectrum label display",
         formatNote: "Use _ for subscript and ^ for superscript: H_2O, M^+, SO_4^{2-}.",
@@ -1605,6 +1615,8 @@
         tickFontSize: "Tamanho dos n\u00fameros dos eixos (pt)",
         mzLabelFontSize: "Tamanho dos r\u00f3tulos m/z (pt)",
         insideLegendFontSize: "Tamanho do nome interno (pt)",
+        resetNamePosition: "Voltar este nome à posição X/Y",
+        resetAllNamePositions: "Voltar todos os nomes à posição X/Y",
         panelLabelFontSize: "Tamanho das letras dos pain\u00e9is (pt)",
         peakColor: "Cor dos picos",
         formatNote: "Use _ para subscrito e ^ para sobrescrito: H_2O, M^+, SO_4^{2-}.",
@@ -1800,6 +1812,7 @@
     let customAnnotations = [];
     let customAnnotationPlacement = null;
     let renderedAnnotationKeys = [];
+    let renderedNameAnnotations = new Map();
     let lastPlot = { data: [], layout: {}, config: {} };
     let clickHandlerBound = false;
     let relayoutHandlerBound = false;
@@ -2468,6 +2481,7 @@
     }
 
     function buildLayout(spectra, threshold, decimals) {
+      renderedNameAnnotations = new Map();
       const total = spectra.length;
       const baseFontPt = Number($("fontSize").value) || 8;
       const fontSize = fontPtToPlotlyPx(baseFontPt);
@@ -2607,13 +2621,14 @@
           domain: axisDomain(i, total, spectrumGap, groupGap),
           anchor: xAxisId
         };
-        if (total > 1 && legendMode === "inside") {
+        if (legendMode === "inside") {
           const domain = axisDomain(i, total, spectrumGap, groupGap);
-          const panelY = domain[0] + (domain[1] - domain[0]) * insideLegendY;
+          const position = insideNamePosition(spectra[i], domain, insideLegendX, insideLegendY);
+          renderedNameAnnotations.set(layout.annotations.length, { spectrumId: spectra[i].id, domain });
           layout.annotations.push({
             text: formatPlotText(spectra[i].name),
-            x: insideLegendX,
-            y: panelY,
+            x: position.x,
+            y: position.y,
             xref: "paper",
             yref: "paper",
             showarrow: false,
@@ -2723,7 +2738,7 @@
         displaylogo: false,
         editable: $("clickMz").checked,
         edits: {
-          annotationPosition: $("clickMz").checked,
+          annotationPosition: $("clickMz").checked || $("legendMode").value === "inside",
           annotationText: false,
           axisTitleText: false,
           colorbarPosition: false,
@@ -3154,6 +3169,35 @@
       }, true);
     }
 
+    function insideNamePosition(spectrum, domain, defaultX, defaultY) {
+      const saved = spectrum.insideNamePosition || {};
+      const x = Number.isFinite(saved.x) ? saved.x : defaultX;
+      const y = Number.isFinite(saved.y) ? saved.y : defaultY;
+      return { x, y: domain[0] + (domain[1] - domain[0]) * y };
+    }
+
+    function saveInsideNamePosition(index, prop, value) {
+      const rendered = renderedNameAnnotations.get(index);
+      if (!rendered || !["x", "y"].includes(prop) || !Number.isFinite(Number(value))) return false;
+      const slot = spectrumSlots.find(spectrum => spectrum.id === rendered.spectrumId);
+      if (!slot) return false;
+      const span = rendered.domain[1] - rendered.domain[0];
+      if (prop === "y" && span <= 0) return false;
+      const position = { ...slot.insideNamePosition };
+      // Store Y relative to its own panel, so reordering or resizing retains the placement.
+      position[prop] = prop === "y" ? (Number(value) - rendered.domain[0]) / span : Number(value);
+      slot.insideNamePosition = position;
+      return true;
+    }
+
+    function resetInsideNamePositions(all = false) {
+      const slots = all ? spectrumSlots : [activeSpectrum()];
+      slots.forEach(slot => {
+        if (slot) delete slot.insideNamePosition;
+      });
+      renderPlot(undefined, { preserveRanges: true });
+    }
+
     function handleRelayout(update) {
       requestAnimationFrame(bringPlotBoxToFront);
       restoreFixedYRangesAfterAutorange(update);
@@ -3163,6 +3207,10 @@
         if (!match) return;
         const index = Number(match[1]);
         const prop = match[2];
+        if (saveInsideNamePosition(index, prop, value)) {
+          annotationMoved = true;
+          return;
+        }
         const keyForAnnotation = renderedAnnotationKeys[index];
         if (!keyForAnnotation) return;
         labelEdits[keyForAnnotation] = {
@@ -4295,6 +4343,7 @@
     }
 
     function resetDefaults() {
+      spectrumSlots.forEach(slot => delete slot.insideNamePosition);
       const defaults = {
         yTickStep: "",
         yTickMax: "100",
@@ -4665,6 +4714,8 @@
       renderPlot(t("selectionCleared"), { preserveRanges: true });
     });
     $("resetManualMzLabelColors").addEventListener("click", resetManualMzLabelColors);
+    $("resetNamePosition").addEventListener("click", () => resetInsideNamePositions());
+    $("resetAllNamePositions").addEventListener("click", () => resetInsideNamePositions(true));
 
     document.querySelectorAll("input, textarea, select").forEach(input => {
       input.addEventListener("input", () => {
