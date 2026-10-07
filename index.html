@@ -624,6 +624,8 @@
     }
 
     .plot-stage {
+      position: relative;
+      overflow: hidden;
       width: 100%;
     }
 
@@ -643,6 +645,7 @@
     }
 
     #plot {
+      transform-origin: top left;
       width: 100%;
       height: 640px;
     }
@@ -1960,27 +1963,19 @@
       wrap.classList.toggle("final-size-preview-active", isActive);
       if (info) info.hidden = !isActive;
       if (summary) summary.textContent = `Final-size preview: ${size.finalWidthMm.toFixed(1)} x ${size.finalHeightMm.toFixed(1)} mm`;
-      if (isActive) {
-        const cssPxPerMm = 96 / MM_PER_IN;
-        const viewport = $("plotViewport");
-        const fitDesktop = window.matchMedia("(min-width: 1051px) and (min-height: 600px)").matches;
-        const scale = Math.min((size.finalWidthMm * cssPxPerMm) / size.baseWidth,
-          viewport.clientWidth / size.baseWidth,
-          fitDesktop ? Math.max(1, viewport.clientHeight - 10) / size.baseHeight : Infinity);
-        stage.style.width = `${size.baseWidth * scale}px`;
-        stage.style.height = `${size.baseHeight * scale}px`;
-        plot.style.width = `${size.baseWidth}px`;
-        plot.style.height = `${size.baseHeight}px`;
-        plot.style.transform = `scale(${scale})`;
-      } else {
-        const fitDesktop = window.matchMedia("(min-width: 1051px) and (min-height: 600px)").matches;
-        const normalPlotHeight = fitDesktop ? Math.max(1, $("plotViewport").clientHeight) : Math.min(500, Math.max(300, window.innerHeight * 0.6));
-        stage.style.width = "";
-        stage.style.height = "";
-        plot.style.width = "";
-        plot.style.height = `${normalPlotHeight}px`;
-        plot.style.transform = "";
-      }
+      // Render one canonical figure; both preview modes only change its uniform scale.
+      const viewport = $("plotViewport");
+      const fitDesktop = window.matchMedia("(min-width: 1051px) and (min-height: 600px)").matches;
+      const availableHeight = fitDesktop ? Math.max(1, viewport.clientHeight - (isActive ? 10 : 0))
+        : Math.min(500, Math.max(300, window.innerHeight * 0.6));
+      const fitScale = Math.min(Math.max(1, viewport.clientWidth) / size.baseWidth, availableHeight / size.baseHeight);
+      const physicalScale = (size.finalWidthMm * 96 / MM_PER_IN) / size.baseWidth;
+      const scale = isActive ? Math.min(physicalScale, fitScale) : fitScale;
+      stage.style.width = `${size.baseWidth * scale}px`;
+      stage.style.height = `${size.baseHeight * scale}px`;
+      plot.style.width = `${size.baseWidth}px`;
+      plot.style.height = `${size.baseHeight}px`;
+      plot.style.transform = `scale(${scale})`;
       if (resizePlot && window.Plotly && plot.data) Plotly.Plots.resize(plot);
       return size;
     }

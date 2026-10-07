@@ -16,7 +16,7 @@ const server = http.createServer((req,res)=>{const asset = req.url === '/compari
  await page.locator('#customAnnotationText').fill('Texto livre\nSegunda linha');
  await page.locator('#placeCustomAnnotation').click();
  await page.locator('#plot').scrollIntoViewIfNeeded();
- const point=await page.evaluate(()=>{const p=document.getElementById('plot'),r=p.getBoundingClientRect(),l=p._fullLayout;return {x:r.left+l.margin.l+0.5*(l.width-l.margin.l-l.margin.r),y:r.top+l.margin.t+0.3*(l.height-l.margin.t-l.margin.b)};});
+ const point=await page.evaluate(()=>{const p=document.getElementById('plot'),r=p.getBoundingClientRect(),l=p._fullLayout;return {x:r.left+(l.margin.l+0.5*(l.width-l.margin.l-l.margin.r))*r.width/l.width,y:r.top+(l.margin.t+0.3*(l.height-l.margin.t-l.margin.b))*r.height/l.height};});
  await page.locator("#plot").scrollIntoViewIfNeeded();
  await page.mouse.click(point.x,point.y);
  await page.waitForFunction(()=>customAnnotations.length===1 && renderedCustomAnnotations.size===1);
