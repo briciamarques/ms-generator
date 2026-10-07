@@ -836,6 +836,10 @@
       #comparisonPanel { min-height: 0; overflow-y: auto; }
       footer { padding-bottom: 10px; font-size: 12px; }
     }
+    .custom-annotation-item { grid-template-columns: 18px minmax(0, 1fr); }
+    .custom-annotation-item .custom-annotation-actions { grid-column: 2; }
+    .custom-annotation-item .annotation-select { width: 18px; height: 18px; min-height: 0; flex: 0 0 18px; margin: 0; }
+    .custom-annotation-item.alignment-selected { background: var(--accent-soft); }
   </style>
 </head>
 <body>
@@ -1393,6 +1397,12 @@
               <button type="button" id="cancelCustomAnnotation" data-i18n="cancelCustomAnnotation" hidden>Cancel</button>
             </div>
             <p class="custom-annotation-waiting" id="customAnnotationPlacementStatus" hidden></p>
+            <div class="file-line" aria-label="Align selected annotations">
+              <button type="button" id="alignAnnotationsHorizontal" disabled>Align horizontally</button>
+              <button type="button" id="alignAnnotationsVertical" disabled>Align vertically</button>
+              <button type="button" id="clearAnnotationSelection" disabled>Clear selection</button>
+            </div>
+            <p class="project-note" id="annotationSelectionStatus" role="status">Select two or more annotations. The first selected is the reference.</p>
             <div class="custom-annotation-list" id="customAnnotationList"></div>
           </div>
         </details>
@@ -1706,6 +1716,7 @@
     let labelEdits = {};
     let customAnnotations = [];
     let renderedCustomAnnotations = new Map();
+    const alignmentSelection = new Set();
     let selectedCustomAnnotationId = null;
     let annotationHistory = [];
     let annotationStage = false;
@@ -2825,6 +2836,7 @@
       customAnnotations = JSON.parse(annotationHistory.pop());
       customAnnotationPlacement = null;
       selectedCustomAnnotationId = null;
+      alignmentSelection.clear();
       updateCustomAnnotationPlacementStatus();
       refreshCustomAnnotationList();
       renderPlot(undefined, { preserveRanges: true });
@@ -2867,7 +2879,58 @@
       return mode === "paper" ? t("customAnnotationModePaper") : t("customAnnotationModeData");
     }
 
+    function updateAlignmentSelection() {
+      for (const id of alignmentSelection) if (!customAnnotations.some(a => a.id === id)) alignmentSelection.delete(id);
+      const count = alignmentSelection.size;
+      $("alignAnnotationsHorizontal").disabled = count < 2;
+      $("alignAnnotationsVertical").disabled = count < 2;
+      $("clearAnnotationSelection").disabled = !count;
+      const reference = customAnnotations.find(a => a.id === [...alignmentSelection][0]);
+      $("annotationSelectionStatus").textContent = count
+        ? `${count} selected · Reference: ${reference.text}. Horizontal = same height; vertical = same column.`
+        : "Select two or more annotations. The first selected is the reference.";
+    }
+
+    function alignCustomAnnotations(direction) {
+      const plot = $("plot"), layout = plot?._fullLayout;
+      if (!layout || alignmentSelection.size < 2) return;
+      const rect = plot.getBoundingClientRect();
+      const scale = rect.width / layout.width;
+      const selected = [...alignmentSelection].map(id => {
+        const index = [...renderedCustomAnnotations].find(([, value]) => value === id)?.[0];
+        const element = plot.querySelector(`.annotation[data-index="${index}"] .annotation-text`);
+        return { annotation: customAnnotations.find(a => a.id === id), rendered: layout.annotations[index], box: element?.getBoundingClientRect() };
+      });
+      if (selected.some(item => !item.box || !item.rendered)) {
+        $("status").textContent = "Show all selected annotations in the figure before aligning them.";
+        return;
+      }
+      const horizontal = direction === "horizontal";
+      const center = box => horizontal ? box.y + box.height / 2 : box.x + box.width / 2;
+      const target = center(selected[0].box);
+      rememberAnnotations();
+      selected.slice(1).forEach(({ annotation, rendered, box }) => {
+        const delta = (target - center(box)) / scale;
+        if (annotation.showarrow) {
+          const offset = horizontal ? "ay" : "ax";
+          annotation[offset] = (Number(annotation[offset]) || 0) + delta;
+        } else if (annotation.mode === "paper") {
+          if (horizontal) annotation.y -= delta / layout._size.h;
+          else annotation.x += delta / layout._size.w;
+        } else {
+          const dimension = horizontal ? "y" : "x";
+          const ref = rendered[dimension + "ref"];
+          const axis = layout[ref.replace(dimension, dimension + "axis")];
+          annotation[dimension] = axis.p2d(axis.d2p(annotation[dimension]) + delta);
+        }
+      });
+      refreshCustomAnnotationList();
+      $("status").textContent = horizontal ? "Selected annotations aligned horizontally." : "Selected annotations aligned vertically.";
+      renderPlot(undefined, { preserveRanges: true });
+    }
+
     function refreshCustomAnnotationList() {
+      updateAlignmentSelection();
       $("applyAnnotation").disabled = !customAnnotations.some(a => a.id === selectedCustomAnnotationId);
       $("undoAnnotation").disabled = !annotationHistory.length;
       const list = $("customAnnotationList");
@@ -2910,7 +2973,19 @@
         edit.textContent = t("annotationEdit");
         item.style.borderColor = annotation.id === selectedCustomAnnotationId ? "var(--accent)" : "";
         actions.append(edit, reposition, remove);
-        item.append(meta, actions);
+        const select = document.createElement("input");
+        select.type = "checkbox";
+        select.className = "annotation-select";
+        select.checked = alignmentSelection.has(annotation.id);
+        select.setAttribute("aria-label", `Select annotation: ${annotation.text}`);
+        select.addEventListener("change", () => {
+          if (select.checked) alignmentSelection.add(annotation.id);
+          else alignmentSelection.delete(annotation.id);
+          item.classList.toggle("alignment-selected", select.checked);
+          updateAlignmentSelection();
+        });
+        item.classList.toggle("alignment-selected", select.checked);
+        item.append(select, meta, actions);
         list.appendChild(item);
       });
     }
@@ -3457,6 +3532,7 @@
       labelEdits = Object.fromEntries(Object.entries(labelEdits).filter(([key]) => !key.startsWith(removed.id + "|")));
       annotationHistory = [];
       selectedCustomAnnotationId = null;
+      alignmentSelection.clear();
       customAnnotations = customAnnotations.filter(annotation => annotation.spectrumId !== removed.id);
       activeSpectrumId = spectrumSlots[Math.min(index, spectrumSlots.length - 1)].id;
       customAnnotationPlacement = null;
@@ -4206,6 +4282,7 @@
       migrateLegacyLabelKeys();
       annotationHistory = [];
       selectedCustomAnnotationId = null;
+      alignmentSelection.clear();
       customAnnotations = Array.isArray(project.customAnnotations) ? project.customAnnotations.map(normalizeCustomAnnotation).filter(Boolean) : [];
       renderedAnnotationKeys = [];
       customAnnotationPlacement = null;
@@ -4462,6 +4539,7 @@
       labelEdits = {};
       annotationHistory = [];
       selectedCustomAnnotationId = null;
+      alignmentSelection.clear();
       customAnnotations = [];
       customAnnotationPlacement = null;
       renderedAnnotationKeys = [];
@@ -4709,6 +4787,9 @@
     });
     $("applyAnnotation").addEventListener("click", applyCustomAnnotationChanges);
     $("undoAnnotation").addEventListener("click", undoCustomAnnotation);
+    $("alignAnnotationsHorizontal").addEventListener("click", () => alignCustomAnnotations("horizontal"));
+    $("alignAnnotationsVertical").addEventListener("click", () => alignCustomAnnotations("vertical"));
+    $("clearAnnotationSelection").addEventListener("click", () => { alignmentSelection.clear(); refreshCustomAnnotationList(); });
     $("cancelCustomAnnotation").addEventListener("click", cancelCustomAnnotationPlacement);
     $("customAnnotationList").addEventListener("click", event => {
       const button = event.target.closest("button[data-action]");
