@@ -821,6 +821,18 @@
       .tabs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
       .tab { font-size: 12px; }
     }
+    .plot-preview-info[hidden] { display: none; }
+    @media (min-width: 1051px) and (min-height: 600px) {
+      body { height: 100dvh; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+      main { min-height: 0; padding-bottom: 12px; align-items: stretch; }
+      .controls { height: 100%; max-height: none; }
+      .plot-wrap { min-height: 0; display: flex; flex-direction: column; }
+      .figure-toolbar, .plot-preview-info { flex: 0 0 auto; }
+      .plot-viewport { flex: 1 1 auto; min-height: 0; overflow: hidden; }
+      .plot-stage { margin-inline: auto; }
+      #comparisonPanel { min-height: 0; overflow-y: auto; }
+      footer { padding-bottom: 10px; font-size: 12px; }
+    }
   </style>
 </head>
 <body>
@@ -1950,14 +1962,19 @@
       if (summary) summary.textContent = `Final-size preview: ${size.finalWidthMm.toFixed(1)} x ${size.finalHeightMm.toFixed(1)} mm`;
       if (isActive) {
         const cssPxPerMm = 96 / MM_PER_IN;
-        const scale = (size.finalWidthMm * cssPxPerMm) / size.baseWidth;
-        stage.style.width = `${size.finalWidthMm.toFixed(3)}mm`;
-        stage.style.height = `${size.finalHeightMm.toFixed(3)}mm`;
+        const viewport = $("plotViewport");
+        const fitDesktop = window.matchMedia("(min-width: 1051px) and (min-height: 600px)").matches;
+        const scale = Math.min((size.finalWidthMm * cssPxPerMm) / size.baseWidth,
+          viewport.clientWidth / size.baseWidth,
+          fitDesktop ? Math.max(1, viewport.clientHeight - 10) / size.baseHeight : Infinity);
+        stage.style.width = `${size.baseWidth * scale}px`;
+        stage.style.height = `${size.baseHeight * scale}px`;
         plot.style.width = `${size.baseWidth}px`;
         plot.style.height = `${size.baseHeight}px`;
         plot.style.transform = `scale(${scale})`;
       } else {
-        const normalPlotHeight = Math.max(420, size.baseHeight);
+        const fitDesktop = window.matchMedia("(min-width: 1051px) and (min-height: 600px)").matches;
+        const normalPlotHeight = fitDesktop ? Math.max(1, $("plotViewport").clientHeight) : Math.min(500, Math.max(300, window.innerHeight * 0.6));
         stage.style.width = "";
         stage.style.height = "";
         plot.style.width = "";
@@ -4727,6 +4744,15 @@
         if (input.id !== "styleSpecText") updateStyleSpecsText();
       });
     });
+
+    let previewResizeFrame;
+    const previewResizeObserver = new ResizeObserver(() => {
+      cancelAnimationFrame(previewResizeFrame);
+      previewResizeFrame = requestAnimationFrame(() => {
+        if (!$("plotViewport").hidden) updateFinalSizePreview(true);
+      });
+    });
+    previewResizeObserver.observe($("plotViewport"));
 
     spectrumSlots = [{ ...defaultSpectrumSlot(0), data: exampleData }];
     activeSpectrumId = spectrumSlots[0].id;
