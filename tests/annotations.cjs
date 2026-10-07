@@ -12,11 +12,12 @@ const server = http.createServer((req,res)=>{res.setHeader('Content-Type','text/
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(`http://127.0.0.1:${server.address().port}`);
  await page.waitForFunction(()=>document.getElementById('plot')._fullLayout,{timeout:45000});
- await page.locator('#ptBtn').click();
- await page.locator('[data-tab="annotations"]').click();
+ await page.locator('#toggleAnnotations').click();
  await page.locator('#customAnnotationText').fill('Texto livre\nSegunda linha');
  await page.locator('#placeCustomAnnotation').click();
+ await page.locator('#plot').scrollIntoViewIfNeeded();
  const point=await page.evaluate(()=>{const p=document.getElementById('plot'),r=p.getBoundingClientRect(),l=p._fullLayout;return {x:r.left+l.margin.l+0.5*(l.width-l.margin.l-l.margin.r),y:r.top+l.margin.t+0.3*(l.height-l.margin.t-l.margin.b)};});
+ await page.locator("#plot").scrollIntoViewIfNeeded();
  await page.mouse.click(point.x,point.y);
  await page.waitForFunction(()=>customAnnotations.length===1 && renderedCustomAnnotations.size===1);
  await page.waitForTimeout(400);
@@ -41,6 +42,7 @@ const server = http.createServer((req,res)=>{res.setHeader('Content-Type','text/
  const arrows=await page.locator('.custom-user-annotation .annotation-arrow-g path').evaluateAll(ps=>ps.map(p=>getComputedStyle(p).display));
  assert(arrows.length>0 && arrows.every(d=>d!=='none'),'arrow visible');
  // Arrow text drag changes pixel offsets while its target stays anchored.
+ await page.locator("#plot").scrollIntoViewIfNeeded();
  const beforeArrow = await page.evaluate(()=>({...customAnnotations[0]}));
  const arrowBox = await label.boundingBox();
  await page.mouse.move(arrowBox.x+arrowBox.width/2,arrowBox.y+arrowBox.height/2);
@@ -64,6 +66,7 @@ const server = http.createServer((req,res)=>{res.setHeader('Content-Type','text/
  await page.locator('#customAnnotationText').fill('Data anchor');
  await page.locator('#customAnnotationMode').selectOption('data');
  await page.locator('#placeCustomAnnotation').click();
+ await page.locator("#plot").scrollIntoViewIfNeeded();
  await page.mouse.click(point.x,point.y);
  await page.waitForFunction(()=>customAnnotations.length===2);
  assert(await page.evaluate(()=>customAnnotations[1].x>200));

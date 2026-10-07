@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -226,17 +226,6 @@
       font-size: 13px;
     }
 
-    .language {
-      display: flex;
-      flex: 0 0 auto;
-      gap: 8px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 4px;
-      background: #f8fafd;
-      margin-left: auto;
-    }
-
     button,
     input,
     textarea,
@@ -261,11 +250,6 @@
     }
 
     button.primary,
-    .language button.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #ffffff;
-    }
 
     button.secondary {
       background: var(--accent-soft);
@@ -305,6 +289,26 @@
       min-height: 0;
     }
 
+    .figure-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px solid var(--line); }
+    .figure-toolbar strong { display: block; font-size: 15px; }
+    .figure-toolbar span { display: block; margin-top: 4px; font-size: 12px; color: var(--muted); }
+    #toggleAnnotations { flex-shrink: 0; color: var(--accent); background: var(--accent-soft); }
+    .annotation-workspace { padding: 14px; margin-bottom: 16px; background: #f8faff; border: 1px solid var(--line); border-radius: 8px; }
+    .annotation-workspace[hidden] { display: none; }
+    .annotation-workspace .field-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+    .annotation-workspace textarea { min-height: 65px; }
+    .annotation-workspace .custom-annotation-list { max-height: 160px; overflow-y: auto; }
+
+    .annotation-workspace .group-body { display: flex; flex-wrap: wrap; align-items: end; gap: 8px 12px; padding: 10px; }
+    .annotation-workspace .group-body > .field { flex: 1 1 65%; margin: 0; }
+    .annotation-workspace textarea { height: 65px; padding: 8px; }
+    .annotation-workspace .toggle { flex: 1 1 160px; margin: 0; padding: 6px; border: 0; min-height: 36px; }
+    .annotation-workspace .field-grid { flex: 1 1 100%; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; padding: 0; margin: 0; }
+    .annotation-workspace .field-grid .field { margin: 0; }
+    .annotation-workspace .field-grid label { font-size: 10px; }
+    .annotation-workspace .file-line { margin: 0; gap: 6px; }
+    .annotation-workspace .custom-annotation-list { flex: 1 1 100%; }
+    .annotation-workspace .project-note { margin: 0 0 8px; }
     .tabs {
       display: grid;
       flex: 0 0 auto;
@@ -737,10 +741,6 @@
         grid-template-columns: 1fr;
       }
 
-      .language {
-        width: max-content;
-      }
-
       main {
         padding-top: 12px;
       }
@@ -809,10 +809,6 @@
           </div>
           <p class="project-note" data-i18n="projectNote">Projects are saved in this browser on this computer.</p>
         </div>
-      <div class="language" role="group" aria-label="Language">
-        <button type="button" id="ptBtn">PT</button>
-        <button type="button" id="enBtn" class="active">EN</button>
-      </div>
     </div>
   </header>
 
@@ -823,7 +819,6 @@
         <button type="button" class="tab active" data-tab="data" data-i18n="tabData">Data</button>
         <button type="button" class="tab" data-tab="style" data-i18n="tabStyle">Style</button>
         <button type="button" class="tab" data-tab="axes" data-i18n="tabAxes">Axes &amp; peaks</button>
-        <button type="button" class="tab" data-tab="annotations" data-i18n="tabAnnotations">Annotations</button>
         <button type="button" class="tab" data-tab="export" data-i18n="tabExport">Export</button>
       </nav>
 
@@ -1179,63 +1174,6 @@
         <button type="button" id="resetDefaults" data-i18n="resetDefaults">Reset defaults</button>
       </div>
 
-      <div class="panel" id="panel-annotations">
-        <p class="project-note" data-i18n="annotationHelp">Step 2: add text, click the figure to place it, then drag it. For arrows, click the target and drag the text. Select text or use Edit to change it. Save your project to keep annotations.</p>
-        <details class="settings-group custom-annotation-controls" open>
-          <summary data-i18n="customAnnotationsGroup">Custom annotations</summary>
-          <div class="group-body">
-            <div class="field">
-              <label for="customAnnotationText" data-i18n="customAnnotationText">Annotation text</label>
-              <textarea id="customAnnotationText" rows="3" placeholder="y4, b12, Parent ion, *"></textarea>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" id="customAnnotationFragmentFormat" checked>
-              <span data-i18n="customAnnotationFragmentFormat">Format peptide fragments</span>
-            </label>
-            <div class="field-grid">
-              <div class="field">
-                <label for="customAnnotationMode" data-i18n="customAnnotationMode">Position mode</label>
-                <select id="customAnnotationMode">
-                  <option value="data" data-i18n="customAnnotationModeData">Attached to m/z</option>
-                  <option value="paper" selected data-i18n="customAnnotationModePaper">Fixed in plot</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="customAnnotationMz" data-i18n="customAnnotationMz">m/z override (optional)</label>
-                <input id="customAnnotationMz" type="number" step="any">
-              </div>
-              <div class="field">
-                <label for="customAnnotationFontSize" data-i18n="customAnnotationFontSize">Font size (pt)</label>
-                <input id="customAnnotationFontSize" type="number" min="1" step="0.1" value="8">
-              </div>
-              <div class="field">
-                <label for="customAnnotationColor" data-i18n="customAnnotationColor">Text color</label>
-                <input id="customAnnotationColor" type="color" value="#1c2430">
-              </div>
-              <div class="field">
-                <label for="customAnnotationAlign" data-i18n="customAnnotationAlign">Text alignment</label>
-                <select id="customAnnotationAlign">
-                  <option value="center" data-i18n="customAnnotationAlignCenter">Center</option>
-                  <option value="left" data-i18n="customAnnotationAlignLeft">Left</option>
-                  <option value="right" data-i18n="customAnnotationAlignRight">Right</option>
-                </select>
-              </div>
-            </div>
-            <label class="toggle"><input type="checkbox" id="customAnnotationArrow"><span data-i18n="annotationArrow">Arrow to point</span></label>
-            <div class="file-line">
-              <button type="button" id="applyAnnotation" data-i18n="annotationApply" disabled>Apply changes</button>
-              <button type="button" id="undoAnnotation" data-i18n="annotationUndo" disabled>Undo</button>
-            </div>
-            <div class="file-line">
-              <button type="button" id="placeCustomAnnotation" data-i18n="placeCustomAnnotation">Place annotation</button>
-              <button type="button" id="cancelCustomAnnotation" data-i18n="cancelCustomAnnotation" hidden>Cancel</button>
-            </div>
-            <p class="custom-annotation-waiting" id="customAnnotationPlacementStatus" hidden></p>
-            <div class="custom-annotation-list" id="customAnnotationList"></div>
-          </div>
-        </details>
-      </div>
-
       <div class="panel" id="panel-export">
         <details class="settings-group" open>
           <summary data-i18n="journalPresetGroup">Journal preset</summary>
@@ -1339,6 +1277,68 @@
     </section>
 
     <section class="plot-wrap" id="plotWrap" aria-label="Spectrum plot">
+      <div class="figure-toolbar">
+        <div><strong>Figure preview</strong><span>Finish your spectrum, then add text and arrows.</span></div>
+        <button type="button" id="toggleAnnotations" aria-expanded="false" aria-controls="panel-annotations">Annotate figure</button>
+      </div>
+      <div class="annotation-workspace" id="panel-annotations" hidden>
+        <p class="project-note" data-i18n="annotationHelp">Add text, click the figure to place it, then drag. For arrows, click the target first. Save your project to keep annotations.</p>
+        <details class="settings-group custom-annotation-controls" open>
+          <summary data-i18n="customAnnotationsGroup">Custom annotations</summary>
+          <div class="group-body">
+            <div class="field">
+              <label for="customAnnotationText" data-i18n="customAnnotationText">Annotation text</label>
+              <textarea id="customAnnotationText" rows="3" placeholder="y4, b12, Parent ion, *"></textarea>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="customAnnotationFragmentFormat" checked>
+              <span data-i18n="customAnnotationFragmentFormat">Format peptide fragments</span>
+            </label>
+            <div class="field-grid">
+              <div class="field">
+                <label for="customAnnotationMode" data-i18n="customAnnotationMode">Position mode</label>
+                <select id="customAnnotationMode">
+                  <option value="data" data-i18n="customAnnotationModeData">Attached to m/z</option>
+                  <option value="paper" selected data-i18n="customAnnotationModePaper">Fixed in plot</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="customAnnotationMz" data-i18n="customAnnotationMz">m/z override (optional)</label>
+                <input id="customAnnotationMz" type="number" step="any">
+              </div>
+              <div class="field">
+                <label for="customAnnotationFontSize" data-i18n="customAnnotationFontSize">Font size (pt)</label>
+                <input id="customAnnotationFontSize" type="number" min="1" step="0.1" value="8">
+              </div>
+              <div class="field">
+                <label for="customAnnotationColor" data-i18n="customAnnotationColor">Text color</label>
+                <input id="customAnnotationColor" type="color" value="#1c2430">
+              </div>
+              <div class="field">
+                <label for="customAnnotationAlign" data-i18n="customAnnotationAlign">Text alignment</label>
+                <select id="customAnnotationAlign">
+                  <option value="center" data-i18n="customAnnotationAlignCenter">Center</option>
+                  <option value="left" data-i18n="customAnnotationAlignLeft">Left</option>
+                  <option value="right" data-i18n="customAnnotationAlignRight">Right</option>
+                </select>
+              </div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="customAnnotationArrow"><span data-i18n="annotationArrow">Arrow to point</span></label>
+            <div class="file-line">
+              <button type="button" id="applyAnnotation" data-i18n="annotationApply" disabled>Apply changes</button>
+              <button type="button" id="undoAnnotation" data-i18n="annotationUndo" disabled>Undo</button>
+            </div>
+            <div class="file-line">
+              <button type="button" id="placeCustomAnnotation" data-i18n="placeCustomAnnotation">Place annotation</button>
+              <button type="button" id="cancelCustomAnnotation" data-i18n="cancelCustomAnnotation" hidden>Cancel</button>
+            </div>
+            <p class="custom-annotation-waiting" id="customAnnotationPlacementStatus" hidden></p>
+            <div class="custom-annotation-list" id="customAnnotationList"></div>
+          </div>
+        </details>
+      </div>
+
+
       <div class="plot-preview-info" id="finalSizePreviewInfo" hidden>
         <span id="finalSizePreviewSummary"></span>
         <span data-i18n="finalSizePreviewNote">Approximate on-screen size; actual physical size depends on browser zoom and display scaling.</span>
@@ -1381,8 +1381,7 @@
 421.386128 1.761244
 435.328491 0.417305`;
 
-    const translations = {
-      en: {
+    const messages = {
         title: "Mass Spectrum Generator",
         subtitle: "Enter a list of m/z and intensity values to generate the spectrum",
         tabData: "Data",
@@ -1495,8 +1494,7 @@
         manualMzLabelColorsReset: "m/z label colors reset.",
         clearSelection: "Clear manual labels",
         resetDefaults: "Reset defaults",
-        tabAnnotations: "2. Annotations",
-        annotationHelp: "Step 2: add text, click the figure to place it, then drag it. For arrows, click the target and drag the text. Select text or use Edit to change it. Save your project to keep annotations.",
+        annotationHelp: "Add text, click the figure to place it, then drag. For arrows, click the target first. Save your project to keep annotations.",
         annotationArrow: "Arrow to point",
         annotationApply: "Apply changes",
         annotationUndo: "Undo",
@@ -1592,212 +1590,9 @@
         projectMissing: "Choose a saved project first.",
         selectionCleared: "Peak selection cleared.",
         selected: mz => `Manual label added: m/z ${mz}`
-      },
-      pt: {
-        title: "Gerador de Espectro de Massa",
-        subtitle: "Insira uma lista de valores m/z e intensidade para gerar o espectro",
-        tabData: "Dados",
-        tabStyle: "Estilo",
-        tabAxes: "Eixos e picos",
-        tabExport: "Exportar",
-        secondSpectrum: "Adicionar um segundo espectro abaixo",
-        thirdSpectrum: "Adicionar um terceiro espectro abaixo",
-        fourthSpectrum: "Adicionar um quarto espectro abaixo",
-        spectrumName1: "Nome do espectro 1",
-        spectrumName2: "Nome do espectro 2",
-        spectrumName3: "Nome do espectro 3",
-        spectrumName4: "Nome do espectro 4",
-        dataLabel: "Dados (m/z, intensidade)",
-        dataLabel2: "Dados 2 (m/z, intensidade)",
-        dataLabel3: "Dados 3 (m/z, intensidade)",
-        dataLabel4: "Dados 4 (m/z, intensidade)",
-        loadExample: "Carregar exemplo",
-        clear: "Limpar",
-        loadFile: "Carregar arquivo (.csv/.txt)",
-        moveSpectrumUp: "Subir",
-        moveSpectrumDown: "Descer",
-        removeSpectrum: "Remover",
-        spectrumMoved: "Ordem dos espectros atualizada.",
-        spectrumRemoved: "Espectro removido.",
-        chartTitle: "T\u00edtulo do gr\u00e1fico",
-        xLabel: "R\u00f3tulo X",
-        yLabel: "R\u00f3tulo Y",
-        styleTextGroup: "Texto",
-        styleLegendGroup: "Nomes dos espectros",
-        styleColorsGroup: "Cores e linhas",
-        styleDisplayGroup: "Exibi\u00e7\u00e3o",
-        titleFontSize: "Tamanho do t\u00edtulo/condi\u00e7\u00e3o (pt)",
-        axisTitleFontSize: "Tamanho dos t\u00edtulos dos eixos (pt)",
-        tickFontSize: "Tamanho dos n\u00fameros dos eixos (pt)",
-        mzLabelFontSize: "Tamanho dos r\u00f3tulos m/z (pt)",
-        insideLegendFontSize: "Tamanho do nome interno (pt)",
-        resetNamePosition: "Voltar este nome à posição X/Y",
-        resetAllNamePositions: "Voltar todos os nomes à posição X/Y",
-        panelLabelFontSize: "Tamanho das letras dos pain\u00e9is (pt)",
-        peakColor: "Cor dos picos",
-        formatNote: "Use _ para subscrito e ^ para sobrescrito: H_2O, M^+, SO_4^{2-}.",
-        peakColor2: "Cor dos picos (2\u00ba)",
-        peakColor3: "Cor dos picos (3\u00ba)",
-        peakColor4: "Cor dos picos (4\u00ba)",
-        backgroundColor: "Cor de fundo",
-        textColor: "Cor do texto",
-        gridColor: "Cor da grade",
-        boxLineWidth: "Espessura da caixa (pt)",
-        gridLineWidth: "Espessura da grade (pt)",
-        peakLineWidth: "Espessura dos picos do espectro (pt)",
-        font: "Fonte",
-        fontSize: "Tamanho base da fonte (pt)",
-        yOffset: "Dist\u00e2ncia do r\u00f3tulo Y (px)",
-        showGrid: "Mostrar grade",
-        closeBox: "Fechar caixa do gr\u00e1fico",
-        showDots: "Mostrar ponto no topo do pico",
-        normalize: "Normalizar pelo pico base (100%)",
-        yScale: "Escala Y (%)",
-        yScale1: "Escala Y 1 (%)",
-        yScale2: "Escala Y 2 (%)",
-        yScale3: "Escala Y 3 (%)",
-        yScale4: "Escala Y 4 (%)",
-        decimals: "Casas decimais de m/z",
-        minMz: "m/z m\u00ednimo (todos; autom\u00e1tico se vazio)",
-        maxMz: "m/z m\u00e1ximo (todos; autom\u00e1tico se vazio)",
-        minMz1: "m/z m\u00ednimo 1",
-        maxMz1: "m/z m\u00e1ximo 1",
-        xTickStep1: "Intervalo X 1",
-        minMz2: "m/z m\u00ednimo 2",
-        maxMz2: "m/z m\u00e1ximo 2",
-        xTickStep2: "Intervalo X 2",
-        minMz3: "m/z m\u00ednimo 3",
-        maxMz3: "m/z m\u00e1ximo 3",
-        xTickStep3: "Intervalo X 3",
-        minMz4: "m/z m\u00ednimo 4",
-        maxMz4: "m/z m\u00e1ximo 4",
-        xTickStep4: "Intervalo X 4",
-        threshold: "Limite para rotular (%)",
-        spectrumGap: "Espa\u00e7amento entre espectros (%)",
-        compositeLayoutGroup: "Layout composto",
-        showSecondXAxis: "Mostrar eixo X no espectro 2",
-        groupGapAfter2: "Espa\u00e7o extra ap\u00f3s o espectro 2 (%)",
-        xLabelDistance: "Dist\u00e2ncia do r\u00f3tulo m/z (px)",
-        lockY: "Travar escalas Y de todos os espectros",
-        lockX: "Travar eixos X de todos os espectros",
-        labelPeaks: "Rotular picos principais",
-        clickMz: "R\u00f3tulos manuais de m/z",
-        mzLabelDistance: "Distância dos rótulos m/z aos picos (px)",
-        yTickStep: "Intervalo da intensidade (automático se vazio)",
-        yTickMax: "Mostrar intensidade até (vazio = limite do eixo)",
-        manualLabelConnectorGroup: "Conectores dos r\u00f3tulos manuais",
-        manualLabelConnectorStyle: "Estilo do conector",
-        manualLabelConnectorLine: "Linha",
-        manualLabelConnectorArrow: "Seta",
-        manualLabelConnectorColor: "Cor do conector",
-        manualMzLabelColor: "Cor do r\u00f3tulo m/z clicado",
-        manualMzLabelColorMode: "Colorir texto do r\u00f3tulo clicado",
-        resetManualMzLabelColors: "Restaurar cores dos r\u00f3tulos",
-        manualMzLabelColorApplied: "Cor do r\u00f3tulo m/z atualizada.",
-        manualMzLabelColorsReset: "Cores dos r\u00f3tulos m/z restauradas.",
-        clearSelection: "Limpar r\u00f3tulos manuais",
-        tabAnnotations: "2. Anotações",
-        annotationHelp: "Etapa 2: adicione o texto, clique na figura para posicionar e arraste. Para setas, clique no alvo e arraste o texto. Selecione o texto ou use Editar para alterá-lo. Salve o projeto para guardar as anotações.",
-        annotationArrow: "Seta apontando para o local",
-        annotationApply: "Aplicar alterações",
-        annotationUndo: "Desfazer",
-        annotationEdit: "Editar",
-        customAnnotationsGroup: "Caixas de texto e setas",
-        customAnnotationText: "Texto da anota\u00e7\u00e3o",
-        customAnnotationFragmentFormat: "Formatar fragmentos pept\u00eddicos",
-        customAnnotationMode: "Modo de posi\u00e7\u00e3o",
-        customAnnotationModeData: "Ligada ao m/z",
-        customAnnotationModePaper: "Fixa no plot",
-        customAnnotationMz: "m/z opcional",
-        customAnnotationFontSize: "Tamanho da fonte (pt)",
-        customAnnotationColor: "Cor do texto",
-        customAnnotationAlign: "Alinhamento do texto",
-        customAnnotationAlignCenter: "Centro",
-        customAnnotationAlignLeft: "Esquerda",
-        customAnnotationAlignRight: "Direita",
-        placeCustomAnnotation: "Posicionar anota\u00e7\u00e3o",
-        cancelCustomAnnotation: "Cancelar",
-        customAnnotationEmpty: "Nenhuma anota\u00e7\u00e3o customizada ainda.",
-        customAnnotationWaitingData: "Clique dentro de um plot de espectro para posicionar esta anota\u00e7\u00e3o. Pressione Escape para cancelar.",
-        customAnnotationWaitingPaper: "Clique dentro da \u00e1rea do plot para posicionar esta anota\u00e7\u00e3o. Pressione Escape para cancelar.",
-        customAnnotationMissingText: "Digite o texto da anota\u00e7\u00e3o primeiro.",
-        customAnnotationPlaced: "Anota\u00e7\u00e3o customizada posicionada.",
-        customAnnotationRepositioned: "Anota\u00e7\u00e3o customizada reposicionada.",
-        customAnnotationDeleted: "Anota\u00e7\u00e3o customizada exclu\u00edda.",
-        customAnnotationReposition: "Reposicionar",
-        customAnnotationDelete: "Excluir",
-        xTickStep: "Intervalo do eixo X (autom\u00e1tico se vazio)",
-        width: "Largura (px)",
-        height: "Altura (px)",
-        scale: "Multiplicador de exporta\u00e7\u00e3o",
-        previewExport: "Pr\u00e9-visualizar no tamanho final",
-        finalSizePreviewNote: "Tamanho aproximado na tela; o tamanho f\u00edsico real depende do zoom do navegador e da escala do monitor.",
-        journalPresetGroup: "Preset de peri\u00f3dico",
-        journalPreset: "Preset de peri\u00f3dico",
-        figureType: "Conte\u00fado da figura",
-        figureTypeColor: "Colorida",
-        figureTypeGray: "Escala de cinza",
-        figureTypeLine: "Line art / preto e branco",
-        applyJournalPreset: "Aplicar preset de peri\u00f3dico",
-        saveJournalPreset: "Salvar como preset de peri\u00f3dico",
-        setDefaultJournal: "Definir como peri\u00f3dico padr\u00e3o",
-        figureStyleGroup: "Preset de estilo da figura",
-        figureStylePreset: "Estilo da figura",
-        presetName: "Nome do preset",
-        applyFigureStyle: "Aplicar estilo da figura",
-        saveFigureStyle: "Salvar estilo atual",
-        deleteFigureStyle: "Apagar preset",
-        resetToPreset: "Voltar ao preset",
-        publicationSizeGroup: "Tamanho de publica\u00e7\u00e3o e exporta\u00e7\u00e3o",
-        exportFormat: "Formato de exporta\u00e7\u00e3o",
-        rasterDpi: "Resolu\u00e7\u00e3o raster",
-        sizeUnit: "Unidade de tamanho",
-        finalWidth: "Largura final (mm)",
-        baseWidth: "Largura base (px)",
-        baseHeight: "Altura base (px)",
-        finalHeightMode: "Altura final",
-        finalHeight: "Valor da altura final",
-        heightAuto: "Autom\u00e1tica",
-        heightCustom: "Personalizada",
-        advancedExportScale: "Multiplicador avan\u00e7ado de exporta\u00e7\u00e3o",
-        checkCompliance: "Verificar JASMS",
-        styleSpecsGroup: "Especificações de estilo, eixos e picos",
-        styleSpecsNote: "Copie este texto para guardar um registro das configurações usadas nesta figura.",
-        copyStyleSpecs: "Copiar especificações",
-        downloadStyleSpecs: "Baixar .txt",
-        styleSpecsCopied: "Especificações copiadas.",
-        styleSpecsDownloaded: "Especificações baixadas.",
-        styleSpecsCopyFailed: "Não foi possível copiar automaticamente. Selecione o texto e copie manualmente.",
-        projectName: "Nome do projeto",
-        savedProjects: "Projetos salvos",
-        saveProject: "Salvar projeto",
-        loadProject: "Abrir projeto",
-        settingsSourceProject: "Copiar configurações de",
-        copyProjectSettings: "Copiar configurações",
-        chooseSettingsSource: "Escolha o projeto de origem",
-        settingsCopied: name => "Configurações copiadas de " + name + ". Dados e anotações atuais mantidos. Salve o projeto para guardar as configurações.",
-        deleteProject: "Apagar projeto",
-        projectNote: "Os projetos ficam salvos neste navegador deste computador.",
-        newProject: "Novo projeto",
-        noSavedProjects: "Nenhum projeto salvo ainda",
-        generate: "Gerar espectro",
-        download: "Baixar figura",
-        footer: "Feito com Plotly.js \u00b7 Todos os c\u00e1lculos rodam no navegador",
-        generated: count => "Espectro gerado com " + count + " picos.",
-        empty: "Adicione pelo menos um par v\u00e1lido de m/z e intensidade.",
-        parseError: "Algumas linhas n\u00e3o puderam ser lidas e foram ignoradas.",
-        fileLoaded: "Arquivo carregado. Gere o espectro para atualizar o gr\u00e1fico.",
-        projectSaved: name => "Projeto salvo: " + name,
-        projectSavedAs: name => "Projeto salvo como: " + name,
-        projectLoaded: name => "Projeto aberto: " + name,
-        projectDeleted: name => "Projeto apagado: " + name,
-        projectMissing: "Escolha um projeto salvo primeiro.",
-        selectionCleared: "Sele\u00e7\u00e3o de pico limpa.",
-        selected: mz => "R\u00f3tulo manual adicionado: m/z " + mz
-      }
     };
 
-    Object.assign(translations.en, {
+    Object.assign(messages, {
       addSpectrum: "Add spectrum", fitSpectrumHeight: "Fit figure height",
       spectrumName: "Spectrum name", editingSpectrum: "Editing spectrum",
       individualYScale: "Individual Y scale (empty = shared)", visibleSpectrum: "Show spectrum",
@@ -1805,19 +1600,11 @@
       removeSpectrumConfirm: "Remove this spectrum and its annotations?",
       projectStorageFull: "Could not save. Browser storage may be full; your current figure is still open."
     });
-    Object.assign(translations.pt, {
-      addSpectrum: "Adicionar espectro", fitSpectrumHeight: "Ajustar altura da figura",
-      spectrumName: "Nome do espectro", editingSpectrum: "Espectro em edi\u00e7\u00e3o",
-      individualYScale: "Escala Y individual (vazio = geral)", visibleSpectrum: "Mostrar espectro",
-      individualMinMz: "m/z m\u00ednimo do espectro", individualMaxMz: "m/z m\u00e1ximo do espectro", individualXTickStep: "Intervalo X do espectro",
-      removeSpectrumConfirm: "Remover este espectro e suas anota\u00e7\u00f5es?",
-      projectStorageFull: "N\u00e3o foi poss\u00edvel salvar. O armazenamento do navegador pode estar cheio; sua figura continua aberta."
-    });
 
     const $ = id => document.getElementById(id);
     function updateControlsToggleText() {
       const collapsed = document.body.classList.contains("controls-collapsed");
-      const labels = language === "pt" ? ["Ocultar ajustes", "Mostrar ajustes"] : ["Hide settings", "Show settings"];
+      const labels = ["Hide settings", "Show settings"];
       $("controlsToggle").textContent = labels[collapsed ? 1 : 0];
     }
 
@@ -1825,7 +1612,6 @@
       document.body.classList.toggle("x-unlocked", !$("lockX").checked);
     }
 
-    let language = "en";
     let spectrumSlots = [];
     let activeSpectrumId = "";
     const parsedSpectrumCache = new WeakMap();
@@ -1977,7 +1763,7 @@
     ];
 
     function t(key) {
-      return translations[language][key];
+      return messages[key];
     }
 
     function formatPlotText(text) {
@@ -2130,19 +1916,15 @@
       }
     }
 
-    function updateLanguage(nextLanguage) {
-      language = nextLanguage;
-      document.documentElement.lang = nextLanguage === "pt" ? "pt-BR" : "en";
-      $("ptBtn").classList.toggle("active", nextLanguage === "pt");
-      $("enBtn").classList.toggle("active", nextLanguage === "en");
+    function initializeInterface() {
       document.querySelectorAll("[data-i18n]").forEach(el => {
         const key = el.dataset.i18n;
-        if (typeof translations[language][key] === "string") {
-          el.textContent = translations[language][key];
+        if (typeof messages[key] === "string") {
+          el.textContent = messages[key];
         }
       });
-      if ($("resetDefaults") && !translations[language].resetDefaults) {
-        $("resetDefaults").textContent = nextLanguage === "pt" ? "Restaurar padroes" : "Reset defaults";
+      if ($("resetDefaults") && !messages.resetDefaults) {
+        $("resetDefaults").textContent = "Reset defaults";
       }
       updateControlsToggleText();
       refreshSpectrumControls();
@@ -2733,9 +2515,7 @@
       plotRenderBusy = true;
       return renderPlotNow(request.statusMessage, request.options).catch(error => {
         console.error("Spectrum render failed", error);
-        $("status").textContent = language === "pt"
-          ? "Não foi possível atualizar o gráfico. Ajuste os valores e tente novamente."
-          : "Could not update the plot. Adjust the values and try again.";
+        $("status").textContent = "Could not update the plot. Adjust the values and try again.";
       }).finally(() => {
         plotRenderBusy = false;
         if (pendingPlotRender) {
@@ -3440,11 +3220,16 @@
       svg.appendChild(overlay);
     }
 
+    function setAnnotationStage(active) {
+      annotationStage = active;
+      $("panel-annotations").hidden = !active;
+      $("toggleAnnotations").setAttribute("aria-expanded", String(active));
+      $("toggleAnnotations").textContent = active ? "Done annotating" : "Annotate figure";
+      if (!active && customAnnotationPlacement) cancelCustomAnnotationPlacement();
+      renderPlot(undefined, { preserveRanges: true });
+    }
+
     function setTab(name) {
-      const wasAnnotationStage = annotationStage;
-      annotationStage = name === "annotations";
-      if (!annotationStage && customAnnotationPlacement) cancelCustomAnnotationPlacement();
-      if (wasAnnotationStage !== annotationStage) renderPlot(undefined, { preserveRanges: true });
       document.querySelectorAll(".tab").forEach(tab => tab.classList.toggle("active", tab.dataset.tab === name));
       document.querySelectorAll(".panel").forEach(panel => panel.classList.toggle("active", panel.id === `panel-${name}`));
     }
@@ -4710,8 +4495,6 @@
 
 
     document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", () => setTab(tab.dataset.tab)));
-    $("ptBtn").addEventListener("click", () => updateLanguage("pt"));
-    $("enBtn").addEventListener("click", () => updateLanguage("en"));
     $("formatHelpButton").addEventListener("click", () => {
       const popover = $("formatHelpPopover");
       const isOpen = !popover.hidden;
@@ -4809,6 +4592,7 @@
     });
     $("resetDefaults").addEventListener("click", resetDefaults);
     $("placeCustomAnnotation").addEventListener("click", () => beginCustomAnnotationPlacement("create"));
+    $("toggleAnnotations").addEventListener("click", () => setAnnotationStage(!annotationStage));
     $("applyAnnotation").addEventListener("click", applyCustomAnnotationChanges);
     $("undoAnnotation").addEventListener("click", undoCustomAnnotation);
     $("cancelCustomAnnotation").addEventListener("click", cancelCustomAnnotationPlacement);
@@ -4865,7 +4649,7 @@
     refreshCustomAnnotationList();
     updateCalculatedOutput();
     updateStyleSpecsText();
-    updateLanguage("en");
+    initializeInterface();
   </script>
 </body>
 </html>
