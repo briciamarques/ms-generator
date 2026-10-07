@@ -3027,7 +3027,10 @@
       status.hidden = !active;
       cancel.hidden = !active;
       if (!active) return;
-      status.textContent = customAnnotationPlacement.mode === "paper" ? t("customAnnotationWaitingPaper") : t("customAnnotationWaitingData");
+      const typedMz = $("customAnnotationMz").value.trim();
+      status.textContent = typedMz
+        ? `Click the desired spectrum to choose the height. The annotation will be placed at m/z ${typedMz}.`
+        : customAnnotationPlacement.mode === "paper" ? t("customAnnotationWaitingPaper") : t("customAnnotationWaitingData");
     }
 
     function beginCustomAnnotationPlacement(action = "create", id = "") {
@@ -3036,7 +3039,14 @@
         $("status").textContent = t("customAnnotationMissingText");
         return;
       }
-      customAnnotationPlacement = { action, id, mode: existing?.mode || $("customAnnotationMode").value || "data" };
+      const typedMz = $("customAnnotationMz").value.trim();
+      if (typedMz && (!Number.isFinite(Number(typedMz)) || Number(typedMz) <= 0)) {
+        $("status").textContent = "Enter a positive m/z value.";
+        return;
+      }
+      const mode = typedMz ? "data" : existing?.mode || $("customAnnotationMode").value || "data";
+      if (typedMz) $("customAnnotationMode").value = "data";
+      customAnnotationPlacement = { action, id, mode };
       updateCustomAnnotationPlacementStatus();
       renderPlot(undefined, { preserveRanges: true });
     }
@@ -3118,9 +3128,9 @@
       return Number.isFinite(start) && Number.isFinite(end) ? [start, end] : null;
     }
 
-    function customAnnotationAxisForPaper(fullLayout, prefix, paperValue, preferredSuffix = "") {
+    function customAnnotationAxisForPaper(fullLayout, prefix, paperValue, preferredSuffix = null) {
       const preferredKey = `${prefix}axis${preferredSuffix}`;
-      if (fullLayout[preferredKey]) return { key: preferredKey, axis: fullLayout[preferredKey] };
+      if (preferredSuffix !== null && fullLayout[preferredKey]) return { key: preferredKey, axis: fullLayout[preferredKey] };
       const key = Object.keys(fullLayout).find(candidate => {
         if (!new RegExp(`^${prefix}axis\\d*$`).test(candidate)) return false;
         const domain = fullLayout[candidate]?.domain;
@@ -3149,6 +3159,10 @@
       const xFraction = (geometry.paperX - xDomain[0]) / (xDomain[1] - xDomain[0]);
       const yFraction = (geometry.paperY - yDomain[0]) / (yDomain[1] - yDomain[0]);
       const typedMz = ($("customAnnotationMz")?.value.trim() ? Number($("customAnnotationMz").value) : NaN);
+      if (Number.isFinite(typedMz) && (typedMz < Math.min(...xRange) || typedMz > Math.max(...xRange))) {
+        $("status").textContent = "That m/z is outside this spectrum's visible range. Adjust the x-axis range or choose another m/z.";
+        return null;
+      }
       const x = Number.isFinite(typedMz) ? typedMz : xRange[0] + xFraction * (xRange[1] - xRange[0]);
       const y = yRange[0] + yFraction * (yRange[1] - yRange[0]);
       if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
