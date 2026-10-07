@@ -105,7 +105,7 @@ var SpectrumComparison = (() => {
     el('comparisonPanel').hidden = !active;
     el('plotViewport').hidden = active;
     el('finalSizePreviewInfo').style.display = active ? 'none' : '';
-    el('toggleAnnotations').hidden = active;
+    el('toggleAnnotations').disabled = active;
     el('toggleComparison').textContent = active ? 'Back to spectrum' : 'Compare spectra';
     el('toggleComparison').setAttribute('aria-expanded', String(active));
     if (active) { page = 0; render(); }

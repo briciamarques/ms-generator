@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mass Spectrum Generator</title>
+  <title>MS Generator</title>
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <style>
     :root {
@@ -783,16 +783,53 @@
     #comparisonTable thead th { position: sticky; top: 0; background: #eaf1ff; min-width: 120px; }
     #comparisonTable tbody th { font-weight: normal; }
     #comparisonTable tbody tr:nth-child(even) { background: #f8faff; }
+
+    /* Compact project header and two-stage editor. */
+    header { padding: 12px clamp(18px, 3vw, 40px); align-items: center; gap: 16px 24px; }
+    header > div:first-child { min-width: 0; flex: 0 0 auto; }
+    .title-row { margin: 0; flex-wrap: nowrap; }
+    h1 { font-size: 26px; line-height: 1.15; }
+    .header-tools { min-width: 0; flex: 1 1 620px; }
+    header .project-panel { min-width: 0; padding: 0; border: 0; background: transparent; gap: 6px 12px; }
+    header .project-grid { grid-template-columns: minmax(130px, 170px) minmax(150px, 200px); align-items: end; }
+    header .project-grid:nth-of-type(3) { grid-template-columns: minmax(140px, 180px) auto; }
+    header .project-note { margin: 0; min-width: 0; flex-basis: 100%; font-size: 11px; }
+    main { padding-top: 14px; }
+    .workspace-tabs { display: grid; grid-template-columns: 1fr 1fr; flex: 0 0 auto; border-bottom: 1px solid var(--line); }
+    .workspace-tab { border: 0; border-radius: 0; border-bottom: 3px solid transparent; min-height: 44px; font-weight: 700; color: var(--muted); }
+    .workspace-tab.active { color: var(--accent); background: var(--accent-soft); border-bottom-color: var(--accent); }
+    #toggleAnnotations { background: transparent; color: var(--muted); }
+    #toggleAnnotations.active { color: var(--accent); background: var(--accent-soft); }
+    #spectraWorkspace { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+    #spectraWorkspace[hidden] { display: none; }
+    .tab { min-height: 40px; font-size: 13px; padding: 0 6px; }
+    .annotation-workspace { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 14px; margin: 0; border: 0; border-radius: 0; background: var(--panel); }
+    .annotation-workspace .group-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+    .annotation-workspace .field-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .annotation-workspace textarea { height: 80px; }
+    .annotation-workspace .custom-annotation-list { max-height: none; }
+    .annotation-workspace .project-note { line-height: 1.5; }
+    .controls.annotating #generate { display: none; }
+    body.controls-collapsed .workspace-tabs,
+    body.controls-collapsed #spectraWorkspace,
+    body.controls-collapsed .annotation-workspace { display: none; }
+    @media (max-width: 640px) {
+      header { align-items: stretch; gap: 12px; }
+      .header-tools { flex-basis: auto; }
+      header .project-grid { flex: 1 1 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      header .project-grid:nth-of-type(3) { grid-template-columns: minmax(0, 1fr) auto; }
+      .tabs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .tab { font-size: 12px; }
+    }
   </style>
 </head>
 <body>
   <header>
     <div>
       <div class="title-row">
-        <h1 data-i18n="title">Mass Spectrum Generator</h1>
+        <h1 data-i18n="title">MS Generator</h1>
         <button type="button" class="format-help-button" id="formatHelpButton" aria-expanded="false" aria-controls="formatHelpPopover" title="Text formatting help">?</button>
       </div>
-      <p data-i18n="subtitle">Enter a list of m/z and intensity values to generate the spectrum</p>
       <p class="format-help-popover" id="formatHelpPopover" data-i18n="formatNote" hidden>Use _ for subscript and ^ for superscript: H_2O, M^+, SO_4^{2-}.</p>
     </div>
     <div class="header-tools">
@@ -829,6 +866,11 @@
   <main>
     <section class="controls" aria-label="Controls">
       <button type="button" class="controls-toggle" id="controlsToggle">Hide settings</button>
+      <nav class="workspace-tabs" role="tablist" aria-label="Editor workspace">
+        <button type="button" class="workspace-tab active" id="spectraTab" role="tab" aria-selected="true" aria-controls="spectraWorkspace">Spectra</button>
+        <button type="button" class="workspace-tab" id="toggleAnnotations" role="tab" aria-selected="false" aria-controls="panel-annotations" tabindex="-1">Annotation</button>
+      </nav>
+      <div id="spectraWorkspace" role="tabpanel" aria-labelledby="spectraTab">
       <nav class="tabs" aria-label="Settings tabs">
         <button type="button" class="tab active" data-tab="data" data-i18n="tabData">Data</button>
         <button type="button" class="tab" data-tab="style" data-i18n="tabStyle">Style</button>
@@ -1283,20 +1325,8 @@
         </div>
       </div>
 
-      <div class="actions">
-        <button type="button" class="primary" id="generate" data-i18n="generate">Generate spectrum</button>
-        <button type="button" class="secondary" id="download" data-i18n="download">Download PNG</button>
       </div>
-      <div class="status" id="status" role="status"></div>
-    </section>
-
-    <section class="plot-wrap" id="plotWrap" aria-label="Spectrum plot">
-      <div class="figure-toolbar">
-        <div><strong>Figure preview</strong><span>Finish your spectrum, then add text and arrows.</span></div>
-        <button type="button" id="toggleComparison" aria-expanded="false" aria-controls="comparisonPanel">Compare spectra</button>
-        <button type="button" id="toggleAnnotations" aria-expanded="false" aria-controls="panel-annotations">Annotate figure</button>
-      </div>
-      <div class="annotation-workspace" id="panel-annotations" hidden>
+      <div class="annotation-workspace" id="panel-annotations" role="tabpanel" aria-labelledby="toggleAnnotations" hidden>
         <p class="project-note" data-i18n="annotationHelp">Add text, click the figure to place it, then drag. For arrows, click the target first. Save your project to keep annotations.</p>
         <details class="settings-group custom-annotation-controls" open>
           <summary data-i18n="customAnnotationsGroup">Custom annotations</summary>
@@ -1353,7 +1383,18 @@
         </details>
       </div>
 
+      <div class="actions">
+        <button type="button" class="primary" id="generate" data-i18n="generate">Generate spectrum</button>
+        <button type="button" class="secondary" id="download" data-i18n="download">Download PNG</button>
+      </div>
+      <div class="status" id="status" role="status"></div>
+    </section>
 
+    <section class="plot-wrap" id="plotWrap" aria-label="Spectrum plot">
+      <div class="figure-toolbar">
+        <div><strong>Figure preview</strong><span>Finish your spectrum, then add text and arrows.</span></div>
+        <button type="button" id="toggleComparison" aria-expanded="false" aria-controls="comparisonPanel">Compare spectra</button>
+      </div>
       <div class="plot-preview-info" id="finalSizePreviewInfo" hidden>
         <span id="finalSizePreviewSummary"></span>
         <span data-i18n="finalSizePreviewNote">Approximate on-screen size; actual physical size depends on browser zoom and display scaling.</span>
@@ -1413,7 +1454,7 @@
 435.328491 0.417305`;
 
     const messages = {
-        title: "Mass Spectrum Generator",
+        title: "MS Generator",
         subtitle: "Enter a list of m/z and intensity values to generate the spectrum",
         tabData: "Data",
         tabStyle: "Style",
@@ -3255,8 +3296,14 @@
     function setAnnotationStage(active) {
       annotationStage = active;
       $("panel-annotations").hidden = !active;
-      $("toggleAnnotations").setAttribute("aria-expanded", String(active));
-      $("toggleAnnotations").textContent = active ? "Done annotating" : "Annotate figure";
+      $("spectraWorkspace").hidden = active;
+      document.querySelector(".controls").classList.toggle("annotating", active);
+      [$("spectraTab"), $("toggleAnnotations")].forEach((tab, index) => {
+        const selected = active === (index === 1);
+        tab.classList.toggle("active", selected);
+        tab.setAttribute("aria-selected", String(selected));
+        tab.tabIndex = selected ? 0 : -1;
+      });
       if (!active && customAnnotationPlacement) cancelCustomAnnotationPlacement();
       renderPlot(undefined, { preserveRanges: true });
     }
@@ -3872,7 +3919,7 @@
       const spectra = getSpectra();
       const output = getPublicationSize();
       const lines = [];
-      lines.push("Mass Spectrum Generator style specifications");
+      lines.push("MS Generator style specifications");
       lines.push(`Generated: ${new Date().toLocaleString()}`);
       lines.push("");
       lines.push("Project");
@@ -4624,7 +4671,16 @@
     });
     $("resetDefaults").addEventListener("click", resetDefaults);
     $("placeCustomAnnotation").addEventListener("click", () => beginCustomAnnotationPlacement("create"));
-    $("toggleAnnotations").addEventListener("click", () => setAnnotationStage(!annotationStage));
+    $("toggleAnnotations").addEventListener("click", () => setAnnotationStage(true));
+    $("spectraTab").addEventListener("click", () => setAnnotationStage(false));
+    document.querySelector(".workspace-tabs").addEventListener("keydown", event => {
+      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+      event.preventDefault();
+      const active = event.key === "Home" ? false : event.key === "End" ? true : !annotationStage;
+      if (active && $("toggleAnnotations").disabled) return;
+      setAnnotationStage(active);
+      $(active ? "toggleAnnotations" : "spectraTab").focus();
+    });
     $("applyAnnotation").addEventListener("click", applyCustomAnnotationChanges);
     $("undoAnnotation").addEventListener("click", undoCustomAnnotation);
     $("cancelCustomAnnotation").addEventListener("click", cancelCustomAnnotationPlacement);
