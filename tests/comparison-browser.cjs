@@ -1,0 +1,42 @@
+const {chromium}=require('playwright');
+const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),assert=require('node:assert/strict');
+const server=http.createServer((req,res)=>{const js=req.url==='/comparison.js';res.setHeader('Content-Type',js?'application/javascript':'text/html; charset=utf-8');res.end(fs.readFileSync(path.join(__dirname,js?'../comparison.js':'../index.html')));});
+(async()=>{
+ await new Promise(r=>server.listen(0,'127.0.0.1',r));
+ const browser=await chromium.launch({channel:'msedge',headless:true});
+ try {
+ const context=await browser.newContext({viewport:{width:1440,height:1000},permissions:['clipboard-read','clipboard-write']});
+ const page=await context.newPage(), errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(`http://127.0.0.1:${server.address().port}`);
+ await page.waitForFunction(()=>document.getElementById('plot')._fullLayout);
+ await page.evaluate(()=>{spectrumSlots=[{...defaultSpectrumSlot(0),name:'Spectrum X',data:'100 20\n200 0\n300 0.00000001'},{...defaultSpectrumSlot(1),name:'Spectrum Y',data:'100.008 5\n400 10'}];activeSpectrumId=spectrumSlots[0].id;refreshSpectrumControls();renderPlot();});
+ await page.locator('#toggleComparison').click();
+ await page.locator('#comparisonTolerance').fill('0.01');
+ assert.equal(await page.locator('#comparisonTable tbody tr').count(),3);
+ assert.deepEqual(await page.locator('#comparisonTable tbody tr').first().locator('td').allTextContents(),['✓','✓']);
+ assert(await page.locator('#plotViewport').isHidden());
+ await page.locator('#comparisonMode').selectOption('relative');
+ assert.deepEqual(await page.locator('#comparisonTable tbody tr').first().locator('td').allTextContents(),['100','50']);
+ assert.notEqual(await page.locator('#comparisonTable tbody tr').nth(1).locator('td').first().textContent(),'0');
+ await page.locator('#copyComparison').click();
+ const copied=await page.evaluate(()=>navigator.clipboard.readText());assert(copied.includes('Spectrum X (%)'));assert(copied.includes('100\t100\t50'));
+ const downloadPromise=page.waitForEvent('download');await page.locator('#exportComparison').click();
+ const download=await downloadPromise;const csv=fs.readFileSync(await download.path(),'utf8');assert(csv.includes('Spectrum Y (%)'));assert.equal(csv.trim().split('\r\n').length,4);
+ await page.locator('#comparisonSpectra input').nth(1).uncheck();assert.equal(await page.locator('#comparisonTable thead th').count(),2);
+ await page.locator('#comparisonSpectra input').first().uncheck();assert((await page.locator('#comparisonSummary').textContent()).includes('Select at least one'));assert(await page.locator('#exportComparison').isDisabled());
+ await page.locator('#comparisonSpectra input').first().check();
+ await page.locator('#comparisonTolerance').fill('-1');assert(await page.locator('#copyComparison').isDisabled());
+ await page.locator('#comparisonTolerance').fill('0');
+ await page.evaluate(()=>{spectrumSlots[0].data=Array.from({length:250},(_,i)=>`${100+i} ${i+1}`).join('\n');refreshSpectrumControls();renderPlot();});
+ await page.waitForFunction(()=>document.querySelectorAll('#comparisonTable tbody tr').length===200);
+ await page.locator('#comparisonNext').click();assert.equal(await page.locator('#comparisonTable tbody tr').count(),50);
+ await page.locator('#copyComparison').click();assert.equal((await page.evaluate(()=>navigator.clipboard.readText())).split('\r\n').length,251);
+ await page.locator('#toggleComparison').click();assert(await page.locator('#comparisonPanel').isHidden());assert(await page.locator('#plotViewport').isVisible());
+ await page.locator('#toggleAnnotations').click();assert(await page.locator('#panel-annotations').isVisible());
+ await page.locator('#toggleComparison').click();assert(await page.locator('#panel-annotations').isHidden());
+ assert(await page.locator('#comparisonPrevious').isDisabled());
+ if(process.env.COMPARISON_SCREENSHOT) await page.screenshot({path:process.env.COMPARISON_SCREENSHOT,fullPage:true});
+ assert.deepEqual(errors,[]);
+ console.log('PASS: comparison UI; display modes; selection; invalid inputs; clipboard; CSV; pagination/full export; data refresh; switching plot/annotations.');
+ } finally {await browser.close();server.close();}
+})().catch(e=>{console.error(e);server.close();process.exitCode=1;});

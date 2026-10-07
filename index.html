@@ -769,6 +769,20 @@
         font-size: 15px;
       }
     }
+    #comparisonPanel[hidden], #plotViewport[hidden], #toggleAnnotations[hidden] { display: none; }
+    #comparisonPanel h2 { margin: 0 0 16px; font-size: 20px; }
+    #comparisonPanel fieldset { border: 1px solid var(--line); border-radius: 8px; margin: 0 0 16px; }
+    #comparisonSpectra { display: flex; flex-wrap: wrap; gap: 12px; }
+    #comparisonSpectra label { display: flex; align-items: center; gap: 6px; text-transform: none; overflow-wrap: anywhere; }
+    #comparisonSpectra input { width: 18px; height: 18px; min-height: 0; }
+    .comparison-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+    .comparison-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+    .comparison-scroll { overflow: auto; max-height: 600px; border: 1px solid var(--line); }
+    #comparisonTable { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+    #comparisonTable th, #comparisonTable td { padding: 10px 14px; border-bottom: 1px solid var(--line); text-align: right; }
+    #comparisonTable thead th { position: sticky; top: 0; background: #eaf1ff; min-width: 120px; }
+    #comparisonTable tbody th { font-weight: normal; }
+    #comparisonTable tbody tr:nth-child(even) { background: #f8faff; }
   </style>
 </head>
 <body>
@@ -1279,6 +1293,7 @@
     <section class="plot-wrap" id="plotWrap" aria-label="Spectrum plot">
       <div class="figure-toolbar">
         <div><strong>Figure preview</strong><span>Finish your spectrum, then add text and arrows.</span></div>
+        <button type="button" id="toggleComparison" aria-expanded="false" aria-controls="comparisonPanel">Compare spectra</button>
         <button type="button" id="toggleAnnotations" aria-expanded="false" aria-controls="panel-annotations">Annotate figure</button>
       </div>
       <div class="annotation-workspace" id="panel-annotations" hidden>
@@ -1343,6 +1358,21 @@
         <span id="finalSizePreviewSummary"></span>
         <span data-i18n="finalSizePreviewNote">Approximate on-screen size; actual physical size depends on browser zoom and display scaling.</span>
       </div>
+      <section id="comparisonPanel" hidden aria-label="Spectrum comparison">
+        <h2>Compare spectra</h2>
+        <fieldset><legend>Spectra to compare</legend><div id="comparisonSpectra"></div></fieldset>
+        <div class="comparison-options">
+          <div class="field"><label for="comparisonMode">Cell display</label><select id="comparisonMode"><option value="presence">Presence (✓ / —)</option><option value="raw">Original intensity</option><option value="relative">Relative intensity (%)</option></select></div>
+          <div class="field"><label for="comparisonTolerance">m/z tolerance</label><input id="comparisonTolerance" type="number" min="0" step="any" value="0"></div>
+          <div class="field"><label for="comparisonUnit">Tolerance unit</label><select id="comparisonUnit"><option value="da">Absolute m/z</option><option value="ppm">ppm</option></select></div>
+        </div>
+        <p class="project-note">Uses all imported peaks, regardless of plot zoom or label threshold. Only positive m/z and intensity values count as present. — means no matching peak.</p>
+        <details><summary>How matching works</summary><p class="project-note">Zero tolerance matches exact m/z values. Each group starts at its lowest m/z; all members must fall within the tolerance of that value (ppm is relative to it). The row shows that lowest m/z, without rounding for matching. If several peaks from one spectrum match, the highest intensity is used. Relative intensity sets each spectrum’s largest imported peak to 100%. Hover over a cell to inspect its matched m/z and peak count.</p></details>
+        <div class="comparison-actions"><button type="button" id="copyComparison">Copy table</button><button type="button" id="exportComparison">Download CSV</button></div>
+        <p id="comparisonSummary" role="status" aria-live="polite"></p>
+        <div class="comparison-scroll" tabindex="0" aria-label="Comparison table"><table id="comparisonTable"></table></div>
+        <div class="comparison-actions"><button type="button" id="comparisonPrevious">Previous rows</button><button type="button" id="comparisonNext">Next rows</button></div>
+      </section>
       <div class="plot-viewport" id="plotViewport">
         <div class="plot-stage" id="plotStage">
           <div id="plot"></div>
@@ -1353,6 +1383,7 @@
 
   <footer data-i18n="footer">Made with Plotly.js &middot; All calculations run in the browser</footer>
 
+  <script src="comparison.js"></script>
   <script>
     const exampleData = `229.171734 5.021981
 243.188475 105.326878
@@ -2531,6 +2562,7 @@
     }
 
     async function renderPlotNow(statusMessage, options = {}) {
+      SpectrumComparison.refresh();
       const spectra = getSpectra();
       const status = $("status");
       if (!spectra.length) {
@@ -4631,7 +4663,7 @@
 
     document.querySelectorAll("input, textarea, select").forEach(input => {
       input.addEventListener("input", () => {
-        if (input.matches("[data-spectrum-selector]")) return;
+        if (input.matches("[data-spectrum-selector]") || input.closest("#comparisonPanel")) return;
         if (input.id !== "styleSpecText") updateStyleSpecsText();
         if (input.type !== "file" && !input.closest(".project-panel") && !input.closest("#panel-export") && !input.closest(".custom-annotation-controls")) schedulePlotRender({ preserveRanges: input.id === "clickMz" || input.id === "mzLabelDistance" });
       });
@@ -4649,6 +4681,7 @@
     refreshCustomAnnotationList();
     updateCalculatedOutput();
     updateStyleSpecsText();
+    SpectrumComparison.init();
     initializeInterface();
   </script>
 </body>

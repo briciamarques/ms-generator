@@ -3,7 +3,7 @@ const fs = require('fs');
 const http = require('http');
 const assert = require('assert/strict');
 const source = require('path').join(__dirname, '../index.html');
-const server = http.createServer((req,res)=>{res.setHeader('Content-Type','text/html; charset=utf-8');res.end(fs.readFileSync(source));});
+const server = http.createServer((req,res)=>{const asset = req.url === '/comparison.js'; res.setHeader('Content-Type',asset ? 'application/javascript' : 'text/html; charset=utf-8');res.end(fs.readFileSync(asset ? require('path').join(__dirname, '../comparison.js') : source));});
 (async()=>{
  await new Promise(r=>server.listen(0,'127.0.0.1',r));
  const browser = await chromium.launch({channel:'msedge',headless:true});
