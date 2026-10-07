@@ -2640,10 +2640,11 @@
       const config = {
         responsive: true,
         displaylogo: false,
+        scrollZoom: false,
         editable: $("clickMz").checked,
         edits: {
-          annotationPosition: $("clickMz").checked || $("legendMode").value === "inside" || annotationStage,
-          annotationTail: annotationStage,
+          annotationPosition: true,
+          annotationTail: true,
           annotationText: false,
           axisTitleText: false,
           colorbarPosition: false,
@@ -2662,6 +2663,7 @@
 
       updateFinalSizePreview(false);
       layout.autosize = true;
+      layout.dragmode = false;
       $("plot").classList.toggle("inside-legend-rounded", $("insideLegendShape").value === "rounded");
 
       await Plotly.react("plot", data, layout, config).then(plotDiv => {
@@ -3111,7 +3113,7 @@
       document.querySelectorAll("#plot .annotation").forEach((annotation, index) => {
         const key = renderedAnnotationKeys[index];
         annotation.dataset.annotationKey = key || "";
-        annotation.style.cursor = key && $("clickMz").checked ? "pointer" : "";
+        annotation.style.cursor = key ? "move" : "";
       });
       if (!annotationDblClickGuardBound) {
         plot.addEventListener("pointerdown", event => { pointerOnAnnotation = Boolean(isPointerInsideAnnotation(event)); }, true);
