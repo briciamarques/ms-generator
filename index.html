@@ -643,7 +643,7 @@
       height: 640px;
     }
 
-    #plot .annotation-arrow-g path:nth-child(2) {
+    #plot .annotation:not(.custom-user-annotation) .annotation-arrow-g path:nth-child(2) {
       display: none;
     }
 
@@ -823,6 +823,7 @@
         <button type="button" class="tab active" data-tab="data" data-i18n="tabData">Data</button>
         <button type="button" class="tab" data-tab="style" data-i18n="tabStyle">Style</button>
         <button type="button" class="tab" data-tab="axes" data-i18n="tabAxes">Axes &amp; peaks</button>
+        <button type="button" class="tab" data-tab="annotations" data-i18n="tabAnnotations">Annotations</button>
         <button type="button" class="tab" data-tab="export" data-i18n="tabExport">Export</button>
       </nav>
 
@@ -1174,12 +1175,18 @@
             </div>
           </div>
         </details>
-        <details class="settings-group custom-annotation-controls">
+        <button type="button" id="clearSelection" data-i18n="clearSelection">Clear peak selection</button>
+        <button type="button" id="resetDefaults" data-i18n="resetDefaults">Reset defaults</button>
+      </div>
+
+      <div class="panel" id="panel-annotations">
+        <p class="project-note" data-i18n="annotationHelp">Step 2: add text, click the figure to place it, then drag it. For arrows, click the target and drag the text. Select text or use Edit to change it. Save your project to keep annotations.</p>
+        <details class="settings-group custom-annotation-controls" open>
           <summary data-i18n="customAnnotationsGroup">Custom annotations</summary>
           <div class="group-body">
             <div class="field">
               <label for="customAnnotationText" data-i18n="customAnnotationText">Annotation text</label>
-              <input id="customAnnotationText" type="text" placeholder="y4, b12, Parent ion, *">
+              <textarea id="customAnnotationText" rows="3" placeholder="y4, b12, Parent ion, *"></textarea>
             </div>
             <label class="toggle">
               <input type="checkbox" id="customAnnotationFragmentFormat" checked>
@@ -1190,7 +1197,7 @@
                 <label for="customAnnotationMode" data-i18n="customAnnotationMode">Position mode</label>
                 <select id="customAnnotationMode">
                   <option value="data" data-i18n="customAnnotationModeData">Attached to m/z</option>
-                  <option value="paper" data-i18n="customAnnotationModePaper">Fixed in plot</option>
+                  <option value="paper" selected data-i18n="customAnnotationModePaper">Fixed in plot</option>
                 </select>
               </div>
               <div class="field">
@@ -1214,6 +1221,11 @@
                 </select>
               </div>
             </div>
+            <label class="toggle"><input type="checkbox" id="customAnnotationArrow"><span data-i18n="annotationArrow">Arrow to point</span></label>
+            <div class="file-line">
+              <button type="button" id="applyAnnotation" data-i18n="annotationApply" disabled>Apply changes</button>
+              <button type="button" id="undoAnnotation" data-i18n="annotationUndo" disabled>Undo</button>
+            </div>
             <div class="file-line">
               <button type="button" id="placeCustomAnnotation" data-i18n="placeCustomAnnotation">Place annotation</button>
               <button type="button" id="cancelCustomAnnotation" data-i18n="cancelCustomAnnotation" hidden>Cancel</button>
@@ -1222,8 +1234,6 @@
             <div class="custom-annotation-list" id="customAnnotationList"></div>
           </div>
         </details>
-        <button type="button" id="clearSelection" data-i18n="clearSelection">Clear peak selection</button>
-        <button type="button" id="resetDefaults" data-i18n="resetDefaults">Reset defaults</button>
       </div>
 
       <div class="panel" id="panel-export">
@@ -1485,7 +1495,13 @@
         manualMzLabelColorsReset: "m/z label colors reset.",
         clearSelection: "Clear manual labels",
         resetDefaults: "Reset defaults",
-        customAnnotationsGroup: "Custom annotations",
+        tabAnnotations: "2. Annotations",
+        annotationHelp: "Step 2: add text, click the figure to place it, then drag it. For arrows, click the target and drag the text. Select text or use Edit to change it. Save your project to keep annotations.",
+        annotationArrow: "Arrow to point",
+        annotationApply: "Apply changes",
+        annotationUndo: "Undo",
+        annotationEdit: "Edit",
+        customAnnotationsGroup: "Text boxes and arrows",
         customAnnotationText: "Annotation text",
         customAnnotationFragmentFormat: "Format peptide fragments",
         customAnnotationMode: "Position mode",
@@ -1680,7 +1696,13 @@
         manualMzLabelColorApplied: "Cor do r\u00f3tulo m/z atualizada.",
         manualMzLabelColorsReset: "Cores dos r\u00f3tulos m/z restauradas.",
         clearSelection: "Limpar r\u00f3tulos manuais",
-        customAnnotationsGroup: "Anota\u00e7\u00f5es customizadas",
+        tabAnnotations: "2. Anotações",
+        annotationHelp: "Etapa 2: adicione o texto, clique na figura para posicionar e arraste. Para setas, clique no alvo e arraste o texto. Selecione o texto ou use Editar para alterá-lo. Salve o projeto para guardar as anotações.",
+        annotationArrow: "Seta apontando para o local",
+        annotationApply: "Aplicar alterações",
+        annotationUndo: "Desfazer",
+        annotationEdit: "Editar",
+        customAnnotationsGroup: "Caixas de texto e setas",
         customAnnotationText: "Texto da anota\u00e7\u00e3o",
         customAnnotationFragmentFormat: "Formatar fragmentos pept\u00eddicos",
         customAnnotationMode: "Modo de posi\u00e7\u00e3o",
@@ -1810,6 +1832,10 @@
     let selectedPeaks = [];
     let labelEdits = {};
     let customAnnotations = [];
+    let renderedCustomAnnotations = new Map();
+    let selectedCustomAnnotationId = null;
+    let annotationHistory = [];
+    let annotationStage = false;
     let customAnnotationPlacement = null;
     let renderedAnnotationKeys = [];
     let renderedNameAnnotations = new Map();
@@ -2449,22 +2475,34 @@
         yref: mode === "paper" ? "paper" : (annotation.yref || "y"),
         fontSizePt: Number.isFinite(fontSizePt) && fontSizePt > 0 ? fontSizePt : 8,
         color: annotation.color || $("textColor")?.value || "#1c2430",
+        showarrow: annotation.showarrow === true,
+        ax: Number.isFinite(Number(annotation.ax)) ? Number(annotation.ax) : -40,
+        ay: Number.isFinite(Number(annotation.ay)) ? Number(annotation.ay) : -40,
         align: ["left", "center", "right"].includes(annotation.align) ? annotation.align : "center"
       };
     }
 
     function buildCustomAnnotations() {
+      renderedCustomAnnotations = new Map();
       const spectra = getSpectra();
       return customAnnotations.map(normalizeCustomAnnotation).filter(Boolean).flatMap(annotation => {
         const index = spectra.findIndex(spectrum => spectrum.id === annotation.spectrumId);
         if (annotation.mode !== "paper" && index < 0) return [];
+        renderedCustomAnnotations.set(renderedAnnotationKeys.length + renderedCustomAnnotations.size, annotation.id);
         return [{
         x: annotation.x,
         y: annotation.y,
         xref: annotation.mode === "paper" ? "paper" : getAxisId("x", index),
         yref: annotation.mode === "paper" ? "paper" : getAxisId("y", index),
-        text: escapePlotAnnotationText(annotation.text),
-        showarrow: false,
+        text: escapePlotAnnotationText(annotation.text).replace(/\n/g, "<br>"),
+        captureevents: true,
+        showarrow: annotation.showarrow,
+        arrowhead: 2,
+        arrowsize: 1,
+        arrowwidth: 1,
+        arrowcolor: annotation.color,
+        ax: annotation.ax,
+        ay: annotation.ay,
         xanchor: customAnnotationXAnchor(annotation.align),
         yanchor: "middle",
         align: annotation.align,
@@ -2738,7 +2776,8 @@
         displaylogo: false,
         editable: $("clickMz").checked,
         edits: {
-          annotationPosition: $("clickMz").checked || $("legendMode").value === "inside",
+          annotationPosition: $("clickMz").checked || $("legendMode").value === "inside" || annotationStage,
+          annotationTail: annotationStage,
           annotationText: false,
           axisTitleText: false,
           colorbarPosition: false,
@@ -2747,7 +2786,7 @@
           titleText: false
         },
         modeBarButtonsToRemove: ["lasso2d", "select2d"],
-        doubleClick: $("clickMz").checked || customAnnotationPlacement ? false : "reset"
+        doubleClick: $("clickMz").checked || customAnnotationPlacement || annotationStage ? false : "reset"
       };
 
       updateFinalSizePreview(false);
@@ -2852,7 +2891,7 @@
 
     function handlePeakClick(event) {
       if (customAnnotationPlacement && handleCustomAnnotationPlotClick(event)) return;
-      if (!$("clickMz").checked || !event.points || !event.points[0]) return;
+      if (annotationStage || !$("clickMz").checked || !event.points || !event.points[0]) return;
       const point = event.points[0];
       const mz = Number(point.customdata || point.x);
       if (!Number.isFinite(mz)) return;
@@ -2895,8 +2934,57 @@
         yref: position.yref,
         fontSizePt: Number($("customAnnotationFontSize").value) || 8,
         color: $("customAnnotationColor").value || $("textColor").value,
+        showarrow: $("customAnnotationArrow").checked,
         align: $("customAnnotationAlign").value || "center"
       });
+    }
+
+    function rememberAnnotations() {
+      annotationHistory.push(JSON.stringify(customAnnotations));
+      if (annotationHistory.length > 50) annotationHistory.shift();
+    }
+
+    function undoCustomAnnotation() {
+      if (!annotationHistory.length) return;
+      customAnnotations = JSON.parse(annotationHistory.pop());
+      customAnnotationPlacement = null;
+      selectedCustomAnnotationId = null;
+      updateCustomAnnotationPlacementStatus();
+      refreshCustomAnnotationList();
+      renderPlot(undefined, { preserveRanges: true });
+    }
+
+    function selectCustomAnnotation(id) {
+      const a = customAnnotations.find(item => item.id === id);
+      if (!a) return;
+      cancelCustomAnnotationPlacement();
+      selectedCustomAnnotationId = id;
+      $("customAnnotationText").value = a.originalText;
+      $("customAnnotationFragmentFormat").checked = a.fragmentFormat;
+      $("customAnnotationMode").value = a.mode;
+      $("customAnnotationFontSize").value = a.fontSizePt;
+      $("customAnnotationColor").value = a.color;
+      $("customAnnotationAlign").value = a.align;
+      $("customAnnotationArrow").checked = a.showarrow === true;
+      $("customAnnotationMz").value = "";
+      refreshCustomAnnotationList();
+      $("customAnnotationText").focus();
+    }
+
+    function applyCustomAnnotationChanges() {
+      const a = customAnnotations.find(item => item.id === selectedCustomAnnotationId);
+      if (!a) return;
+      const updated = createCustomAnnotationFromForm(a);
+      if (!updated) { $("status").textContent = t("customAnnotationMissingText"); return; }
+      rememberAnnotations();
+      Object.assign(a, updated, { id: a.id, spectrumId: a.spectrumId, ax: a.ax, ay: a.ay });
+      // Changing coordinate systems needs a new anchor, not the old numeric coordinates.
+      if ($("customAnnotationMode").value !== a.mode) {
+        customAnnotationPlacement = { action: "reposition", id: a.id, mode: $("customAnnotationMode").value };
+        updateCustomAnnotationPlacementStatus();
+      }
+      refreshCustomAnnotationList();
+      renderPlot(undefined, { preserveRanges: true });
     }
 
     function customAnnotationModeLabel(mode) {
@@ -2904,6 +2992,8 @@
     }
 
     function refreshCustomAnnotationList() {
+      $("applyAnnotation").disabled = !customAnnotations.some(a => a.id === selectedCustomAnnotationId);
+      $("undoAnnotation").disabled = !annotationHistory.length;
       const list = $("customAnnotationList");
       if (!list) return;
       list.innerHTML = "";
@@ -2937,7 +3027,13 @@
         remove.dataset.action = "delete";
         remove.dataset.id = annotation.id;
         remove.textContent = t("customAnnotationDelete");
-        actions.append(reposition, remove);
+        const edit = document.createElement("button");
+        edit.type = "button";
+        edit.dataset.action = "edit";
+        edit.dataset.id = annotation.id;
+        edit.textContent = t("annotationEdit");
+        item.style.borderColor = annotation.id === selectedCustomAnnotationId ? "var(--accent)" : "";
+        actions.append(edit, reposition, remove);
         item.append(meta, actions);
         list.appendChild(item);
       });
@@ -2974,6 +3070,7 @@
 
     function finishCustomAnnotationPlacement(position) {
       if (!customAnnotationPlacement || !position) return false;
+      rememberAnnotations();
       const placement = customAnnotationPlacement;
       position.spectrumId = position.mode === "paper" ? null : getSpectra()[axisIndexFromRef(position.yref || "y", "y")]?.id;
       if (placement.action === "reposition") {
@@ -2985,6 +3082,7 @@
         const annotation = createCustomAnnotationFromForm(position);
         if (!annotation) return false;
         customAnnotations.push(annotation);
+        selectedCustomAnnotationId = annotation.id;
         $("status").textContent = t("customAnnotationPlaced");
       }
       customAnnotationPlacement = null;
@@ -2997,7 +3095,7 @@
 
     function customAnnotationPositionFromPoint(point) {
       if (!point) return null;
-      const typedMz = Number($("customAnnotationMz")?.value);
+      const typedMz = ($("customAnnotationMz")?.value.trim() ? Number($("customAnnotationMz").value) : NaN);
       const x = Number.isFinite(typedMz) ? typedMz : Number(point.customdata || point.x);
       const y = Number(point.y);
       if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
@@ -3070,7 +3168,7 @@
       if (!xRange || !yRange || xDomain[1] === xDomain[0] || yDomain[1] === yDomain[0]) return null;
       const xFraction = (geometry.paperX - xDomain[0]) / (xDomain[1] - xDomain[0]);
       const yFraction = (geometry.paperY - yDomain[0]) / (yDomain[1] - yDomain[0]);
-      const typedMz = Number($("customAnnotationMz")?.value);
+      const typedMz = ($("customAnnotationMz")?.value.trim() ? Number($("customAnnotationMz").value) : NaN);
       const x = Number.isFinite(typedMz) ? typedMz : xRange[0] + xFraction * (xRange[1] - xRange[0]);
       const y = yRange[0] + yFraction * (yRange[1] - yRange[0]);
       if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
@@ -3089,6 +3187,7 @@
     }
 
     function deleteCustomAnnotation(id) {
+      rememberAnnotations();
       customAnnotations = customAnnotations.filter(annotation => annotation.id !== id);
       refreshCustomAnnotationList();
       $("status").textContent = t("customAnnotationDeleted");
@@ -3096,7 +3195,9 @@
     }
 
     function handleAnnotationClick(event) {
-      if (!$("clickMz").checked) return;
+      const customId = renderedCustomAnnotations.get(Number(event?.index));
+      if (annotationStage && customId) { selectCustomAnnotation(customId); return; }
+      if (annotationStage || !$("clickMz").checked) return;
       const index = Number(event?.index);
       const key = Number.isFinite(index) ? renderedAnnotationKeys[index] : "";
       if (!key) return;
@@ -3202,11 +3303,21 @@
       requestAnimationFrame(bringPlotBoxToFront);
       restoreFixedYRangesAfterAutorange(update);
       let annotationMoved = false;
+      let customMoved = false;
       Object.entries(update || {}).forEach(([key, value]) => {
         const match = key.match(/^annotations\[(\d+)\]\.(ax|ay|x|y)$/);
         if (!match) return;
         const index = Number(match[1]);
         const prop = match[2];
+        const customId = renderedCustomAnnotations.get(index);
+        const custom = customAnnotations.find(a => a.id === customId);
+        if (custom && Number.isFinite(Number(value))) {
+          if (!customMoved) rememberAnnotations();
+          custom[prop] = Number(value);
+          customMoved = true;
+          annotationMoved = true;
+          return;
+        }
         if (saveInsideNamePosition(index, prop, value)) {
           annotationMoved = true;
           return;
@@ -3220,6 +3331,7 @@
         };
         annotationMoved = true;
       });
+      if (customMoved) refreshCustomAnnotationList();
       if (annotationMoved) {
         requestAnimationFrame(() => renderPlot(undefined, { preserveRanges: true }));
       }
@@ -3255,7 +3367,10 @@
     }
 
     function hideVerticalAnnotationConnectors() {
-      document.querySelectorAll("#plot .annotation-arrow-g path:first-child").forEach(path => {
+      document.querySelectorAll("#plot .annotation").forEach(item => {
+        item.classList.toggle("custom-user-annotation", renderedCustomAnnotations.has(Number(item.getAttribute("data-index"))));
+      });
+      document.querySelectorAll("#plot .annotation:not(.custom-user-annotation) .annotation-arrow-g path:first-child").forEach(path => {
         const match = (path.getAttribute("d") || "").match(/^M([0-9.-]+),[0-9.-]+L([0-9.-]+),/);
         if (!match) return;
         const x1 = Number(match[1]);
@@ -3326,6 +3441,10 @@
     }
 
     function setTab(name) {
+      const wasAnnotationStage = annotationStage;
+      annotationStage = name === "annotations";
+      if (!annotationStage && customAnnotationPlacement) cancelCustomAnnotationPlacement();
+      if (wasAnnotationStage !== annotationStage) renderPlot(undefined, { preserveRanges: true });
       document.querySelectorAll(".tab").forEach(tab => tab.classList.toggle("active", tab.dataset.tab === name));
       document.querySelectorAll(".panel").forEach(panel => panel.classList.toggle("active", panel.id === `panel-${name}`));
     }
@@ -3446,6 +3565,8 @@
       const [removed] = spectrumSlots.splice(index, 1);
       selectedPeaks = selectedPeaks.filter(label => !label.key.startsWith(removed.id + "|"));
       labelEdits = Object.fromEntries(Object.entries(labelEdits).filter(([key]) => !key.startsWith(removed.id + "|")));
+      annotationHistory = [];
+      selectedCustomAnnotationId = null;
       customAnnotations = customAnnotations.filter(annotation => annotation.spectrumId !== removed.id);
       activeSpectrumId = spectrumSlots[Math.min(index, spectrumSlots.length - 1)].id;
       customAnnotationPlacement = null;
@@ -4193,6 +4314,8 @@
       selectedPeaks = Array.isArray(project.selectedPeaks) ? project.selectedPeaks.map(label => ({ ...label })) : [];
       labelEdits = project.labelEdits && typeof project.labelEdits === "object" ? { ...project.labelEdits } : {};
       migrateLegacyLabelKeys();
+      annotationHistory = [];
+      selectedCustomAnnotationId = null;
       customAnnotations = Array.isArray(project.customAnnotations) ? project.customAnnotations.map(normalizeCustomAnnotation).filter(Boolean) : [];
       renderedAnnotationKeys = [];
       customAnnotationPlacement = null;
@@ -4447,6 +4570,8 @@
       $("previewExport").checked = false;
       selectedPeaks = [];
       labelEdits = {};
+      annotationHistory = [];
+      selectedCustomAnnotationId = null;
       customAnnotations = [];
       customAnnotationPlacement = null;
       renderedAnnotationKeys = [];
@@ -4684,10 +4809,13 @@
     });
     $("resetDefaults").addEventListener("click", resetDefaults);
     $("placeCustomAnnotation").addEventListener("click", () => beginCustomAnnotationPlacement("create"));
+    $("applyAnnotation").addEventListener("click", applyCustomAnnotationChanges);
+    $("undoAnnotation").addEventListener("click", undoCustomAnnotation);
     $("cancelCustomAnnotation").addEventListener("click", cancelCustomAnnotationPlacement);
     $("customAnnotationList").addEventListener("click", event => {
       const button = event.target.closest("button[data-action]");
       if (!button) return;
+      if (button.dataset.action === "edit") selectCustomAnnotation(button.dataset.id);
       if (button.dataset.action === "reposition") beginCustomAnnotationPlacement("reposition", button.dataset.id);
       if (button.dataset.action === "delete") deleteCustomAnnotation(button.dataset.id);
     });
