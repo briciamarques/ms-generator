@@ -1717,6 +1717,7 @@
     let relayoutHandlerBound = false;
     let annotationClickHandlerBound = false;
     let annotationDblClickGuardBound = false;
+    let pointerOnAnnotation = false;
     let customAnnotationClickGuardBound = false;
     let customAnnotationDoubleClickBlockUntil = 0;
     let lastAnnotationClick = { key: "", time: 0 };
@@ -2650,8 +2651,13 @@
           shapePosition: false,
           titleText: false
         },
-        modeBarButtonsToRemove: ["lasso2d", "select2d"],
-        doubleClick: $("clickMz").checked || customAnnotationPlacement || annotationStage ? false : "reset"
+        modeBarButtonsToRemove: ["lasso2d", "select2d", "autoScale2d", "resetScale2d"],
+        modeBarButtonsToAdd: [{
+          name: "Reset zoom to configured ranges",
+          icon: Plotly.Icons.home,
+          click: () => renderPlot()
+        }],
+        doubleClick: false
       };
 
       updateFinalSizePreview(false);
@@ -2670,6 +2676,9 @@
         }
         if (!relayoutHandlerBound && typeof plotDiv.on === "function") {
           plotDiv.on("plotly_relayout", handleRelayout);
+          plotDiv.on("plotly_doubleclick", () => {
+            if (!pointerOnAnnotation && !customAnnotationPlacement && Date.now() >= customAnnotationDoubleClickBlockUntil) renderPlot();
+          });
           relayoutHandlerBound = true;
         }
         if (!annotationClickHandlerBound && typeof plotDiv.on === "function") {
@@ -3105,12 +3114,13 @@
         annotation.style.cursor = key && $("clickMz").checked ? "pointer" : "";
       });
       if (!annotationDblClickGuardBound) {
+        plot.addEventListener("pointerdown", event => { pointerOnAnnotation = Boolean(isPointerInsideAnnotation(event)); }, true);
         plot.addEventListener("dblclick", event => {
-          const shouldBlockCustomAnnotationDoubleClick = customAnnotationPlacement || Date.now() < customAnnotationDoubleClickBlockUntil;
-          const shouldBlockManualAnnotationDoubleClick = $("clickMz").checked && isPointerInsideAnnotation(event);
-          if (!shouldBlockCustomAnnotationDoubleClick && !shouldBlockManualAnnotationDoubleClick) return;
+          if (customAnnotationPlacement || Date.now() < customAnnotationDoubleClickBlockUntil || isPointerInsideAnnotation(event)) return;
+          if (!customAnnotationClickGeometry(event)) return;
           event.preventDefault();
           event.stopImmediatePropagation();
+          renderPlot();
         }, true);
         annotationDblClickGuardBound = true;
       }
@@ -3166,7 +3176,7 @@
 
     function handleRelayout(update) {
       requestAnimationFrame(bringPlotBoxToFront);
-      restoreFixedYRangesAfterAutorange(update);
+      restoreConfiguredRangesAfterAutorange(update);
       let annotationMoved = false;
       let customMoved = false;
       Object.entries(update || {}).forEach(([key, value]) => {
@@ -3202,21 +3212,23 @@
       }
     }
 
-    function restoreFixedYRangesAfterAutorange(update) {
+    function restoreConfiguredRangesAfterAutorange(update) {
       const entries = Object.entries(update || {});
-      const yAutorangeAxes = entries
-        .filter(([key, value]) => /^yaxis\d*\.autorange$/.test(key) && value)
+      const autorangeAxes = entries
+        .filter(([key, value]) => /^[xy]axis\d*\.autorange$/.test(key) && value)
         .map(([key]) => key.split(".")[0]);
-      if (!yAutorangeAxes.length) return;
+      if (!autorangeAxes.length) return;
       const spectra = getSpectra();
-      const sharedYMax = Number($("yScale").value) || 100;
+      const configuredLayout = buildLayout(spectra, Number($("threshold").value) || 0, getMzDecimals());
       const relayoutUpdate = {};
-      yAutorangeAxes.forEach(axisName => {
-        const suffix = axisName === "yaxis" ? "" : axisName.replace("yaxis", "");
+      autorangeAxes.forEach(axisName => {
+        const suffix = axisName.replace(/^[xy]axis/, "");
         const index = suffix ? Number(suffix) - 1 : 0;
         if (!Number.isInteger(index) || index < 0 || index >= spectra.length) return;
+        const range = configuredLayout[axisName]?.range;
+        if (!Array.isArray(range) || !range.every(Number.isFinite)) return;
         relayoutUpdate[`${axisName}.autorange`] = false;
-        relayoutUpdate[`${axisName}.range`] = [0, getYScale(index, sharedYMax)];
+        relayoutUpdate[`${axisName}.range`] = range;
       });
       if (Object.keys(relayoutUpdate).length) {
         requestAnimationFrame(() => Plotly.relayout($("plot"), relayoutUpdate).then(bringPlotBoxToFront));
