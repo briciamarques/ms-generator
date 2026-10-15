@@ -4897,8 +4897,21 @@
     updateCalculatedOutput();
     updateStyleSpecsText();
     SpectrumComparison.init();
+    window.MSCloudAdapter = {
+      getCurrentProject: () => projectFromForm($("projectName").value || "My spectrum figure"),
+      loadProject: project => {
+        if (!project || typeof project !== "object" || !project.fields || typeof project.fields !== "object" || Array.isArray(project.fields)) throw new Error("Invalid MS Generator project.");
+        applyProject(project, "Cloud project opened");
+      },
+      getSavedProjects: readProjects,
+      getPresets: () => window.MSCloudPresets.read(),
+      loadPresets: data => { window.MSCloudPresets.restore(data); refreshPresetSelectors(); }
+    };
     initializeInterface();
   </script>
   <script defer src="/browser-backup.js" data-backup-site="ms-generator"></script>
+  <script defer src="/vendor/supabase-2.117.3.js"></script>
+  <script defer src="/cloud-presets.js" data-cloud-site="ms-generator"></script>
+  <script defer src="/cloud-workspace.js" data-cloud-site="ms-generator"></script>
 </body>
 </html>
