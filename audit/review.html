@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revisão do MS Generator — 19 outubro 2026</title>
+<style>
+  :root { color-scheme: light; font: 16px/1.65 system-ui, sans-serif; color: #203047; background: #eef2f6; }
+  body { max-width: 1040px; margin: auto; padding: 36px 22px 70px; }
+  header, section { background: white; padding: 28px; border: 1px solid #d9e1ea; border-radius: 12px; margin: 18px 0; }
+  h1 { font-size: clamp(28px, 5vw, 42px); line-height: 1.15; margin: 8px 0 18px; }
+  h2 { font-size: 25px; margin-top: 0; } h3 { font-size: 19px; margin-bottom: 8px; }
+  p { margin: 10px 0; } a { color: #194dad; } code { background: #f0f3f7; padding: 2px 5px; overflow-wrap: anywhere; }
+  article + article { border-top: 1px solid #e1e7ee; padding-top: 16px; margin-top: 24px; }
+  .eyebrow, .meta { color: #52647b; font-size: 13px; }
+  .badge { display: inline-block; font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 5px; background: #eef2f6; }
+  .critical { background: #ffe8e4; color: #8c2519; } .high { background: #fff0d6; color: #754700; }
+  .note { border-left: 4px solid #386abb; padding-left: 16px; }
+  table { border-collapse: collapse; width: 100%; } td, th { text-align: left; vertical-align: top; padding: 10px; border-bottom: 1px solid #d9e1ea; }
+  .table { overflow-x: auto; } nav { display: flex; flex-wrap: wrap; gap: 10px 20px; }
+  li { margin: 8px 0; } @media print { body { background: white; padding: 0; } section, header { border: 0; padding: 12px 0; } article { break-inside: avoid; } }
+</style>
+<header>
+  <div class="eyebrow">REVISÃO TÉCNICA E DE PRODUTO · 19 OUTUBRO 2026</div>
+  <h1>MS Generator: o que melhorar e em qual ordem</h1>
+  <p>O aplicativo já oferece um conjunto amplo para preparar figuras de espectrometria: múltiplos espectros, estilos, eixos independentes, anotações, comparação e exportação. A prioridade é tornar os resultados e o salvamento confiáveis, seguida da simplificação do fluxo de trabalho.</p>
+  <p class="note"><strong>Escopo real:</strong> revisão da cópia local de <code>index.html</code> e <code>comparison.js</code>, inspeção dos testes existentes e execução de verificações isoladas. A tentativa de abrir a interface no navegador desta sessão terminou em timeout, inclusive com um servidor Node iniciado. Portanto, aparência renderizada, interação por mouse, responsividade e downloads reais permanecem sem validação nesta revisão. Esse problema de acesso não comprova uma falha no site nem explica o problema anterior do usuário.</p>
+  <p class="meta">Base da auditoria original: <code>db16015</code>. A versão publicada não foi conferida. Os arquivos desta auditoria ficam em <code>audit/</code>; as evidências abaixo preservam o estado dessa versão.</p>
+  <p class="note"><strong>Atualização antes do envio ao GitHub:</strong> a sincronização encontrou alterações remotas até <code>45ff651</code>, incorporadas à cópia local. Elas adicionam backup e restauração dos dados salvos (<code>0d98504</code>), projetos e presets na nuvem (<code>aa4808f</code>) e menu compacto (<code>45ff651</code>). Assim, o item 8 e partes dos itens 16, 24 e 25 já foram atendidos ou precisam ser reavaliados. O backup portátil exige salvar as edições primeiro, e a documentação de nuvem informa que o salvamento é explícito, não automático. Foram inspecionados BACKUP.md, CLOUD.md, workspace-menu.js e o início de browser-backup.js; os novos fluxos não passaram por nova auditoria completa nem teste de login nesta sessão. As linhas, o hash e as evidências originais permanecem como registro histórico.</p>
+  <nav aria-label="Conteúdo"><a href="#priority">Prioridades</a><a href="#data">Dados e cálculos</a><a href="#projects">Projetos</a><a href="#export">Exportação</a><a href="#experience">Experiência</a><a href="#engineering">Manutenção</a><a href="#validation">Validação</a></nav>
+</header>
+<section id="priority">
+  <h2>Ordem recomendada</h2>
+  <div class="table"><table><thead><tr><th>Etapa</th><th>Entrega</th><th>Resultado esperado</th></tr></thead><tbody>
+    <tr><td>1 · Integridade</td><td>Normalização, leitura de dados e identidade do projeto aberto.</td><td>Valores corretos e nenhum projeto sobrescrito por engano.</td></tr>
+    <tr><td>2 · Recuperação</td><td>Backup portátil, rascunho recuperável e desfazer exclusões.</td><td>Trabalho protegido ao fechar o navegador ou mudar de computador.</td></tr>
+    <tr><td>3 · Exportação</td><td>Aguardar renderização, tratar erros e limitar dimensões.</td><td>Arquivo consistente com os ajustes atuais e retorno claro ao usuário.</td></tr>
+    <tr><td>4 · Interface</td><td>Controles essenciais primeiro, projeto ativo visível, ajuda e acessibilidade.</td><td>Menos esforço para chegar à figura final.</td></tr>
+    <tr><td>5 · Sustentação</td><td>Módulos, ambiente reproduzível e testes de regressão.</td><td>Novas melhorias com menor risco de quebrar recursos existentes.</td></tr>
+  </tbody></table></div>
+</section>
+<section id="data">
+  <h2>Dados e cálculos</h2>
+  <article><span class="badge critical">P0 · COMPROVADO EM EXECUÇÃO ISOLADA</span><h3>1. A normalização erra para intensidades menores que 1</h3>
+    <p>Com intensidades <code>0.2</code> e <code>0.5</code>, o gráfico calcula <strong>20 e 50</strong>. A opção promete normalizar o pico base para 100%, portanto o resultado deveria ser <strong>40 e 100</strong>. A tabela de comparação já calcula 40 e 100, criando uma divergência entre duas partes do aplicativo.</p>
+    <p><strong>Melhoria:</strong> usar o maior valor positivo real como denominador, tratando separadamente espectros sem intensidade positiva. Compartilhar essa regra entre gráfico e comparação.</p>
+    <p class="meta">Fonte: index.html:2074, normalizePeaks; comparison.js:31, matrix. Aceite: valores fracionários, zeros e valores muito pequenos produzem resultados coerentes nas duas visualizações.</p>
+  </article>
+  <article><span class="badge critical">P0 · COMPROVADO EM EXECUÇÃO ISOLADA</span><h3>2. Vírgula decimal pode alterar os dados silenciosamente</h3>
+    <p><code>100,5;20,5</code> é interpretado como m/z <strong>100</strong> e intensidade <strong>5</strong>, sem registrar linha ignorada. A separação por vírgula acontece antes da tentativa de converter vírgula decimal em ponto.</p>
+    <p><strong>Melhoria:</strong> identificar delimitador e separador decimal antes de converter números; exibir uma prévia da importação e permitir escolher as colunas. Em formatos ambíguos, pedir a escolha do formato dentro do próprio aplicativo.</p>
+    <p class="meta">Fonte: index.html:2039, parseSpectrum. Aceite: CSV com ponto, ponto e vírgula com vírgula decimal, TSV e notação científica preservam exatamente os números fornecidos.</p>
+  </article>
+  <article><span class="badge high">P1 · COMPROVADO EM EXECUÇÃO ISOLADA</span><h3>3. CSV com campos vazios ou aspas precisa de tratamento próprio</h3>
+    <p><code>100,,25</code> perde a coluna vazia e vira o par 100/25. Já <code>"100.5","20.5"</code> é descartado. Colunas adicionais são ignoradas sem explicação. A interface anuncia importação de CSV, mas o leitor atual é uma separação simples de texto.</p>
+    <p><strong>Melhoria:</strong> leitor CSV que preserve aspas e colunas vazias, seleção de cabeçalho e relatório com número da linha e motivo da rejeição. Separar cabeçalhos esperados de erros reais.</p>
+    <p class="meta">Fonte: index.html:2039 e :2710. Aceite: nenhuma coluna muda de posição por existir um campo vazio.</p>
+  </article>
+  <article><span class="badge high">P1 · COMPROVADO EM EXECUÇÃO ISOLADA</span><h3>4. Intensidade original aparece com símbolo de porcentagem</h3>
+    <p>Os dois modelos de tooltip em <code>makePeakTrace</code> sempre acrescentam <code>%</code>, mesmo com a normalização desativada. O título inicial do eixo Y também é “Relative intensity (%)”, sem atualização automática ligada a essa opção.</p>
+    <p><strong>Melhoria:</strong> unidades condicionais nos tooltips e título automático do eixo quando ainda estiver no valor padrão; preservar títulos personalizados. Oferecer precisão de m/z coerente com a configuração.</p>
+    <p class="meta">Fonte: index.html:2117, :2138, :2153 e configuração de yLabel.</p>
+  </article>
+  <article><span class="badge">P1 · COMPORTAMENTO CONFIRMADO, REGRA A DEFINIR</span><h3>5. Explicitar valores não positivos e duplicatas</h3>
+    <p>O leitor aceita m/z negativo, m/z zero e intensidade negativa. A comparação usa somente m/z e intensidades positivos, conforme sua própria ajuda. Isso pode surpreender quem compara o que vê no gráfico com a tabela.</p>
+    <p><strong>Melhoria:</strong> apresentar contagens de valores excluídos e declarar as regras em cada visão. Tratar intensidades negativas conforme a finalidade dos dados, sem apagá-las silenciosamente. Para duplicatas, permitir inspecionar os picos agrupados; a comparação já documenta o uso da maior intensidade.</p>
+    <p class="meta">Fonte: index.html:2039; comparison.js:3 e :94. Não é necessário mudar a regra de comparação já documentada para tornar a diferença compreensível.</p>
+  </article>
+  <article><span class="badge">P1 · INSPEÇÃO DO CÓDIGO</span><h3>6. Validar os intervalos dos eixos antes de renderizar</h3>
+    <p>O eixo X só usa um intervalo configurado quando mínimo e máximo são finitos. Um único limite informado é ignorado; os dois limites não são verificados quanto à ordem. Vários campos numéricos usam substituições por padrão que podem esconder uma entrada inválida.</p>
+    <p><strong>Melhoria:</strong> mensagem junto ao campo, verificação mínimo &lt; máximo e indicação explícita quando um limite estiver em modo automático. Preservar a última figura válida enquanto o usuário corrige a entrada.</p>
+    <p class="meta">Fonte: index.html:1885 e :2403, buildLayout. Aceite: limites incompletos e invertidos têm comportamento explicado e testado.</p>
+  </article>
+</section>
+<section id="projects">
+  <h2>Projetos e proteção do trabalho</h2>
+  <article><span class="badge critical">P0 · FLUXO CONFIRMADO NO CÓDIGO E SALVAMENTO SIMULADO</span><h3>7. Selecionar um projeto pode direcionar um salvamento para o projeto errado</h3>
+    <p>O seletor altera o nome do projeto sem abrir seus dados. O botão “Save project” usa o ID selecionado se o nome coincidir. Assim, selecionar A enquanto o conteúdo B está na tela e clicar em salvar pode substituir A por B. A simulação isolada reproduziu essa substituição, sem tocar no armazenamento real.</p>
+    <p><strong>Melhoria:</strong> guardar separadamente o ID do projeto efetivamente aberto e o item selecionado para abertura. Oferecer ações claras de “Salvar” e “Salvar como”.</p>
+    <p class="meta">Fonte: index.html:4432 e :4814. Aceite: mudar apenas a seleção jamais altera o destino de “Salvar”.</p>
+  </article>
+  <article><span class="badge">ATUALIZADO · BACKUP PORTÁTIL ADICIONADO NO REMOTO</span><h3>8. Portabilidade dos projetos — diagnóstico da versão original</h3>
+    <p><strong>Estado após sincronização:</strong> já existe backup/restauração de projetos e presets salvos, além do recurso de nuvem. A recomendação abaixo documenta a lacuna na versão db16015; validar agora a transferência e a recuperação de ponta a ponta.</p>
+    <p>Projetos são gravados em <code>localStorage</code>. O aviso da interface explica que ficam nesse navegador e computador, mas não existe exportação/importação do projeto completo para backup ou transferência.</p>
+    <p><strong>Melhoria:</strong> “Baixar projeto” e “Importar projeto”, com dados, configurações, anotações, versão do formato e validação do arquivo. Incluir metadados dos arquivos de origem quando disponíveis. Depois, considerar armazenamento apropriado para conjuntos grandes.</p>
+    <p class="meta">Fonte: index.html:4260–4342. Aceite: exportar e reabrir em um navegador vazio reproduz a figura e todos os espectros.</p>
+  </article>
+  <article><span class="badge high">P1 · INSPEÇÃO DO CÓDIGO</span><h3>9. Falta recuperação de alterações não salvas</h3>
+    <p>Não há rascunho automático nem indicador de alterações pendentes. Abrir outro projeto aplica seu conteúdo imediatamente. Recarregar a página inicializa o exemplo.</p>
+    <p><strong>Melhoria:</strong> rascunho recuperável, estado “Salvo / Alterações pendentes” e data do último salvamento. Preservar o rascunho anterior ao trocar de projeto.</p>
+    <p class="meta">Fonte: index.html:4294, :4454 e inicialização final do script. Aceite: recuperar edição após recarregar e diferenciar rascunho de projeto salvo.</p>
+  </article>
+  <article><span class="badge high">P1 · INSPEÇÃO DO CÓDIGO</span><h3>10. Exclusões e substituições precisam de desfazer</h3>
+    <p>“Delete project” remove diretamente o registro. “Clear” e “Load example” substituem os dados ativos sem histórico. Já a remoção de espectro pede confirmação, e as anotações possuem um histórico limitado: a proteção está inconsistente.</p>
+    <p><strong>Melhoria:</strong> lixeira ou recuperação de projetos e histórico para dados, eixos, estilos e espectros. Preferir “Desfazer” após ações rotineiras para evitar excesso de diálogos.</p>
+    <p class="meta">Fonte: index.html:4463, :4751, :4756, :3570 e :2834.</p>
+  </article>
+  <article><span class="badge">P1 · INSPEÇÃO DO CÓDIGO</span><h3>11. Tratar falhas de armazenamento de forma uniforme</h3>
+    <p>Salvar projeto trata exceções; excluir projeto e gravar presets não têm o mesmo tratamento. Leituras com erro retornam listas vazias, indistinguíveis de uma primeira utilização.</p>
+    <p><strong>Melhoria:</strong> camada única de armazenamento com erro visível, validação dos registros e opção de baixar o trabalho atual. Distinguir armazenamento bloqueado, cheio e conteúdo inválido.</p>
+    <p class="meta">Fonte: index.html:3685, :3704, :3833, :4264 e :4463. Esses cenários foram identificados no código; não foram provocados no navegador do usuário.</p>
+  </article>
+</section>
+<section id="export">
+  <h2>Exportação e figuras para publicação</h2>
+  <article><span class="badge high">P1 · RISCO IDENTIFICADO NO FLUXO</span><h3>12. A exportação não aguarda de forma explícita a figura atualizada</h3>
+    <p>A atualização dos campos é adiada em 180 ms. O download chama <code>Plotly.toImage</code> diretamente e, quando chama <code>renderPlot</code>, não aguarda a conclusão. Existe uma janela em que o arquivo pode refletir a figura anterior.</p>
+    <p><strong>Melhoria:</strong> consolidar alterações pendentes, aguardar a renderização correspondente e exportar uma cópia estável do estado. Mostrar “Preparando arquivo”, impedir downloads duplicados e apresentar sucesso ou erro.</p>
+    <p class="meta">Fonte: index.html:2604 e :4694. Ainda precisa de reprodução em navegador: alterar dado e baixar imediatamente, inclusive durante renderização pesada.</p>
+  </article>
+  <article><span class="badge high">P1 · INSPEÇÃO DO CÓDIGO</span><h3>13. Limites de dimensão e erros de exportação</h3>
+    <p>Largura final e proporção podem produzir imagens enormes. A conversão TIFF mantém buffers RGBA e RGB em memória. A cadeia do download não possui tratamento final de rejeição; exceções dentro de <code>image.onload</code> também precisam ser encaminhadas.</p>
+    <p><strong>Melhoria:</strong> validar dimensões finitas e positivas, estabelecer orçamento de pixels, estimar memória antes da conversão e sugerir resolução menor quando necessário. Testar PNG, SVG e TIFF com dados pequenos e grandes.</p>
+    <p class="meta">Fonte: index.html:1929, :4625, :4676 e :4694. Nenhum teste de esgotamento de memória foi feito.</p>
+  </article>
+  <article><span class="badge">P1 · VERIFICAÇÃO ADICIONAL NECESSÁRIA</span><h3>14. Conferir tamanho físico e metadados dos arquivos</h3>
+    <p>SVG recebe dimensões em milímetros; TIFF recebe tags de resolução. PNG é entregue diretamente pelo Plotly. O número de pixels é calculado com o DPI escolhido, mas essa revisão não verificou se o arquivo PNG contém a resolução física pretendida.</p>
+    <p><strong>Melhoria:</strong> inspecionar os arquivos finais, verificar dimensões físicas ao abrir em outro programa e distinguir “pixels calculados para X dpi” de “resolução gravada no arquivo”. Usar o nome do projeto no nome do download.</p>
+    <p class="meta">Fonte: index.html:4594, :4625 e :4694. Não foi afirmado que os metadados PNG estão errados; falta verificá-los.</p>
+  </article>
+  <article><span class="badge">P1 · INSPEÇÃO DO CÓDIGO</span><h3>15. A checagem de publicação deve declarar seus limites</h3>
+    <p>A função que verifica fontes não percorre os tamanhos das anotações livres. As regras JASMS estão fixas no código, sem fonte e data de revisão visíveis. O seletor de conteúdo “grayscale/lineart” orienta verificações de resolução; não há conversão de cor associada no download.</p>
+    <p><strong>Melhoria:</strong> incluir anotações na checagem, explicitar que o resultado é uma verificação técnica parcial, mostrar a origem e versão das regras e explicar a função do seletor de conteúdo. Conferir requisitos editoriais atuais antes de alterar os valores.</p>
+    <p class="meta">Fonte: index.html:1816, :3927 e :3950. Não houve consulta às regras editoriais atuais nesta revisão e não se concluiu que os valores fixos estão desatualizados.</p>
+  </article>
+</section>
+<section id="experience">
+  <h2>Experiência, aparência e acessibilidade</h2>
+  <p class="note">As propostas abaixo partem da estrutura HTML/CSS e do fluxo descrito no código. Precisam ser ajustadas após inspeção visual em desktop e celular; não constituem avaliação de screenshots.</p>
+  <article><span class="badge">P2 · PROPOSTA DE PRODUTO</span><h3>16. Dar prioridade ao projeto ativo e à figura</h3>
+    <p>O cabeçalho reúne nome, lista de projetos, salvar, abrir, excluir e copiar configurações. Proponho nome e estado de salvamento sempre visíveis, com gerenciamento em um menu “Projeto”. Dar destaque à exportação e deixar exclusão fora do caminho principal.</p>
+    <p><strong>Aceite:</strong> identificar imediatamente qual projeto está aberto, se há alterações pendentes e onde baixar a figura.</p>
+  </article>
+  <article><span class="badge">P2 · PROPOSTA DE PRODUTO</span><h3>17. Simplificar os ajustes sem retirar recursos</h3>
+    <p>Organizar a jornada em “Dados → Aparência → Anotações → Exportar”, mantendo comparação como ferramenta. Mostrar configurações frequentes primeiro e recolher avançadas. Hoje há dois níveis de abas e vários grupos abertos. O rótulo “Generate spectrum” também compete com a atualização automática.</p>
+    <p><strong>Melhoria:</strong> dizer quando a prévia é automática e usar uma ação de atualização apenas quando necessária. Separar configurações globais e do espectro selecionado.</p>
+  </article>
+  <article><span class="badge">P2 · PROPOSTA DE PRODUTO</span><h3>18. Tornar a importação autoexplicativa</h3>
+    <p>Adicionar instruções próximas da área de dados, miniatura do formato esperado, contagem de picos válidos e lista de problemas. Oferecer soltar arquivo e importação de múltiplos espectros; conservar o nome original do arquivo como referência. Identificar claramente o exemplo inicial como exemplo.</p>
+    <p><strong>Aceite:</strong> uma pessoa nova consegue importar um arquivo correto sem consultar outra pessoa, e consegue entender por que um arquivo foi rejeitado.</p>
+  </article>
+  <article><span class="badge">P2 · PROPOSTA DE PRODUTO</span><h3>19. Melhorar edição e descoberta das anotações</h3>
+    <p>Manter alinhamento e seleção múltipla existentes; acrescentar edição numérica de posição, atalhos de movimento, duplicação e refazer. Exibir explicitamente o espectro de destino e a diferença entre posição relativa à figura e posição ligada aos dados. Considerar aviso de colisão entre rótulos, com ajuste manual preservado.</p>
+    <p><strong>Aceite:</strong> posicionar com precisão sem depender exclusivamente de arrastar com o mouse.</p>
+  </article>
+  <article><span class="badge">P2 · INSPEÇÃO DO CÓDIGO E PROPOSTA</span><h3>20. Acessibilidade e uso em telas menores</h3>
+    <p>As abas principais “Spectra/Annotation” já possuem papéis ARIA e teclas de direção. As abas internas “Data/Style/Axes/Export” alternam classes, sem semântica equivalente. Existem textos de 10–12 px no cabeçalho e nas anotações. O gráfico depende bastante de apontar e arrastar.</p>
+    <p><strong>Melhoria:</strong> padronizar abas acessíveis, foco visível, nomes dos controles e navegação por teclado; tornar tooltips de comparação acessíveis sem mouse. Avaliar painel de ajustes recolhível, acesso rápido à prévia e alvos de toque confortáveis no celular.</p>
+    <p class="meta">Fonte: index.html:303–310, :792–837, :895, :3455 e :4823. Testar 390×844, 768×1024, 1280×720, 1440×900 e zoom de 200%. Não foi comprovado overflow visual nesta sessão.</p>
+  </article>
+  <article><span class="badge">P2 · PROPOSTA DE PRODUTO</span><h3>21. Dar mais contexto à comparação</h3>
+    <p>A comparação já documenta tolerância, agrupamento e intensidade máxima. Melhorias úteis: busca por m/z, filtros de picos compartilhados/exclusivos, contagens por espectro e inspeção dos membros de cada grupo. Informar quando há espectros vazios e manter o m/z representativo claramente identificado.</p>
+    <p><strong>Aceite:</strong> rastrear cada célula até os picos originais. A paginação deve continuar exportando todos os resultados, não apenas a página visível.</p>
+  </article>
+</section>
+<section id="engineering">
+  <h2>Manutenção, desempenho e disponibilidade</h2>
+  <article><span class="badge">P2 · INSPEÇÃO DO CÓDIGO</span><h3>22. Separar responsabilidades e consolidar estilos</h3>
+    <p>O HTML reúne cerca de 4.900 linhas de interface, estilos, estado, importação, cálculo, persistência e exportação. Há regras CSS posteriores que substituem regras anteriores para os mesmos painéis.</p>
+    <p><strong>Melhoria:</strong> extrair módulos de dados, projetos, gráficos, anotações e exportação em passos pequenos; consolidar CSS e centralizar mensagens. Não há necessidade de trocar de framework para fazer isso.</p>
+  </article>
+  <article><span class="badge">P2 · INSPEÇÃO DO CÓDIGO, SEM BENCHMARK</span><h3>23. Reduzir trabalho repetido com conjuntos grandes</h3>
+    <p>O gráfico já tem cache de parsing e atraso de atualização. A comparação relê todos os espectros e refaz os grupos ao renderizar, inclusive na troca de página. Entradas de formulários também atualizam especificações com frequência.</p>
+    <p><strong>Melhoria:</strong> invalidar caches somente quando dados ou tolerância mudarem, separar paginação do cálculo e medir importação/renderização com 1 mil, 10 mil e 100 mil picos. Considerar processamento em segundo plano somente se as medições justificarem.</p>
+    <p class="meta">Fonte: index.html:2062, :2604 e :4870; comparison.js:48–97. Não se afirma uma lentidão medida.</p>
+  </article>
+  <article><span class="badge">P1/P2 · INSPEÇÃO DO CÓDIGO</span><h3>24. Ter uma versão identificável e abertura previsível</h3>
+    <p>A biblioteca gráfica depende de um CDN externo. Não há versão do aplicativo visível nem instruções de execução no repositório inspecionado. Isso dificulta diferenciar cópia local, versão publicada e versão alterada em outro chat.</p>
+    <p><strong>Melhoria:</strong> exibir versão/data ou commit, documentar um endereço ou comando de abertura, registrar mudanças e apresentar erro específico se Plotly não carregar. Se uso offline for necessário, distribuir a dependência localmente com licença e versão fixadas.</p>
+    <p class="meta">Fonte: index.html:7 e estrutura de arquivos. A dependência externa é confirmada; sua relação com o acesso anterior do usuário é desconhecida.</p>
+  </article>
+  <article><span class="badge">P1/P2 · INSPEÇÃO DO CÓDIGO</span><h3>25. Tornar os testes reproduzíveis</h3>
+    <p>Há dez scripts de testes cobrindo comparação, anotações, cópia de ajustes, zoom e escala. Os testes de navegador importam Playwright e usam Edge; não foi encontrado manifesto de dependências ou comando central de execução.</p>
+    <p><strong>Melhoria:</strong> manifesto com dependências fixadas, comando único, casos puros para parsing e cálculos, testes de salvamento/recuperação e inspeção dos arquivos exportados. Adicionar regressões para os problemas desta revisão antes de corrigi-los.</p>
+    <p><strong>Aceite:</strong> executar os testes a partir de uma instalação limpa com instruções curtas, e identificar claramente ambiente bloqueado versus defeito do aplicativo.</p>
+  </article>
+</section>
+<section id="validation">
+  <h2>O que foi validado</h2>
+  <ul>
+    <li><strong>Passou:</strong> sintaxe dos scripts inline e de comparison.js; nenhum ID HTML duplicado identificado.</li>
+    <li><strong>Passou:</strong> teste existente <code>node ms-generator/tests/comparison.cjs</code>, cobrindo correspondência exata/absoluta/ppm, agrupamento sem encadeamento, duplicatas, normalização da tabela, intensidades pequenas e escape CSV.</li>
+    <li><strong>Reproduzido:</strong> vírgula decimal interpretada incorretamente, campo vazio eliminado, CSV com aspas rejeitado, normalização de valores fracionários errada, tooltip com porcentagem em modo bruto e substituição de projeto em uma simulação de salvamento.</li>
+    <li><strong>Sem validação nesta sessão:</strong> interface renderizada, fluxo completo de importação e download, comportamento por teclado e toque, responsividade, metadados de PNG, desempenho com arquivos grandes e versão publicada.</li>
+  </ul>
+  <p>Reprodução: executar <code>node ms-generator/audit/check.cjs</code> a partir da pasta “Mass Spec”. O script extrai funções da versão atual e usa dados fictícios, sem acessar projetos reais. Ele registra o comportamento observado; não é uma suíte que exige que os defeitos continuem existindo.</p>
+  <p><a href="evidence.json">Abrir evidências em JSON</a> · <a href="check.cjs">Abrir script de reprodução</a></p>
+  <p class="meta">Identificador SHA-256 do index.html revisado: <code>a8e24b75d39836f35eec0a7062bf94068c4874ef11d8dc850446f78660d3e061</code>.</p>
+</section>
+</html>

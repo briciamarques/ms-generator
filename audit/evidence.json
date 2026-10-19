@@ -1,0 +1,101 @@
+{
+  "checkedAt": "2026-10-18T23:26:19.484Z",
+  "sha256": "a8e24b75d39836f35eec0a7062bf94068c4874ef11d8dc850446f78660d3e061",
+  "syntax": "PASS",
+  "duplicateHtmlIds": [],
+  "probes": {
+    "decimalComma": {
+      "peaks": [
+        {
+          "mz": 100,
+          "intensity": 5
+        }
+      ],
+      "skipped": 0
+    },
+    "emptyColumn": {
+      "peaks": [
+        {
+          "mz": 100,
+          "intensity": 25
+        }
+      ],
+      "skipped": 0
+    },
+    "quotedCsv": {
+      "peaks": [],
+      "skipped": 1
+    },
+    "dotDecimal": {
+      "peaks": [
+        {
+          "mz": 100.5,
+          "intensity": 20.5
+        }
+      ],
+      "skipped": 0
+    },
+    "nonPositiveValues": {
+      "peaks": [
+        {
+          "mz": -10,
+          "intensity": 5
+        },
+        {
+          "mz": 0,
+          "intensity": 1
+        },
+        {
+          "mz": 100,
+          "intensity": -2
+        }
+      ],
+      "skipped": 0
+    },
+    "normalizedBelowOne": [
+      {
+        "mz": 100,
+        "intensity": 0.2,
+        "y": 20
+      },
+      {
+        "mz": 200,
+        "intensity": 0.5,
+        "y": 50
+      }
+    ],
+    "normalizedZeros": [
+      {
+        "mz": 100,
+        "intensity": 0,
+        "y": 0
+      }
+    ],
+    "comparisonNormalized": [
+      [
+        "m/z (lowest in group)",
+        "Sample (%)"
+      ],
+      [
+        "100",
+        "40"
+      ],
+      [
+        "200",
+        "100"
+      ]
+    ],
+    "rawHover": [
+      "m/z %{customdata:.4f}<br>%{y:.2f}%<extra></extra>",
+      "m/z %{customdata:.4f}<br>%{y:.2f}%<extra></extra>"
+    ],
+    "saveAfterSelectingWithoutOpening": [
+      {
+        "id": "project-a",
+        "name": "Project A",
+        "data": "current unsaved data B"
+      }
+    ]
+  },
+  "scope": "Pure functions extracted from the current source; no browser rendering or user storage accessed."
+}
