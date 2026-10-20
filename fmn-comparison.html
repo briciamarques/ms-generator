@@ -105,9 +105,9 @@ $("upload").addEventListener("change",async function(ev){
  else if(data.some(function(d){return d.kind==="spray"}))group.value="spray";
  else if(data.some(function(d){return d.kind==="agc"}))group.value="agc";
  else group.value="full";
- win.value=group.value==="led"?"products":"high";newRegion();
+ win.value=group.value==="led"?"full":"high";newRegion();
 });
-group.addEventListener("change",function(){win.value=group.value==="full"?"full":group.value==="led"?"products":"high";newRegion()});
+group.addEventListener("change",function(){win.value=group.value==="full"?"full":group.value==="led"?"full":"high";newRegion()});
 win.addEventListener("change",newRegion);
 [ymode,yscale,xmin,xmax].forEach(function(x){x.addEventListener("change",render)});
 $("export").addEventListener("click",function(){if(window.Plotly&&data.length)Plotly.downloadImage("plot",{format:"png",width:1500,height:850,scale:2,filename:"FMN_"+group.value})});
