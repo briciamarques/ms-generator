@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FMN Spectral Review · MS Generator</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+:root{color-scheme:light;--ink:#233344;--forest:#275b4e;--paper:#faf8f3;--line:#dee4e4;--muted:#66717b}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);font:14px/1.52 system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink)}
+header{background:#143c33;color:#fff;padding:18px max(20px,calc((100vw - 1200px)/2));display:flex;justify-content:space-between;align-items:center;gap:15px}
+header a{color:#dcefe7;text-decoration:none}main{max-width:1220px;margin:22px auto;padding:0 18px 32px}
+h1{font-size:23px;margin:0}h2{font-size:16px;margin:0 0 10px}p{margin:5px 0 13px}.sub{color:#d9e9e2;font-size:12px}
+section{background:#fff;border:1px solid var(--line);border-radius:14px;padding:17px;margin:14px 0;box-shadow:0 2px 16px #163b3210}
+.controls{display:flex;align-items:end;gap:11px;flex-wrap:wrap}.controls label{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:5px}
+select,input[type="number"],button{background:#fff;padding:9px 11px;border:1px solid #bfcaca;border-radius:8px;color:var(--ink);font:inherit}
+button,.upload{cursor:pointer}button.primary,.upload{background:var(--forest);color:#fff;border:none;padding:10px 14px;border-radius:8px;display:inline-flex;align-items:center;gap:8px}
+.upload input{display:none}.btns{margin-left:auto;display:flex;gap:7px}
+small{color:var(--muted)}.pill{display:inline-block;background:#e6efe9;padding:3px 10px;border-radius:30px;color:#215746;font-size:12px}
+#plot{height:550px;min-height:320px}#files{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}#files span{background:#f2f5f4;padding:4px 9px;border-radius:20px;font-size:11px}
+#status{padding:11px 12px;background:#eff6f2;border-radius:8px;color:#31594b;margin-top:12px}#note{background:#f7f7f4;border-left:3px solid #507e6b;padding:12px 16px;margin-top:10px}
+#empty{min-height:220px;display:flex;align-items:center;justify-content:center;color:var(--muted);text-align:center;padding:20px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:720px){.grid{grid-template-columns:1fr}#plot{height:430px}header{flex-direction:column;align-items:flex-start}.btns{margin-left:0}}
+</style></head><body>
+<header><div><h1>FMN · Spectral comparison</h1><div class="sub">LTQ-XL diagnostics · built alongside MS Generator · 21 October 2026</div></div><a href="/">← Back to MS Generator</a></header>
+<main>
+<section><h2>1. Load experimental spectra</h2><p>Choose your Thermo exported TXT spectra together. Data are processed locally in this browser; files are not uploaded or saved to the site.</p>
+<label class="upload">Choose TXT files <input id="upload" type="file" multiple accept=".txt,.csv,text/plain"></label>
+<div id="status">No spectra loaded. Choose the FMN TXT files to start.</div><div id="files"></div></section>
+<section><h2>2. Compare the spectra</h2><div class="controls">
+<label>Experiment group<select id="group"><option value="led">LED ON vs LED OFF</option><option value="spray">Spray voltage sweep</option><option value="agc">MSn AGC target sweep</option><option value="full">Full MS survey</option><option value="all">All MS2 spectra</option></select></label>
+<label>Mass region<select id="window"><option value="high">High-mass features: 460–525</option><option value="products">Photoproducts: 225–450</option><option value="precursor">Precursor: 430–462</option><option value="full">Full range: 125–800</option><option value="custom">Custom region</option></select></label>
+<label>m/z min<input id="xmin" type="number" step="0.5" value="460" style="width:90px"></label>
+<label>m/z max<input id="xmax" type="number" step="0.5" value="525" style="width:90px"></label>
+<label>Y axis<select id="ymode"><option value="precursor">Relative to m/z 457 (%)</option><option value="raw">Export intensity</option><option value="base">Relative to own base peak (%)</option></select></label>
+<label>Scale<select id="yscale"><option value="linear">Linear</option><option value="log">Log</option></select></label>
+<div class="btns"><button id="export" class="primary">Export PNG</button><button id="svg">Export SVG</button></div>
+</div><div id="plot"></div><div id="empty">Your mass spectra will appear here after selecting the TXT files.</div>
+<div id="note">Tip: select a mass window, click individual traces in the legend to hide them, and drag on the graph to zoom. Double-click to reset.</div></section>
+<section><h2>3. Guide for the group meeting</h2><div class="grid"><p><strong>AGC target</strong><br>Broad signals above the precursor persist across AGC 100, 300 and 1000. A substantial reduction is not apparent.</p><p><strong>Spray voltage</strong><br>The highest FMN precursor maximum in these averaged data is at 3.5 kV, but high-mass features remain at every voltage.</p><p><strong>LED photoactivation</strong><br>Major LED ON products include m/z 243, 257, 286 and 359. The above-precursor features are also visible LED OFF.</p><p><strong>Important limitations</strong><br>LED ON used isolation centre 457.00 versus LED OFF 457.11. The data are averaged spectra, so they cannot diagnose scan-level intermittency.</p></div>
+<small>Next checks: solvent blank, individual scans and a matched OFF → ON → OFF sequence with a fixed isolation centre.</small></section>
+</main>
+<script>
+(function(){
+"use strict";
+var colors=["#2C7865","#8B3755","#1B3557","#AD783C","#3D83A3","#777D87","#725D9A","#7F7754"];
+var data=[],views={high:[460,525],products:[225,450],precursor:[430,462],full:[125,800]};
+var $=function(id){return document.getElementById(id)};
+var group=$("group"),win=$("window"),ymode=$("ymode"),yscale=$("yscale"),xmin=$("xmin"),xmax=$("xmax");
+function classify(name){
+ var low=name.toLowerCase();
+ if(low.includes("fullms"))return "full";
+ if(low.includes("sprayvoltage"))return "spray";
+ if(low.includes("msnagc"))return "agc";
+ if(low.includes("ledon"))return "on";
+ if(low.includes("ledoff")||low.includes("lefoff"))return "off";
+ return "other";
+}
+function parseTxt(text){
+ var lines=text.split(/\r?\n/),mz=[],I=[],n=0;
+ for(var i=0;i<lines.length;i++){
+  var p=lines[i].trim().split(/[\t ,;]+/);if(p.length<2)continue;
+  var x=Number(p[0]),y=Number(p[1]);
+  if(Number.isFinite(x)&&Number.isFinite(y)&&x>0&&y>=0){mz.push(x);I.push(y);n++;}
+ }
+ return n>40?{x:mz,y:I}:null;
+}
+function which(d){var g=group.value;return g==="all"?d.kind!=="full":g==="led"?d.kind==="on"||d.kind==="off":d.kind===g}
+function maxima(d){var mi=0,all=0;for(var i=0;i<d.x.length;i++){if(d.y[i]>all)all=d.y[i];if(d.x[i]>=455.5&&d.x[i]<=458.5&&d.y[i]>mi)mi=d.y[i]}return {all:all,prec:mi};}
+function render(){
+ if(!data.length){$("plot").style.display="none";$("empty").style.display="flex";return;}
+ $("plot").style.display="block";$("empty").style.display="none";
+ var traces=[],notes=[],selected=data.filter(which);
+ for(var j=0;j<selected.length;j++){
+  var d=selected[j],m=maxima(d),denom=ymode.value==="raw"?1:ymode.value==="base"?m.all:m.prec;
+  if(!denom){notes.push(d.name+" has no precursor at 457");continue;}
+  traces.push({x:d.x,y:d.y.map(function(y){return y/denom*(ymode.value==="raw"?1:100)}),
+   type:"scattergl",mode:"lines",name:d.name.replace("FMN_Test_","").replace(".txt",""),
+   line:{width:1.5,color:colors[j%colors.length]},hovertemplate:"m/z %{x:.3f}<br>I %{y:.3g}<extra>%{fullData.name}</extra>"});
+ }
+ var xl=Number(xmin.value),xh=Number(xmax.value);if(!(xh>xl)){xl=460;xh=525}
+ var ytitle=ymode.value==="raw"?"Intensity (TXT export units)":ymode.value==="base"?"Intensity (% of spectrum base peak)":"Intensity (% of m/z 457 maximum)";
+ var layout={paper_bgcolor:"#fff",plot_bgcolor:"#fff",font:{family:"Arial, sans-serif",color:"#344054",size:12},
+  margin:{l:73,r:28,t:20,b:70},xaxis:{title:"m/z",range:[xl,xh],gridcolor:"#E7EBEF",zeroline:false},
+  yaxis:{title:ytitle,type:yscale.value,gridcolor:"#E7EBEF",rangemode:"tozero",zeroline:false},
+  legend:{orientation:"h",x:0,y:1.16},hovermode:"closest",
+  annotations:traces.length?[]:[{text:"No matching files for this group; select a different group.",xref:"paper",yref:"paper",x:0.5,y:0.5,showarrow:false}]};
+ if(window.Plotly){Plotly.react("plot",traces,layout,{responsive:true,displaylogo:false,scrollZoom:true,toImageButtonOptions:{format:"png",filename:"FMN_"+group.value+"_"+win.value,scale:3}})}
+ else{$("empty").textContent="Plotting library not loaded. Check your internet connection."; $("empty").style.display="flex"; $("plot").style.display="none";}
+ $("note").textContent=selected.length+" spectrum/spectra in this plot. "+(notes.length?notes.join("; ")+". ":"")+"Relative intensity is normalised independently for each trace. Legend traces are switchable; zoom by dragging on the plot.";
+}
+function newRegion(){var p=views[win.value];if(p){xmin.value=p[0];xmax.value=p[1]}render()}
+$("upload").addEventListener("change",async function(ev){
+ var arr=Array.from(ev.target.files||[]),ok=0,skipped=[];
+ for(var i=0;i<arr.length;i++){
+  var f=arr[i];try{var txt=await f.text(),d=parseTxt(txt);
+    if(!d){skipped.push(f.name);continue}
+    var prev=data.findIndex(function(x){return x.name===f.name});
+    var a={name:f.name,kind:classify(f.name),x:d.x,y:d.y};
+    if(prev<0)data.push(a);else data[prev]=a;
+    ok++;
+  }catch(e){skipped.push(f.name)}
+ }
+ $("status").textContent="Loaded "+ok+" file(s); "+data.length+" spectra in memory"+(skipped.length?". Skipped: "+skipped.join(", "):"")+". Nothing was uploaded to a server.";
+ $("files").innerHTML="";
+ data.forEach(function(d){var s=document.createElement("span");s.textContent=d.name+" · "+d.x.length+" points";$("files").appendChild(s)});
+ if(data.some(function(d){return d.kind==="on"}))group.value="led";
+ else if(data.some(function(d){return d.kind==="spray"}))group.value="spray";
+ else if(data.some(function(d){return d.kind==="agc"}))group.value="agc";
+ else group.value="full";
+ win.value=group.value==="led"?"products":"high";newRegion();
+});
+group.addEventListener("change",function(){win.value=group.value==="full"?"full":group.value==="led"?"products":"high";newRegion()});
+win.addEventListener("change",newRegion);
+[ymode,yscale,xmin,xmax].forEach(function(x){x.addEventListener("change",render)});
+$("export").addEventListener("click",function(){if(window.Plotly&&data.length)Plotly.downloadImage("plot",{format:"png",width:1500,height:850,scale:2,filename:"FMN_"+group.value})});
+$("svg").addEventListener("click",function(){if(window.Plotly&&data.length)Plotly.downloadImage("plot",{format:"svg",width:1500,height:850,filename:"FMN_"+group.value})});
+})();
+</script></body></html>
