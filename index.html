@@ -317,7 +317,8 @@
     }
 
     .controls-toggle {
-      display: none;
+      display: block;
+      flex: 0 0 auto;
       width: 100%;
       min-height: 44px;
       border: 0;
@@ -825,6 +826,48 @@
       .tab { font-size: 12px; }
     }
     .plot-preview-info[hidden] { display: none; }
+    /* Keep desktop chrome compact so the figure gets the available workspace. */
+    @media (min-width: 1051px) {
+      header { padding: 8px 16px; gap: 8px 18px; }
+      h1 { font-size: 22px; }
+      .header-tools { flex: 1 1 740px; font-size: 12px; }
+      header .project-panel { gap: 4px 8px; }
+      header .project-grid { grid-template-columns: minmax(110px, 140px) minmax(120px, 150px); gap: 6px; }
+      header .project-grid:nth-of-type(3) { grid-template-columns: minmax(120px, 140px) auto; }
+      header .project-actions { gap: 4px; }
+      header .project-actions button,
+      header .project-panel input,
+      header .project-panel select,
+      #copyProjectSettings { min-height: 32px; padding: 6px 8px; }
+      header .project-panel label { font-size: 10px; margin-bottom: 3px; }
+      main { padding: 10px 16px 12px; gap: 12px; grid-template-columns: clamp(300px, 23vw, 340px) minmax(0, 1fr); }
+      body.controls-collapsed main { grid-template-columns: 48px minmax(0, 1fr); }
+      .controls { min-width: 0; font-size: 14px; }
+      .controls-toggle { min-height: 32px; font-size: 12px; }
+      .workspace-tab { min-height: 36px; }
+      .tab { min-height: 34px; }
+      .panel, .annotation-workspace { padding: 12px; }
+      .controls .field { margin-bottom: 9px; }
+      .controls .field label, .controls .label { font-size: 12px; margin-bottom: 5px; }
+      .controls .field-grid { gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .controls input[type="text"], .controls input[type="number"],
+      .controls input[type="color"], .controls select { min-width: 0; min-height: 34px; padding: 6px 8px; }
+      .controls textarea { min-height: 180px; font-size: 14px; padding: 8px; }
+      .controls .annotation-workspace textarea { min-height: 65px; }
+      .controls button { min-height: 32px; }
+      .controls .settings-group summary { min-height: 36px; padding-inline: 10px; }
+      .controls .settings-group .field-grid, .controls .settings-group .group-body { padding: 10px; }
+      .controls .toggle { min-height: 36px; padding: 6px 8px; margin-bottom: 8px; gap: 8px; }
+      .controls .toggle input { width: 18px; height: 18px; flex-shrink: 0; }
+      .actions { padding: 0 12px 10px; gap: 6px; }
+      .actions button { padding-inline: 10px; }
+      .status { min-height: 34px; padding: 8px 12px; font-size: 12px; }
+      .plot-wrap { min-width: 0; padding: 12px; }
+      .figure-toolbar { gap: 8px; padding-bottom: 8px; margin-bottom: 8px; }
+      .figure-toolbar button { min-height: 32px; padding: 6px 10px; font-size: 13px; }
+      .figure-toolbar span { margin-top: 2px; }
+      footer { padding-inline: 16px; }
+    }
     @media (min-width: 1051px) and (min-height: 600px) {
       body { height: 100dvh; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
       main { min-height: 0; padding-bottom: 12px; align-items: stretch; }
@@ -1706,6 +1749,7 @@
       const collapsed = document.body.classList.contains("controls-collapsed");
       const labels = ["Hide settings", "Show settings"];
       $("controlsToggle").textContent = labels[collapsed ? 1 : 0];
+      $("controlsToggle").setAttribute("aria-expanded", String(!collapsed));
     }
 
     function syncXControlVisibility() {
