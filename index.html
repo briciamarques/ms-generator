@@ -7,15 +7,17 @@
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <style>
     :root {
-      --page: #eef4fb;
-      --panel: #ffffff;
-      --ink: #1d2530;
-      --muted: #66717f;
-      --line: #dde4ee;
-      --accent: #245fc6;
-      --accent-soft: #eaf1ff;
-      --danger: #b84545;
-      --shadow: 0 18px 45px rgba(28, 49, 82, 0.12);
+      --page: #eeeee4;
+      --panel: #fffdf7;
+      --ink: #26382e;
+      --muted: #626b60;
+      --line: #d5dbce;
+      --accent: #254d3c;
+      --accent-soft: #e7eddf;
+      --danger: #7b3042;
+      --burgundy: #6d2e3b;
+      --cream: #fff9e9;
+      --shadow: 0 18px 45px rgba(32, 52, 37, 0.08);
     }
 
     * {
@@ -59,7 +61,7 @@
     }
 
     h1 {
-      color: #213f93;
+      color: #254d3c;
       font-size: clamp(30px, 3vw, 42px);
       margin: 0;
       line-height: 1.05;
@@ -75,7 +77,7 @@
       font-weight: 700;
       color: var(--accent);
       background: var(--accent-soft);
-      border-color: #bdd0f6;
+      border-color: #c7d2bc;
       flex: 0 0 auto;
     }
 
@@ -85,11 +87,11 @@
       padding: 10px 12px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: #fbfdff;
+      background: #f7f7ef;
       color: var(--muted);
       font-size: 14px;
       line-height: 1.45;
-      box-shadow: 0 10px 24px rgba(28, 49, 82, 0.08);
+      box-shadow: 0 10px 24px rgba(32, 52, 37, 0.06);
     }
 
     header p {
@@ -124,7 +126,7 @@
       border: 1px solid var(--line);
       border-radius: 8px;
       padding: 10px 12px;
-      background: #fbfcfe;
+      background: #f8f8f1;
       box-shadow: none;
       display: flex;
       align-items: flex-end;
@@ -189,7 +191,7 @@
       padding: 8px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: #fbfdff;
+      background: #f7f7ef;
     }
 
     .custom-annotation-meta {
@@ -219,10 +221,10 @@
 
     .custom-annotation-waiting {
       padding: 8px 10px;
-      border: 1px solid #bdd0f6;
+      border: 1px solid #c7d2bc;
       border-radius: 8px;
       background: var(--accent-soft);
-      color: #164397;
+      color: #254d3c;
       font-size: 13px;
     }
 
@@ -237,7 +239,7 @@
       min-height: 42px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: #ffffff;
+      background: #fffdf7;
       color: var(--ink);
       padding: 0 12px;
       cursor: pointer;
@@ -245,7 +247,7 @@
     }
 
     button:hover {
-      border-color: #aab8ca;
+      border-color: #82947c;
       transform: translateY(-1px);
     }
 
@@ -253,8 +255,8 @@
 
     button.secondary {
       background: var(--accent-soft);
-      border-color: #bdd0f6;
-      color: #164397;
+      border-color: #c7d2bc;
+      color: #254d3c;
     }
 
     button.danger {
@@ -293,7 +295,7 @@
     .figure-toolbar strong { display: block; font-size: 15px; }
     .figure-toolbar span { display: block; margin-top: 4px; font-size: 12px; color: var(--muted); }
     #toggleAnnotations { flex-shrink: 0; color: var(--accent); background: var(--accent-soft); }
-    .annotation-workspace { padding: 14px; margin-bottom: 16px; background: #f8faff; border: 1px solid var(--line); border-radius: 8px; }
+    .annotation-workspace { padding: 14px; margin-bottom: 16px; background: #f3f5ec; border: 1px solid var(--line); border-radius: 8px; }
     .annotation-workspace[hidden] { display: none; }
     .annotation-workspace .field-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
     .annotation-workspace textarea { min-height: 65px; }
@@ -324,7 +326,7 @@
       border: 0;
       border-bottom: 1px solid var(--line);
       border-radius: 0;
-      background: #fbfdff;
+      background: #f7f7ef;
       color: var(--accent);
       font-weight: 700;
     }
@@ -349,14 +351,14 @@
       min-height: 48px;
       font-weight: 700;
       color: var(--muted);
-      background: #ffffff;
+      background: #fffdf7;
       border-bottom: 3px solid transparent;
     }
 
     .tab.active {
       color: var(--accent);
       border-bottom-color: var(--accent);
-      background: #fbfdff;
+      background: #f7f7ef;
     }
 
     .panel {
@@ -403,7 +405,7 @@
       border: 1px solid var(--line);
       border-radius: 8px;
       color: var(--ink);
-      background: #fbfcfe;
+      background: #f8f8f1;
       min-height: 44px;
       padding: 10px 12px;
       outline: none;
@@ -412,8 +414,8 @@
     textarea:focus,
     input:focus,
     select:focus {
-      border-color: #8aa7df;
-      box-shadow: 0 0 0 3px rgba(36, 95, 198, 0.12);
+      border-color: #6d8566;
+      box-shadow: 0 0 0 3px rgba(37, 77, 60, 0.14);
     }
 
     textarea {
@@ -441,7 +443,7 @@
       border: 1px solid var(--line);
       border-radius: 8px;
       margin-bottom: 10px;
-      background: #fbfcfe;
+      background: #f8f8f1;
       overflow: hidden;
     }
 
@@ -460,6 +462,10 @@
       color: var(--muted);
     }
 
+    .settings-group summary::before { content: "▸"; margin-right: 8px; }
+    .settings-group[open] > summary::before { content: "▾"; }
+    #panel-axes .group-body > .field-grid { padding: 0; border: 0; }
+
     .settings-group .field-grid,
     .settings-group .group-body {
       padding: 12px;
@@ -475,7 +481,7 @@
       border-radius: 8px;
       padding: 10px 12px;
       margin-bottom: 12px;
-      background: #fbfcfe;
+      background: #f8f8f1;
       cursor: pointer;
       user-select: none;
     }
@@ -515,7 +521,7 @@
     .project-panel {
       border-top: 1px solid var(--line);
       padding: 12px 18px;
-      background: #fbfcfe;
+      background: #f8f8f1;
     }
 
     .project-grid {
@@ -543,7 +549,7 @@
     .compliance-results {
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: #ffffff;
+      background: #fffdf7;
       padding: 10px 12px;
       color: var(--muted);
       line-height: 1.45;
@@ -559,7 +565,7 @@
     .compliance-item {
       border-left: 4px solid var(--line);
       padding: 6px 8px;
-      background: #fbfcfe;
+      background: #f8f8f1;
     }
 
     .compliance-summary {
@@ -587,7 +593,7 @@
     }
 
     .compliance-item.na {
-      border-left-color: #8a95a6;
+      border-left-color: #899281;
       color: var(--muted);
     }
 
@@ -784,9 +790,9 @@
     .comparison-scroll { overflow: auto; max-height: 600px; border: 1px solid var(--line); }
     #comparisonTable { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
     #comparisonTable th, #comparisonTable td { padding: 10px 14px; border-bottom: 1px solid var(--line); text-align: right; }
-    #comparisonTable thead th { position: sticky; top: 0; background: #eaf1ff; min-width: 120px; }
+    #comparisonTable thead th { position: sticky; top: 0; background: #e7eddf; min-width: 120px; }
     #comparisonTable tbody th { font-weight: normal; }
-    #comparisonTable tbody tr:nth-child(even) { background: #f8faff; }
+    #comparisonTable tbody tr:nth-child(even) { background: #f3f5ec; }
 
     /* Compact project header and two-stage editor. */
     header { padding: 12px clamp(18px, 3vw, 40px); align-items: center; gap: 16px 24px; }
@@ -802,6 +808,8 @@
     .workspace-tabs { display: grid; grid-template-columns: 1fr 1fr; flex: 0 0 auto; border-bottom: 1px solid var(--line); }
     .workspace-tab { border: 0; border-radius: 0; border-bottom: 3px solid transparent; min-height: 44px; font-weight: 700; color: var(--muted); }
     .workspace-tab.active { color: var(--accent); background: var(--accent-soft); border-bottom-color: var(--accent); }
+    .tab:hover, .workspace-tab:hover { transform: none; border-bottom-color: transparent; }
+    .tab.active:hover, .workspace-tab.active:hover { border-bottom-color: var(--accent); }
     #toggleAnnotations { background: transparent; color: var(--muted); }
     #toggleAnnotations.active { color: var(--accent); background: var(--accent-soft); }
     #spectraWorkspace { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
@@ -813,7 +821,6 @@
     .annotation-workspace textarea { height: 80px; }
     .annotation-workspace .custom-annotation-list { max-height: none; }
     .annotation-workspace .project-note { line-height: 1.5; }
-    .controls.annotating #generate { display: none; }
     body.controls-collapsed .workspace-tabs,
     body.controls-collapsed #spectraWorkspace,
     body.controls-collapsed .annotation-workspace { display: none; }
@@ -869,7 +876,7 @@
       footer { padding-inline: 16px; }
     }
     @media (min-width: 1051px) and (min-height: 600px) {
-      body { height: 100dvh; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+      body { height: 100dvh; display: grid; grid-template-rows: minmax(0, 1fr) auto; }
       main { min-height: 0; padding-bottom: 12px; align-items: stretch; }
       .controls { height: 100%; max-height: none; }
       .plot-wrap { min-height: 0; display: flex; flex-direction: column; }
@@ -883,12 +890,66 @@
     .custom-annotation-item .custom-annotation-actions { grid-column: 2; }
     .custom-annotation-item .annotation-select { width: 18px; height: 18px; min-height: 0; flex: 0 0 18px; margin: 0; }
     .custom-annotation-item.alignment-selected { background: var(--accent-soft); }
+    /* Project tools live in the sidebar; the figure starts at the top of the workspace. */
+    .sidebar-header { padding: 10px 12px; flex: 0 0 auto; }
+    .sidebar-header h1 { font-size: 20px; }
+    .sidebar-header .format-help-popover { font-size: 12px; }
+    .sidebar-projects { flex: 0 0 auto; min-width: 0; border-bottom: 1px solid var(--line); }
+    .sidebar-projects > summary { padding: 10px 12px; color: var(--accent); font-weight: 700; cursor: pointer; }
+    .sidebar-projects > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
+    .sidebar-projects .project-panel { padding: 12px; margin: 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: #f8f8f1; max-height: 38dvh; overflow-y: auto; }
+    .sidebar-projects .project-grid { grid-template-columns: minmax(0, 1fr); gap: 8px; margin-bottom: 10px; }
+    .sidebar-projects .field { margin-bottom: 0; min-width: 0; }
+    .sidebar-projects .project-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-bottom: 12px; }
+    .sidebar-projects button { padding: 6px; font-size: 12px; }
+    .sidebar-projects #copyProjectSettings { width: 100%; }
+    .sidebar-projects .project-note { font-size: 11px; line-height: 1.4; margin: 0; }
+    body.controls-collapsed .sidebar-projects { display: none; }
     #annotationSelectionOverlay { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-    .annotation-selection-glow { position: absolute; border: 2px solid #387bff; border-radius: 5px; background: rgba(56, 123, 255, 0.10); box-shadow: 0 0 8px 3px rgba(56, 123, 255, 0.35); pointer-events: none; }
+    .annotation-selection-glow { position: absolute; border: 2px solid #6d2e3b; border-radius: 5px; background: rgba(109, 46, 59, 0.10); box-shadow: 0 0 8px 3px rgba(109, 46, 59, 0.25); pointer-events: none; }
+    .sidebar-header { flex-direction: row; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: 8px; background: var(--accent); color: var(--cream); border-bottom: 0; }
+    .sidebar-header h1 { color: var(--cream); font: 600 22px/1.2 Georgia, "Times New Roman", serif; letter-spacing: -0.4px; }
+    .sidebar-header .title-row { gap: 8px; }
+    .sidebar-header .format-help-button { width: 28px; height: 28px; min-height: 28px; font-size: 12px; background: transparent; color: var(--cream); border-color: #718674; }
+    .sidebar-header .format-help-popover { color: var(--ink); }
+    .sidebar-header .controls-toggle { display: flex; align-items: center; justify-content: center; flex: 0 0 32px; width: 32px; min-height: 32px; height: 32px; padding: 0; border: 1px solid #718674; border-radius: 7px; background: transparent; color: var(--cream); writing-mode: horizontal-tb; }
+    .sidebar-header .controls-toggle:hover, .sidebar-header .format-help-button:hover { background: #3c5f4d; border-color: #a6b59b; transform: none; }
+    .controls-toggle svg { flex: 0 0 auto; }
+    .controls-toggle .eye-slash { display: none; }
+    body.controls-collapsed .controls-toggle .eye-slash { display: block; }
+    body.controls-collapsed .sidebar-header { display: flex; padding: 8px 6px; justify-content: center; }
+    body.controls-collapsed .sidebar-header > div { display: none; }
+    body.controls-collapsed .sidebar-header .controls-toggle { min-height: 32px; }
+    .sidebar-projects > summary { background: var(--burgundy); color: var(--cream); padding: 11px 14px; font-size: 13px; letter-spacing: 0.3px; }
+    .sidebar-projects > summary:hover { background: #7c3a48; }
+    .sidebar-projects > summary:focus-visible { outline-color: var(--cream); }
+    .sidebar-projects[open] > summary { box-shadow: inset 3px 0 #c7b582; }
+    .project-sections { padding: 10px; max-height: 45dvh; overflow-y: auto; overscroll-behavior: contain; }
+    .local-projects { border: 1px solid var(--line); border-radius: 7px; background: var(--panel); }
+    .local-projects > summary { padding: 10px; color: var(--accent); font-size: 13px; line-height: 1.5; font-weight: 600; cursor: pointer; }
+    .sidebar-projects .local-projects .project-panel { max-height: none; overflow: visible; padding: 10px; }
+    .figure-toolbar > div:first-child { min-width: 0; }
+    .figure-toolbar strong { font: 600 20px/1.2 Georgia, "Times New Roman", serif; color: var(--accent); }
+    .figure-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .figure-actions button { min-height: 36px; padding: 8px 12px; font-size: 13px; }
+    .figure-actions #generate { background: var(--accent); border-color: var(--accent); color: var(--cream); }
+    .figure-actions #generate:hover { background: #193d2d; }
+    .figure-actions #download { background: var(--burgundy); border-color: var(--burgundy); color: var(--cream); }
+    .figure-actions #download:hover { background: #542330; }
+    button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .sidebar-header button:focus-visible { outline-color: var(--cream); }
+    input[type="checkbox"] { accent-color: var(--accent); }
+    @media (max-width: 640px) {
+      .figure-toolbar { align-items: flex-start; }
+      .figure-actions { width: 100%; gap: 6px; }
+      .figure-actions button { flex: 1 1 auto; }
+    }
   </style>
 </head>
 <body>
-  <header>
+  <main>
+    <section class="controls" id="settingsSidebar" aria-label="Controls">
+  <header class="sidebar-header">
     <div>
       <div class="title-row">
         <h1 data-i18n="title">MS Generator</h1>
@@ -896,7 +957,19 @@
       </div>
       <p class="format-help-popover" id="formatHelpPopover" data-i18n="formatNote" hidden>Use _ for subscript and ^ for superscript: H_2O, M^+, SO_4^{2-}.</p>
     </div>
-    <div class="header-tools">
+    <button type="button" class="controls-toggle" id="controlsToggle" aria-label="Hide settings" title="Hide settings" aria-expanded="true" aria-controls="sidebarProjects spectraWorkspace panel-annotations">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/>
+        <circle cx="12" cy="12" r="3"/>
+        <path class="eye-slash" d="m3 3 18 18"/>
+      </svg>
+    </button>
+  </header>
+      <details class="sidebar-projects" id="sidebarProjects">
+        <summary>Projects</summary>
+        <div class="project-sections">
+        <details class="local-projects" id="localProjects">
+          <summary>Local projects</summary>
         <div class="project-panel" aria-label="Saved projects">
           <div class="project-grid">
             <div class="field">
@@ -924,12 +997,10 @@
           </div>
           <p class="project-note" data-i18n="projectNote">Projects are saved in this browser on this computer.</p>
         </div>
-    </div>
-  </header>
-
-  <main>
-    <section class="controls" aria-label="Controls">
-      <button type="button" class="controls-toggle" id="controlsToggle">Hide settings</button>
+        </details>
+        <div id="workspaceTools"></div>
+        </div>
+      </details>
       <nav class="workspace-tabs" role="tablist" aria-label="Editor workspace">
         <button type="button" class="workspace-tab active" id="spectraTab" role="tab" aria-selected="true" aria-controls="spectraWorkspace">Spectra</button>
         <button type="button" class="workspace-tab" id="toggleAnnotations" role="tab" aria-selected="false" aria-controls="panel-annotations" tabindex="-1">Annotation</button>
@@ -970,7 +1041,7 @@
       </div>
 
       <div class="panel" id="panel-style">
-                <details class="settings-group" open>
+                <details class="settings-group">
           <summary data-i18n="figureStyleGroup">Figure style preset</summary>
           <div class="group-body">
             <div class="field-grid">
@@ -986,7 +1057,7 @@
             </div>
           </div>
         </details>
-<details class="settings-group" open>
+<details class="settings-group">
           <summary data-i18n="styleTextGroup">Text</summary>
           <div class="field-grid">
             <div class="field">
@@ -1044,7 +1115,7 @@
         </details>
 
         <details class="settings-group">
-          <summary data-i18n="styleLegendGroup">Spectrum names</summary>
+          <summary data-i18n="styleLegendGroup">Legend</summary>
           <div class="field-grid">
             <div class="field">
               <label for="legendMode" data-i18n="legendMode">Spectrum label display</label>
@@ -1162,75 +1233,116 @@
       </div>
 
       <div class="panel" id="panel-axes">
-        <label class="toggle">
-          <input type="checkbox" id="normalize" checked>
-          <span data-i18n="normalize">Normalize to base peak (100%)</span>
-        </label>
-        <div class="field-grid">
-          <div class="field">
-            <label for="yScale" data-i18n="yScale">Y scale (%)</label>
-            <input id="yScale" type="number" min="1" value="110">
-          </div>
-          <div class="field">
-            <label for="yTickStep" data-i18n="yTickStep">Intensity tick interval (auto if empty)</label>
-            <input id="yTickStep" type="number" min="0.000001" step="any" placeholder="Auto">
-          </div>
-          <div class="field">
-            <label for="yTickMax" data-i18n="yTickMax">Show intensity ticks up to (empty = axis limit)</label>
-            <input id="yTickMax" type="number" min="0" step="any" value="100">
-          </div>
-          <div class="field">
-            <label for="axesSpectrumSelect" data-i18n="editingSpectrum">Editing spectrum</label>
-            <select id="axesSpectrumSelect" data-spectrum-selector></select>
-          </div>
-          <div class="field">
-            <label for="activeSpectrumYScale" data-i18n="individualYScale">Individual Y scale</label>
-            <input id="activeSpectrumYScale" type="number" min="0.000001" step="any" value="110">
-          </div>
-          <div class="field">
-            <label for="decimals" data-i18n="decimals">m/z decimal places</label>
-            <input id="decimals" type="number" min="0" max="6" value="1">
-          </div>
-          <div class="field">
-            <label for="minMz" data-i18n="minMz">Min m/z (auto if empty)</label>
-            <input id="minMz" type="number" step="any">
-          </div>
-          <div class="field">
-            <label for="maxMz" data-i18n="maxMz">Max m/z (auto if empty)</label>
-            <input id="maxMz" type="number" step="any">
-          </div>
-          <div class="field">
-            <label for="xTickStep" data-i18n="xTickStep">X tick interval (auto if empty)</label>
-            <input id="xTickStep" type="number" min="0" step="any">
-          </div>
-          <div class="field x-individual-field">
-            <label for="activeSpectrumMinMz" data-i18n="individualMinMz">Spectrum min m/z</label>
-            <input id="activeSpectrumMinMz" type="number" step="any">
-          </div>
-          <div class="field x-individual-field">
-            <label for="activeSpectrumMaxMz" data-i18n="individualMaxMz">Spectrum max m/z</label>
-            <input id="activeSpectrumMaxMz" type="number" step="any">
-          </div>
-          <div class="field x-individual-field">
-            <label for="activeSpectrumXTickStep" data-i18n="individualXTickStep">Spectrum X tick interval</label>
-            <input id="activeSpectrumXTickStep" type="number" min="0" step="any">
-          </div>
-          <div class="field">
-            <label for="mzLabelDistance" data-i18n="mzLabelDistance">Peak m/z label distance (px)</label>
-            <input id="mzLabelDistance" type="number" step="1" value="3">
-          </div>
-          <div class="field">
-            <label for="threshold" data-i18n="threshold">Label threshold (%)</label>
-            <input id="threshold" type="number" min="0" max="100" value="10">
-          </div>
-          <div class="field">
-            <label for="spectrumGap" data-i18n="spectrumGap">Spectra spacing (%)</label>
-            <input id="spectrumGap" type="number" min="0" max="30" value="8">
-          </div>
-        </div>
         <details class="settings-group">
-          <summary data-i18n="compositeLayoutGroup">Composite layout</summary>
+          <summary data-i18n="axesScalesGroup">Scales</summary>
           <div class="group-body">
+            <label class="toggle">
+              <input type="checkbox" id="normalize" checked>
+              <span data-i18n="normalize">Normalize to base peak (100%)</span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" id="lockY" checked>
+              <span data-i18n="lockY">Lock Y scales of all spectra</span>
+            </label>
+            <div class="field-grid">
+              <div class="field">
+                <label for="yScale" data-i18n="yScale">Y scale (%)</label>
+                <input id="yScale" type="number" min="1" value="110">
+              </div>
+              <div class="field">
+                <label for="yTickStep" data-i18n="yTickStep">Intensity tick interval (auto if empty)</label>
+                <input id="yTickStep" type="number" min="0.000001" step="any" placeholder="Auto">
+              </div>
+              <div class="field">
+                <label for="yTickMax" data-i18n="yTickMax">Show intensity ticks up to (empty = axis limit)</label>
+                <input id="yTickMax" type="number" min="0" step="any" value="100">
+              </div>
+              <div class="field">
+                <label for="axesSpectrumSelect" data-i18n="editingSpectrum">Editing spectrum</label>
+                <select id="axesSpectrumSelect" data-spectrum-selector></select>
+              </div>
+              <div class="field">
+                <label for="activeSpectrumYScale" data-i18n="individualYScale">Individual Y scale</label>
+                <input id="activeSpectrumYScale" type="number" min="0.000001" step="any" value="110">
+              </div>
+            </div>
+          </div>
+        </details>
+        <details class="settings-group">
+          <summary data-i18n="axesRangesGroup">Ranges</summary>
+          <div class="group-body">
+            <label class="toggle">
+              <input type="checkbox" id="lockX" checked>
+              <span data-i18n="lockX">Lock X ranges of all spectra</span>
+            </label>
+            <div class="field-grid">
+              <div class="field">
+                <label for="minMz" data-i18n="minMz">Min m/z (auto if empty)</label>
+                <input id="minMz" type="number" step="any">
+              </div>
+              <div class="field">
+                <label for="maxMz" data-i18n="maxMz">Max m/z (auto if empty)</label>
+                <input id="maxMz" type="number" step="any">
+              </div>
+              <div class="field">
+                <label for="xTickStep" data-i18n="xTickStep">X tick interval (auto if empty)</label>
+                <input id="xTickStep" type="number" min="0" step="any">
+              </div>
+              <div class="field">
+                <label for="rangesSpectrumSelect" data-i18n="editingSpectrum">Editing spectrum</label>
+                <select id="rangesSpectrumSelect" data-spectrum-selector></select>
+              </div>
+              <div class="field x-individual-field">
+                <label for="activeSpectrumMinMz" data-i18n="individualMinMz">Spectrum min m/z</label>
+                <input id="activeSpectrumMinMz" type="number" step="any">
+              </div>
+              <div class="field x-individual-field">
+                <label for="activeSpectrumMaxMz" data-i18n="individualMaxMz">Spectrum max m/z</label>
+                <input id="activeSpectrumMaxMz" type="number" step="any">
+              </div>
+              <div class="field x-individual-field">
+                <label for="activeSpectrumXTickStep" data-i18n="individualXTickStep">Spectrum X tick interval</label>
+                <input id="activeSpectrumXTickStep" type="number" min="0" step="any">
+              </div>
+            </div>
+          </div>
+        </details>
+        <details class="settings-group">
+          <summary data-i18n="axesPeakLabelsGroup">Peak labels</summary>
+          <div class="group-body">
+            <label class="toggle">
+              <input type="checkbox" id="labelPeaks" checked>
+              <span data-i18n="labelPeaks">Label main peaks</span>
+            </label>
+            <div class="field-grid">
+              <div class="field">
+                <label for="threshold" data-i18n="threshold">Label threshold (%)</label>
+                <input id="threshold" type="number" min="0" max="100" value="10">
+              </div>
+              <div class="field">
+                <label for="decimals" data-i18n="decimals">m/z decimal places</label>
+                <input id="decimals" type="number" min="0" max="6" value="1">
+              </div>
+              <div class="field">
+                <label for="mzLabelDistance" data-i18n="mzLabelDistance">Peak m/z label distance (px)</label>
+                <input id="mzLabelDistance" type="number" step="1" value="3">
+              </div>
+            </div>
+          </div>
+        </details>
+        <details class="settings-group">
+          <summary data-i18n="compositeLayoutGroup">Spacing and layout</summary>
+          <div class="group-body">
+            <div class="field-grid">
+              <div class="field">
+                <label for="spectrumGap" data-i18n="spectrumGap">Spectra spacing (%)</label>
+                <input id="spectrumGap" type="number" min="0" max="30" value="8">
+              </div>
+              <div class="field">
+                <label for="xLabelDistance" data-i18n="xLabelDistance">m/z label distance (px)</label>
+                <input id="xLabelDistance" type="number" min="0" max="80" value="18">
+              </div>
+            </div>
             <label class="toggle">
               <input type="checkbox" id="showSecondXAxis">
               <span data-i18n="showSecondXAxis">Show X axis on spectrum 2</span>
@@ -1239,31 +1351,15 @@
               <label for="groupGapAfter2" data-i18n="groupGapAfter2">Extra gap after spectrum 2 (%)</label>
               <input id="groupGapAfter2" type="number" min="0" max="30" value="0">
             </div>
-            <div class="field">
-              <label for="xLabelDistance" data-i18n="xLabelDistance">m/z label distance (px)</label>
-              <input id="xLabelDistance" type="number" min="0" max="80" value="18">
-            </div>
           </div>
         </details>
-        <label class="toggle">
-          <input type="checkbox" id="lockY" checked>
-          <span data-i18n="lockY">Lock Y scales of all spectra</span>
-        </label>
-        <label class="toggle">
-          <input type="checkbox" id="lockX" checked>
-          <span data-i18n="lockX">Lock X ranges of all spectra</span>
-        </label>
-        <label class="toggle">
-          <input type="checkbox" id="labelPeaks" checked>
-          <span data-i18n="labelPeaks">Label main peaks</span>
-        </label>
-        <label class="toggle">
-          <input type="checkbox" id="clickMz">
-          <span data-i18n="clickMz">Show m/z when clicking a peak</span>
-        </label>
         <details class="settings-group">
-          <summary data-i18n="manualLabelConnectorGroup">Manual label connectors</summary>
+          <summary data-i18n="manualLabelConnectorGroup">Manual labels</summary>
           <div class="group-body">
+            <label class="toggle">
+              <input type="checkbox" id="clickMz">
+              <span data-i18n="clickMz">Show m/z when clicking a peak</span>
+            </label>
             <div class="field-grid">
               <div class="field">
                 <label for="manualLabelConnectorStyle" data-i18n="manualLabelConnectorStyle">Connector style</label>
@@ -1287,15 +1383,15 @@
             </label>
             <div class="file-line">
               <button type="button" class="secondary" id="resetManualMzLabelColors" data-i18n="resetManualMzLabelColors">Reset label colors</button>
+              <button type="button" id="clearSelection" data-i18n="clearSelection">Clear peak selection</button>
             </div>
           </div>
         </details>
-        <button type="button" id="clearSelection" data-i18n="clearSelection">Clear peak selection</button>
         <button type="button" id="resetDefaults" data-i18n="resetDefaults">Reset defaults</button>
       </div>
 
       <div class="panel" id="panel-export">
-        <details class="settings-group" open>
+        <details class="settings-group">
           <summary data-i18n="journalPresetGroup">Journal preset</summary>
           <div class="group-body">
             <div class="field-grid">
@@ -1319,7 +1415,7 @@
             </div>
           </div>
         </details>
-<details class="settings-group" open>
+<details class="settings-group">
           <summary data-i18n="publicationSizeGroup">Publication size and export</summary>
           <div class="field-grid">
             <div class="field">
@@ -1392,7 +1488,7 @@
       </div>
       <div class="annotation-workspace" id="panel-annotations" role="tabpanel" aria-labelledby="toggleAnnotations" hidden>
         <p class="project-note" data-i18n="annotationHelp">Add text, click the figure to place it, then drag. For arrows, click the target first. Save your project to keep annotations.</p>
-        <details class="settings-group custom-annotation-controls" open>
+        <details class="settings-group custom-annotation-controls">
           <summary data-i18n="customAnnotationsGroup">Custom annotations</summary>
           <div class="group-body">
             <div class="field">
@@ -1453,17 +1549,17 @@
         </details>
       </div>
 
-      <div class="actions">
-        <button type="button" class="primary" id="generate" data-i18n="generate">Generate spectrum</button>
-        <button type="button" class="secondary" id="download" data-i18n="download">Download PNG</button>
-      </div>
       <div class="status" id="status" role="status"></div>
     </section>
 
     <section class="plot-wrap" id="plotWrap" aria-label="Spectrum plot">
       <div class="figure-toolbar">
         <div><strong>Figure preview</strong><span>Finish your spectrum, then add text and arrows.</span></div>
-        <button type="button" id="toggleComparison" aria-expanded="false" aria-controls="comparisonPanel">Compare spectra</button>
+        <div class="figure-actions" role="group" aria-label="Figure actions">
+          <button type="button" class="primary" id="generate" data-i18n="generate">Generate spectrum</button>
+          <button type="button" class="secondary" id="download" data-i18n="download">Download figure</button>
+          <button type="button" id="toggleComparison" aria-expanded="false" aria-controls="comparisonPanel">Compare spectra</button>
+        </div>
       </div>
       <div class="plot-preview-info" id="finalSizePreviewInfo" hidden>
         <span id="finalSizePreviewSummary"></span>
@@ -1476,8 +1572,10 @@
           <div class="field"><label for="comparisonMode">Cell display</label><select id="comparisonMode"><option value="presence">Presence (✓ / —)</option><option value="raw">Original intensity</option><option value="relative">Relative intensity (%)</option></select></div>
           <div class="field"><label for="comparisonTolerance">m/z tolerance</label><input id="comparisonTolerance" type="number" min="0" step="any" value="0"></div>
           <div class="field"><label for="comparisonUnit">Tolerance unit</label><select id="comparisonUnit"><option value="da">Absolute m/z</option><option value="ppm">ppm</option></select></div>
+          <div class="field"><label for="comparisonMinimumIntensity">Minimum intensity</label><input id="comparisonMinimumIntensity" type="number" min="0" max="100" step="any" value="0" aria-describedby="comparisonIntensityHelp"></div>
+          <div class="field"><label for="comparisonIntensityUnit">Intensity unit</label><select id="comparisonIntensityUnit"><option value="relative">Relative intensity (%)</option><option value="raw">Original intensity</option></select></div>
         </div>
-        <p class="project-note">Uses all imported peaks, regardless of plot zoom or label threshold. Only positive m/z and intensity values count as present. — means no matching peak.</p>
+        <p class="project-note" id="comparisonIntensityHelp">Only peaks at or above the minimum intensity enter the comparison. Relative intensity uses each spectrum’s largest imported peak as 100%. Set 0 to include all positive peaks. Plot zoom and label threshold do not affect this table. — means no matching peak meets the minimum intensity. Copy and CSV include the filtered table.</p>
         <details><summary>How matching works</summary><p class="project-note">Zero tolerance matches exact m/z values. Each group starts at its lowest m/z; all members must fall within the tolerance of that value (ppm is relative to it). The row shows that lowest m/z, without rounding for matching. If several peaks from one spectrum match, the highest intensity is used. Relative intensity sets each spectrum’s largest imported peak to 100%. Hover over a cell to inspect its matched m/z and peak count.</p></details>
         <div class="comparison-actions"><button type="button" id="copyComparison">Copy table</button><button type="button" id="exportComparison">Download CSV</button></div>
         <p id="comparisonSummary" role="status" aria-live="polite"></p>
@@ -1554,7 +1652,7 @@
         xLabel: "X label",
         yLabel: "Y label",
         styleTextGroup: "Text",
-        styleLegendGroup: "Spectrum names",
+        styleLegendGroup: "Legend",
         styleColorsGroup: "Colors and lines",
         styleDisplayGroup: "Display",
         titleFontSize: "Condition/title font size (pt)",
@@ -1614,7 +1712,10 @@
         xTickStep4: "X tick interval 4",
         threshold: "Label threshold (%)",
         spectrumGap: "Spectra spacing (%)",
-        compositeLayoutGroup: "Composite layout",
+        axesScalesGroup: "Scales",
+        axesRangesGroup: "Ranges",
+        axesPeakLabelsGroup: "Peak labels",
+        compositeLayoutGroup: "Spacing and layout",
         showSecondXAxis: "Show X axis on spectrum 2",
         groupGapAfter2: "Extra gap after spectrum 2 (%)",
         xLabelDistance: "m/z label distance (px)",
@@ -1625,7 +1726,7 @@
         mzLabelDistance: "Peak m/z label distance (px)",
         yTickStep: "Intensity tick interval (auto if empty)",
         yTickMax: "Show intensity ticks up to (empty = axis limit)",
-        manualLabelConnectorGroup: "Manual label connectors",
+        manualLabelConnectorGroup: "Manual labels",
         manualLabelConnectorStyle: "Connector style",
         manualLabelConnectorLine: "Line",
         manualLabelConnectorArrow: "Arrow",
@@ -1748,7 +1849,8 @@
     function updateControlsToggleText() {
       const collapsed = document.body.classList.contains("controls-collapsed");
       const labels = ["Hide settings", "Show settings"];
-      $("controlsToggle").textContent = labels[collapsed ? 1 : 0];
+      $("controlsToggle").setAttribute("aria-label", labels[collapsed ? 1 : 0]);
+      $("controlsToggle").title = labels[collapsed ? 1 : 0];
       $("controlsToggle").setAttribute("aria-expanded", String(!collapsed));
     }
 

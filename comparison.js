@@ -1,10 +1,21 @@
 /* Comparison uses full imported peaks, independent of plot ranges and label thresholds. */
 var SpectrumComparison = (() => {
-  function buildRows(spectra, tolerance = 0, unit = 'da') {
+  function validPeak(p) {
+    return Number.isFinite(p.mz) && p.mz > 0 && Number.isFinite(p.intensity) && p.intensity > 0;
+  }
+  function maximumIntensity(spectrum) {
+    return spectrum.peaks.reduce((max, p) => validPeak(p) ? Math.max(max, p.intensity) : max, 0);
+  }
+  function buildRows(spectra, tolerance = 0, unit = 'da', minimumIntensity = 0, intensityUnit = 'relative') {
     if (!Number.isFinite(tolerance) || tolerance < 0) throw new Error('Enter a non-negative tolerance.');
-    const peaks = spectra.flatMap((s, column) => s.peaks
-      .filter(p => Number.isFinite(p.mz) && p.mz > 0 && Number.isFinite(p.intensity) && p.intensity > 0)
-      .map(p => ({ ...p, column })));
+    if (!Number.isFinite(minimumIntensity) || minimumIntensity < 0) throw new Error('Enter a non-negative minimum intensity.');
+    if (intensityUnit === 'relative' && minimumIntensity > 100) throw new Error('Relative minimum intensity must be between 0 and 100%.');
+    const peaks = spectra.flatMap((s, column) => {
+      const maximum = maximumIntensity(s);
+      return s.peaks
+        .filter(p => validPeak(p) && (intensityUnit === 'relative' ? p.intensity / maximum * 100 : p.intensity) >= minimumIntensity)
+        .map(p => ({ ...p, column }));
+    });
     peaks.sort((a, b) => a.mz - b.mz || a.column - b.column || b.intensity - a.intensity);
     const rows = [];
     for (const peak of peaks) {
@@ -29,7 +40,7 @@ var SpectrumComparison = (() => {
     return value !== 0 && Math.abs(value) < 0.001 ? value.toExponential(3) : String(Number(value.toPrecision(6)));
   }
   function matrix(spectra, rows, mode) {
-    const maxima = spectra.map(s => s.peaks.reduce((max,p) => (Number.isFinite(p.mz) && p.mz > 0 && Number.isFinite(p.intensity) ? Math.max(max, p.intensity) : max), 0));
+    const maxima = spectra.map(maximumIntensity);
     const suffix = mode === 'relative' ? ' (%)' : mode === 'raw' ? ' (intensity)' : '';
     return [['m/z (lowest in group)', ...spectra.map(s => s.name + suffix)],
       ...rows.map(row => [String(row.mz), ...row.cells.map((cell, i) => !cell ? '—' : mode === 'presence' ? '✓' : formatIntensity(mode === 'relative' ? cell.intensity / maxima[i] * 100 : cell.intensity))])];
@@ -68,8 +79,11 @@ var SpectrumComparison = (() => {
     const table = el('comparisonTable'); table.replaceChildren();
     data = [];
     const tolerance = el('comparisonTolerance').value.trim() === '' ? NaN : Number(el('comparisonTolerance').value);
+    const minimumIntensity = el('comparisonMinimumIntensity').value.trim() === '' ? NaN : Number(el('comparisonMinimumIntensity').value);
+    const intensityUnit = el('comparisonIntensityUnit').value;
+    el('comparisonMinimumIntensity').max = intensityUnit === 'relative' ? '100' : '';
     let rows;
-    try { rows = buildRows(spectra, tolerance, el('comparisonUnit').value); }
+    try { rows = buildRows(spectra, tolerance, el('comparisonUnit').value, minimumIntensity, intensityUnit); }
     catch (error) { el('comparisonSummary').textContent = error.message; updateButtons(0); return; }
     if (!spectra.length) { el('comparisonSummary').textContent = 'Select at least one spectrum.'; updateButtons(0); return; }
     data = matrix(spectra, rows, el('comparisonMode').value);
@@ -85,13 +99,13 @@ var SpectrumComparison = (() => {
         const cell = document.createElement(i === 0 ? 'th' : 'td');
         cell.textContent = text;
         if (!i) { cell.scope = 'row'; cell.title = `Group range: ${source.mz}–${source.maxMz}`; }
-        else { const match = source.cells[i - 1]; cell.title = match ? `Matched m/z: ${match.mz}; ${match.count} peak(s); maximum intensity used` : 'No positive-intensity peak in this group'; }
+        else { const match = source.cells[i - 1]; cell.title = match ? `Matched m/z: ${match.mz}; ${match.count} peak(s); maximum intensity used` : 'No peak meeting the minimum intensity in this group'; }
         row.append(cell);
       }); body.append(row);
     }); table.append(body);
     const skipped = spectra.reduce((n,s) => n + s.skipped, 0);
-    const empty = spectra.filter(s => !s.peaks.some(p => p.mz > 0 && p.intensity > 0)).length;
-    el('comparisonSummary').textContent = `${rows.length} m/z groups · ${spectra.length} spectra · tolerance ${tolerance} ${el('comparisonUnit').value === 'ppm' ? 'ppm' : 'm/z'}.` + (rows.length ? ` Showing ${page * pageSize + 1}–${Math.min((page + 1) * pageSize, rows.length)}.` : ' No positive-intensity peaks.') + (empty ? ` ${empty} selected spectrum/spectra have no positive-intensity peaks.` : '') + (skipped ? ` ${skipped} unreadable line(s) skipped.` : '');
+    const empty = spectra.filter((s, i) => !rows.some(row => row.cells[i])).length;
+    el('comparisonSummary').textContent = `${rows.length} m/z groups · ${spectra.length} spectra · tolerance ${tolerance} ${el('comparisonUnit').value === 'ppm' ? 'ppm' : 'm/z'} · minimum intensity ${minimumIntensity}${intensityUnit === 'relative' ? '% of each base peak' : ' (original)'}.` + (rows.length ? ` Showing ${page * pageSize + 1}–${Math.min((page + 1) * pageSize, rows.length)}.` : ' No peaks meet the minimum intensity.') + (empty ? ` ${empty} selected spectrum/spectra have no peaks meeting the minimum intensity.` : '') + (skipped ? ` ${skipped} unreadable line(s) skipped.` : '');
     updateButtons(rows.length);
   }
   function updateButtons(count) {
@@ -114,7 +128,7 @@ var SpectrumComparison = (() => {
   function refresh() { if (active) render(); }
   function init() {
     el('toggleComparison').addEventListener('click', toggle);
-    ['comparisonTolerance', 'comparisonUnit', 'comparisonMode'].forEach(id => el(id).addEventListener('input', () => { page = 0; render(); }));
+    ['comparisonTolerance', 'comparisonUnit', 'comparisonMode', 'comparisonMinimumIntensity', 'comparisonIntensityUnit'].forEach(id => el(id).addEventListener('input', () => { page = 0; render(); }));
     el('comparisonPrevious').addEventListener('click', () => { page--; render(); });
     el('comparisonNext').addEventListener('click', () => { page++; render(); });
     el('copyComparison').addEventListener('click', async () => {

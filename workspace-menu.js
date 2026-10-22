@@ -1,7 +1,9 @@
 /* Compact, shared home for cloud projects and portable backups. */
 (() => {
+  const sidebar = document.getElementById('workspaceTools');
   const host = document.createElement('div');
   host.id = 'ms-workspace-menu';
+  if (sidebar) host.className = 'workspace-inline';
   const style = document.createElement('style');
   style.textContent = `
     #ms-workspace-menu{position:fixed;right:16px;bottom:16px;z-index:1000;font:14px/1.5 system-ui;color:#193629}
@@ -17,9 +19,31 @@
     #ms-workspace-menu .cloud-row>input,#ms-workspace-menu .cloud-row>select{width:100%;min-width:0}
     #ms-workspace-menu p{overflow-wrap:anywhere}
     #ms-workspace-menu :focus-visible{outline:2px solid #245e45;outline-offset:3px}
+    #ms-workspace-menu.workspace-inline{position:static;font:inherit;color:var(--ink);}
+    #ms-workspace-menu.workspace-inline .workspace-content{position:static;width:auto;max-height:none;overflow:visible;padding:0;background:transparent;border:0;border-radius:0;box-shadow:none;}
+    #ms-workspace-menu.workspace-inline .workspace-content>details{margin:8px 0 0!important;padding:10px!important;border:1px solid var(--line)!important;border-radius:7px!important;background:var(--panel)!important;color:var(--ink);font:13px/1.5 Arial,Helvetica,sans-serif!important;}
+    #ms-workspace-menu.workspace-inline summary{color:var(--accent);list-style-position:inside;}
+    #ms-workspace-menu.workspace-inline button,#ms-workspace-menu.workspace-inline input,#ms-workspace-menu.workspace-inline select{background:var(--accent-soft);color:var(--ink);border-color:var(--line);font:inherit;min-width:0;}
+    #ms-workspace-menu.workspace-inline button{white-space:normal;}
+    #ms-workspace-menu.workspace-inline .cloud-row>input{background:var(--panel);}
     @media print{#ms-workspace-menu{display:none}}
   `;
   document.head.append(style);
+  const content = document.createElement('div');
+  content.id = 'ms-workspace-content';
+  content.className = 'workspace-content';
+  if (sidebar) {
+    host.append(content);
+    sidebar.append(host);
+    window.MSWorkspaceMenu = {
+      mount(panel, section) {
+        panel.open = false;
+        if (section === 'cloud') content.prepend(panel);
+        else content.append(panel);
+      }
+    };
+    return;
+  }
   const toggle = document.createElement('button');
   toggle.type = 'button';
   toggle.className = 'workspace-toggle';
@@ -27,9 +51,6 @@
   toggle.setAttribute('aria-expanded', 'false');
   toggle.setAttribute('aria-controls', 'ms-workspace-content');
   toggle.setAttribute('aria-label', 'Projects, presets and backup menu');
-  const content = document.createElement('div');
-  content.id = 'ms-workspace-content';
-  content.className = 'workspace-content';
   content.hidden = true;
   const close = (restoreFocus = false) => {
     content.hidden = true;

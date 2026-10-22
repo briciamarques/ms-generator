@@ -1,6 +1,15 @@
 const {chromium}=require('playwright');
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),assert=require('node:assert/strict');
-const server=http.createServer((req,res)=>{const js=req.url==='/comparison.js';res.setHeader('Content-Type',js?'application/javascript':'text/html; charset=utf-8');res.end(fs.readFileSync(path.join(__dirname,js?'../comparison.js':'../index.html')));});
+const root=path.resolve(__dirname,'..');
+const server=http.createServer((req,res)=>{
+ const pathname=new URL(req.url,'http://localhost').pathname;
+ // Keep the comparison test independent of cloud accounts.
+ if(pathname==='/cloud-config.json'){res.setHeader('Content-Type','application/json');res.end('{}');return;}
+ const file=path.resolve(root,'.'+(pathname==='/'?'/index.html':pathname));
+ if(!file.startsWith(root+path.sep)||!fs.existsSync(file)||!fs.statSync(file).isFile()){res.writeHead(404);res.end();return;}
+ res.setHeader('Content-Type',file.endsWith('.js')?'application/javascript':'text/html; charset=utf-8');
+ res.end(fs.readFileSync(file));
+});
 (async()=>{
  await new Promise(r=>server.listen(0,'127.0.0.1',r));
  const browser=await chromium.launch({channel:'msedge',headless:true});
@@ -22,6 +31,26 @@ const server=http.createServer((req,res)=>{const js=req.url==='/comparison.js';r
  const copied=await page.evaluate(()=>navigator.clipboard.readText());assert(copied.includes('Spectrum X (%)'));assert(copied.includes('100\t100\t50'));
  const downloadPromise=page.waitForEvent('download');await page.locator('#exportComparison').click();
  const download=await downloadPromise;const csv=fs.readFileSync(await download.path(),'utf8');assert(csv.includes('Spectrum Y (%)'));assert.equal(csv.trim().split('\r\n').length,4);
+ await page.locator('#comparisonMinimumIntensity').fill('50');
+ assert.equal(await page.locator('#comparisonTable tbody tr').count(),2);
+ assert.deepEqual(await page.locator('#comparisonTable tbody tr').first().locator('td').allTextContents(),['100','50']);
+ await page.locator('#comparisonMinimumIntensity').fill('51');
+ assert.deepEqual(await page.locator('#comparisonTable tbody tr').first().locator('td').allTextContents(),['100','—']);
+ await page.locator('#copyComparison').click();
+ assert.equal((await page.evaluate(()=>navigator.clipboard.readText())).split('\r\n').length,3);
+ const filteredDownloadPromise=page.waitForEvent('download');await page.locator('#exportComparison').click();
+ const filteredDownload=await filteredDownloadPromise;
+ assert.equal(fs.readFileSync(await filteredDownload.path(),'utf8').trim().split('\r\n').length,3);
+ await page.locator('#comparisonIntensityUnit').selectOption('raw');
+ assert.equal(await page.locator('#comparisonTable tbody tr').count(),0);
+ assert(await page.locator('#exportComparison').isDisabled());
+ await page.locator('#comparisonMinimumIntensity').fill('10');
+ assert.equal(await page.locator('#comparisonTable tbody tr').count(),2);
+ await page.locator('#comparisonMinimumIntensity').fill('');assert(await page.locator('#copyComparison').isDisabled());
+ await page.locator('#comparisonMinimumIntensity').fill('101');
+ await page.locator('#comparisonIntensityUnit').selectOption('relative');
+ assert((await page.locator('#comparisonSummary').textContent()).includes('between 0 and 100%'));
+ await page.locator('#comparisonMinimumIntensity').fill('0');
  await page.locator('#comparisonSpectra input').nth(1).uncheck();assert.equal(await page.locator('#comparisonTable thead th').count(),2);
  await page.locator('#comparisonSpectra input').first().uncheck();assert((await page.locator('#comparisonSummary').textContent()).includes('Select at least one'));assert(await page.locator('#exportComparison').isDisabled());
  await page.locator('#comparisonSpectra input').first().check();
@@ -31,6 +60,10 @@ const server=http.createServer((req,res)=>{const js=req.url==='/comparison.js';r
  await page.waitForFunction(()=>document.querySelectorAll('#comparisonTable tbody tr').length===200);
  await page.locator('#comparisonNext').click();assert.equal(await page.locator('#comparisonTable tbody tr').count(),50);
  await page.locator('#copyComparison').click();assert.equal((await page.evaluate(()=>navigator.clipboard.readText())).split('\r\n').length,251);
+ await page.locator('#comparisonMinimumIntensity').fill('90');
+ assert.equal(await page.locator('#comparisonTable tbody tr').count(),26);
+ assert(await page.locator('#comparisonPrevious').isDisabled());
+ await page.locator('#comparisonMinimumIntensity').fill('0');
  await page.locator('#toggleComparison').click();assert(await page.locator('#comparisonPanel').isHidden());assert(await page.locator('#plotViewport').isVisible());
  await page.locator('#toggleAnnotations').click();assert(await page.locator('#panel-annotations').isVisible());
  await page.locator('#toggleComparison').click();assert(await page.locator('#panel-annotations').isHidden());
