@@ -46,7 +46,5 @@ close(pos.x, 0.2); close(pos.y, 0.75);
 ctx.resetInsideNamePositions(true);
 assert(slots.every(s=>!s.insideNamePosition));
 assert.equal(renders, 2);
-assert(script.includes('annotationPosition: $("clickMz").checked || $("legendMode").value === "inside"'));
-assert(script.includes('renderedNameAnnotations.set(layout.annotations.length'));
-assert(script.includes('if (saveInsideNamePosition(index, prop, value))'));
+// Browser wiring and drag behavior are exercised by label-drag.cjs, with peak selection off.
 console.log("PASS: syntax; independent names; saved/reopened positions; panel-relative resize/reorder; stable IDs; reset selected/all; unrelated annotations ignored.");

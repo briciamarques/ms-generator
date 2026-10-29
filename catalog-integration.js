@@ -1,0 +1,82 @@
+/* Native MS Generator adapter for the Catalog-defined exchange envelope. */
+(function(){
+'use strict';
+const X=MSCatalogExchange, native=window.MSGeneratorCatalogNative, APP_VERSION='catalog-adapter-1.0.0';
+const copy=v=>JSON.parse(JSON.stringify(v)), uid=()=>crypto.randomUUID();
+function to64(data){let s='';for(let i=0;i<data.length;i+=16384)s+=String.fromCharCode(...data.subarray(i,i+16384));return btoa(s);}
+function from64(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0));}
+function parseTxt(bytes){const text=X.dec.decode(bytes);const parsed=native.parse(text);X.assert(parsed.peaks.length>0&&!parsed.skipped,'TXT contains unsupported/non-numeric rows. Import manually for review; no source has been replaced.');return {text,peaks:parsed.peaks};}
+function checkProject(p){
+ X.assert(p&&p.spectrumSchemaVersion===2&&Array.isArray(p.spectra)&&p.spectra.length>0&&p.fields&&p.checks,'Invalid native project.');X.checkJsonSafety(p);
+ const ids=new Set();for(const slot of p.spectra){X.assert(typeof slot.id==='string'&&slot.id.startsWith('spectrum-')&&!slot.id.includes('|')&&!ids.has(slot.id)&&typeof slot.data==='string','Invalid project spectrum.');ids.add(slot.id);}
+ for(const id of [...Object.keys(p.fields),...Object.keys(p.checks)])X.assert(native.allowedFields().includes(id),'Unknown project control: '+id);
+}
+async function prepare(blob){
+ const files=await X.unzip(blob),m=await X.validate(files),receipt=m.kind==='selection'?{packageId:m.packageId,manifestSha256:await X.sha(files.get('manifest.json'))}:copy(m.selectionReceipt);
+ const sources=m.inputs.map(input=>{const file=m.files.find(f=>f.id===input.txtFileId),data=files.get(file.path);parseTxt(data);return {input:copy(input),file:copy(file),base64:to64(data)};});
+ const context={schemaVersion:'1.0.0',catalog:copy(m.catalog),receipt,sources,extensions:copy(m.extensions),lineage:m.kind==='result'?{resultId:m.result.resultId,previousVersionId:m.result.versionId}:null,resultExtensions:m.kind==='result'?copy(m.result.extensions):{}};
+ let project;
+ if(m.kind==='selection'){
+ project=native.capture();project.name=m.catalog.study.name+' — spectrum figure';project.id='project-'+uid();project.spectra=m.selection.orderedInputIds.map((id,i)=>{const source=sources.find(s=>s.input.inputId===id);return {...native.slot(i),name:source.input.spectrum.name,data:parseTxt(from64(source.base64)).text,catalogInputId:id,catalogSeriesId:uid()};});project.activeSpectrumId=project.spectra[0].id;project.selectedPeaks=[];project.labelEdits={};project.customAnnotations=[];delete project.catalogAxisRanges;project.catalogComparisonSelection=null;
+ }else{
+ const descriptor=m.files.find(f=>f.id===m.result.artifacts.project.fileId);project=JSON.parse(X.dec.decode(files.get(descriptor.path)));checkProject(project);const bindings=m.result.artifacts.project.datasetBindings;
+ X.assert(project.spectra.length===bindings.length,'Project and dataset bindings disagree.');for(const slot of project.spectra){const binding=bindings.find(b=>b.datasetId===slot.id);X.assert(binding&&binding.inputIds[0]===slot.catalogInputId&&sources.some(s=>s.input.inputId===slot.catalogInputId),'Project input binding mismatch.');X.assert(X.uuid(slot.catalogSeriesId)&&m.result.series.some(s=>s.seriesId===slot.catalogSeriesId&&s.inputIds.includes(slot.catalogInputId)),'Project series binding mismatch.');}
+ }
+ project.catalogExchange=context;return {manifest:m,project,context};
+}
+function csvCell(value){const text=String(value??'');const safe=/^[=+@-]/.test(text)&&typeof value!=='number'?"'"+text:text;return /[",\r\n]/.test(safe)?'"'+safe.replace(/"/g,'""')+'"':safe;}
+function csv(rows){return X.enc.encode(rows.map(row=>row.map(csvCell).join(',')).join('\r\n')+'\r\n');}
+async function createResult(title,analysisType){
+ X.assert(title.trim(),'Enter a result title.');X.assert(['spectrum-figure','spectrum-comparison'].includes(analysisType),'Unsupported analysis type.');
+ const project=native.capture(),context=project.catalogExchange;X.assert(context?.schemaVersion==='1.0.0'&&context.sources?.length,'Open a Catalog selection or result first.');checkProject(project);
+ X.assert(project.spectra.every(s=>context.sources.some(src=>src.input.inputId===s.catalogInputId)&&X.uuid(s.catalogSeriesId)),'A spectrum has no Catalog source. Select that TXT in the Catalog and import a new selection before exporting this result.');
+ const used=[...new Set(project.spectra.map(s=>s.catalogInputId))],sources=context.sources.filter(s=>used.includes(s.input.inputId));
+ const files=new Map(),descriptors=[],inputs=[];
+ for(const source of sources){const data=from64(source.base64);X.assert(await X.sha(data)===source.file.sha256&&data.length===source.file.size,'Saved source bytes no longer match the Catalog hash.');files.set(source.file.path,data);descriptors.push(copy(source.file));inputs.push(copy(source.input));}
+ const resultId=context.lineage?.resultId||uid(),versionId=uid(),previousVersionId=context.lineage?.previousVersionId||null;
+ const add=async(role,mime,suffix,data)=>{X.assert(data.length<=X.MAX_FILE,'Generated '+role+' exceeds 20 MiB. Reduce export dimensions or input size.');const id=uid(),path=(role==='project'?'project/':'outputs/')+id+suffix;files.set(path,data);descriptors.push({id,path,name:role+suffix,role,mime,size:data.length,sha256:await X.sha(data)});return id;};
+ const rows=[['series_id','input_ids','data_stage','mz','intensity','display_intensity','visible_in_figure']],transformations=[],series=[],limitations=[];
+ for(const slot of project.spectra){
+ const source=sources.find(s=>s.input.inputId===slot.catalogInputId),stored=parseTxt(from64(source.base64)),edited=native.parse(slot.data);X.assert(edited.peaks.length>0&&!edited.skipped,'Review invalid/empty data in '+slot.name+' before exporting.');const transformationIds=[];
+ if(slot.data!==stored.text){const id=uid();transformations.push({id,order:transformations.length,scope:'calculation',inputIds:[slot.catalogInputId],method:'manual-spectrum-edit',methodVersion:'1',parameters:{datasetId:slot.id,description:'Editor text differs from the immutable stored TXT; original bytes retained in inputs.'}});transformationIds.push(id);limitations.push('Edited spectrum data: '+slot.name);}
+ const id=uid();transformations.push({id,order:transformations.length,scope:'display',inputIds:[slot.catalogInputId],method:project.checks.normalize?'base-peak-relative':'identity',methodVersion:'1',parameters:{datasetId:slot.id,formula:project.checks.normalize?'intensity / max(1, maximum editor intensity) * 100':'intensity',visible:slot.visible!==false,sourceIntensityState:source.input.intensity.state}});transformationIds.push(id);
+ series.push({seriesId:slot.catalogSeriesId,label:slot.name,inputIds:[slot.catalogInputId],transformationIds});const lineage=JSON.stringify([slot.catalogInputId]);
+ for(const peak of stored.peaks)rows.push([slot.catalogSeriesId,lineage,'stored',peak.mz,peak.intensity,null,slot.visible!==false]);
+ const maximum=edited.peaks.reduce((max,p)=>Math.max(max,p.intensity),1);for(const peak of edited.peaks)rows.push([slot.catalogSeriesId,lineage,'editor',peak.mz,peak.intensity,project.checks.normalize?peak.intensity/maximum*100:peak.intensity,slot.visible!==false]);
+ if(source.input.intensity.state==='unknown')limitations.push('Prior intensity normalization unknown: '+slot.name);
+ }
+ const tableId=await add('table','text/csv','.csv',csv(rows));const table={fileId:tableId,delimiter:',',encoding:'utf-8',header:true,missingValue:'',formulaSafety:'Text beginning with = + - @ is prefixed with an apostrophe; finite numeric cells are unmodified.',columns:[{name:'series_id',type:'text',unit:null,description:'Result series UUID.'},{name:'input_ids',type:'text',unit:null,description:'JSON array of exact source TXT UUIDs.'},{name:'data_stage',type:'text',unit:null,description:'stored = source numeric values; editor = current editable values.'},{name:'mz',type:'number',unit:'m/z',description:'Parsed mass-to-charge ratio without display rounding.'},{name:'intensity',type:'number',unit:null,description:'As-stored or editor intensity, with source-specific units/state in manifest.'},{name:'display_intensity',type:'number',unit:null,description:'Visual intensity for editor rows; blank on stored rows. Formula recorded in transformations.'},{name:'visible_in_figure',type:'boolean',unit:null,description:'Whether this dataset is visible in the spectrum figure.'}],lineageColumns:{seriesId:'series_id',inputIds:'input_ids'}};
+ const tables=[table];let comparison=null;
+ if(analysisType==='spectrum-comparison'){
+ comparison=native.comparison();X.assert(comparison&&comparison.spectra.length,'Open Compare spectra and select inputs before exporting a comparison.');
+ const comparisonRows=SpectrumComparison.buildRows(comparison.spectra,comparison.tolerance,comparison.unit,comparison.minimumIntensity,comparison.intensityUnit);
+ const values=SpectrumComparison.matrix(comparison.spectra,comparisonRows,comparison.mode),long=[['series_id','input_ids','mz_group','value']];
+ for(let i=1;i<values.length;i++)for(let j=0;j<comparison.spectra.length;j++){const slot=project.spectra.find(s=>s.id===comparison.spectra[j].id);long.push([slot.catalogSeriesId,JSON.stringify([slot.catalogInputId]),Number(values[i][0]),values[i][j+1]]);}
+ const fileId=await add('table','text/csv','.csv',csv(long));tables.push({...table,fileId,columns:[...table.columns.slice(0,2),{name:'mz_group',type:'number',unit:'m/z',description:'Lowest mass in the tolerance group.'},{name:'value',type:'text',unit:null,description:'Comparison display value; em dash = no positive matching peak.'}]});
+ const parameters={mode:comparison.mode,tolerance:comparison.tolerance,unit:comparison.unit,minimumIntensity:comparison.minimumIntensity,intensityUnit:comparison.intensityUnit,datasetIds:comparison.spectra.map(s=>s.id)};
+ const t={id:uid(),order:transformations.length,scope:'calculation',inputIds:[...new Set(comparison.spectra.map(s=>s.catalogInputId))],method:'spectrum-comparison',methodVersion:'1',parameters};transformations.push(t);for(const item of series)if(t.inputIds.some(id=>item.inputIds.includes(id)))item.transformationIds.push(t.id);
+ comparison=parameters;
+ }
+ const png=await native.figure();const figureId=await add('figure','image/png','.png',png);
+ project.name=title.trim();project.catalogExchange={...copy(context),sources:copy(sources),lineage:{resultId,previousVersionId:versionId}};
+ const projectId=await add('project','application/json','.json',X.enc.encode(JSON.stringify(project)));
+ const manifest={format:'ms-analysis-exchange',schemaVersion:'1.0.0',kind:'result',packageId:uid(),createdAt:new Date().toISOString(),producer:{app:'ms-generator',version:APP_VERSION},catalog:copy(context.catalog),requiredFeatures:[],inputs,files:descriptors,extensions:copy(context.extensions||{}),selectionReceipt:copy(context.receipt),result:{resultId,versionId,previousVersionId,derivedFrom:null,title:title.trim(),analysisType,editor:{app:'ms-generator',version:APP_VERSION},status:'exploratory-unvalidated',usedInputIds:used,method:{id:analysisType,version:'1',definition:'Spectrum visualization and optional comparison of individual Catalog TXT inputs. No inference of experimental replication.',parameters:{normalization:project.checks.normalize?'base-peak-relative-display':'none-applied-by-editor',comparison,figureSettings:copy(project.fields),figureChecks:copy(project.checks),datasets:project.spectra.map(s=>({datasetId:s.id,seriesId:s.catalogSeriesId,inputId:s.catalogInputId,visible:s.visible!==false}))}},transformations,series,photodepletion:null,artifacts:{figureFileIds:[figureId],tables,project:{fileId:projectId,editor:'ms-generator',formatId:'ms-generator-project',formatVersion:'2',datasetBindings:project.spectra.map(s=>({datasetId:s.id,inputIds:[s.catalogInputId]}))}},limitations:[...new Set(['Exploratory figure; scientific interpretation has not been independently reviewed.','All datasets retained in the editable project are declared inputs; visibility and comparison selection are recorded separately.',...limitations])],extensions:copy(context.resultExtensions||{})}};
+ files.set('manifest.json',X.enc.encode(JSON.stringify(manifest,null,2)));await X.validate(files);const blob=X.zip(files);X.assert(blob.size<=X.MAX_TOTAL,'Result package exceeds size limit.');return {blob,manifest,project};
+}
+function el(tag,text,parent){const n=document.createElement(tag);if(text)n.textContent=text;if(parent)parent.append(n);return n;}
+const style=el('style');style.textContent='#catalogExchangePanel label{display:block;margin:12px 0 4px} #catalogExchangePanel label input,#catalogExchangePanel label select{display:block;width:100%;margin-top:4px} #catalogExchangePanel button{display:block;width:100%;margin:6px 0} #catalogExchangePanel p{line-height:1.5}';document.head.append(style);
+const panel=el('details');panel.id='catalogExchangePanel';panel.className='project-panel';el('summary','MS Catalog · file packages',panel);el('p','Open a Catalog ZIP selection or result. Each TXT remains separate. Returning a result downloads a ZIP; import it in the Catalog to save it there.',panel);
+const file=el('input',null,panel);file.type='file';file.accept='.zip,application/zip';file.setAttribute('aria-label','Catalog exchange ZIP');const review=el('div',null,panel),open=el('button','Open reviewed package',panel);open.type='button';open.disabled=true;
+const titleLabel=el('label','Result title',panel),title=el('input',null,titleLabel);title.type='text';title.value=native.capture().name;title.maxLength=160;
+const typeLabel=el('label','Analysis type',panel),type=el('select',null,typeLabel);for(const [value,label]of [['spectrum-figure','Spectrum figure'],['spectrum-comparison','Spectrum comparison']]){const o=el('option',label,type);o.value=value;}
+const exportButton=el('button','Download new result version',panel);exportButton.type='button';const retry=el('button','Download same version again',panel);retry.type='button';retry.disabled=true;const status=el('p',null,panel);status.setAttribute('role','status');
+let pending=null,last=null,busy=false;
+function download(result){const url=URL.createObjectURL(result.blob),a=el('a');a.href=url;a.download='ms-generator-'+result.manifest.result.versionId+'.zip';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+async function run(work){if(busy)return;busy=true;const main=document.querySelector('main'),wasInert=main?.inert;if(main)main.inert=true;for(const e of [file,open,exportButton,retry])e.disabled=true;status.textContent='Working…';try{await work();}catch(e){status.textContent=e.message;}finally{if(main)main.inert=wasInert;busy=false;file.disabled=false;open.disabled=!pending;exportButton.disabled=false;retry.disabled=!last;}}
+file.addEventListener('change',()=>run(async()=>{pending=null;review.replaceChildren();const chosen=file.files[0];if(!chosen)return;pending=await prepare(chosen);el('p',`Study: ${pending.manifest.catalog.study.name} · ${pending.manifest.inputs.length} individual TXT files`,review);for(const input of pending.manifest.inputs)el('p',`${input.spectrum.name} · ${input.experiment.name} · ID ${input.inputId} · intensity: ${input.intensity.state}`,review);status.textContent='Package verified locally. Review inputs, then open. Existing saved projects are kept.';}));
+open.addEventListener('click',()=>run(async()=>{if(!pending)return;if(!confirm('Replace the current editor contents with this reviewed Catalog package? Save current edits first.')){status.textContent='Opening cancelled.';return;}native.open(pending.project);title.value=pending.manifest.result?.title||pending.project.name;type.value=pending.manifest.result?.analysisType||'spectrum-figure';last=null;status.textContent='Opened locally. Original TXT files and source identities are retained.';}));
+exportButton.addEventListener('click',()=>run(async()=>{last=await createResult(title.value,type.value);download(last);native.setContext(last.project.catalogExchange);status.textContent='Result ZIP downloaded. Import it in MS Catalog to save this version. Use “same version” to retry without creating another version.';}));
+retry.addEventListener('click',()=>{if(last)download(last);});
+window.MSCatalogIntegration={prepare,createResult,checkProject};
+if(window.MSWorkspaceMenu)MSWorkspaceMenu.mount(panel,'catalog');else document.body.append(panel);
+})();

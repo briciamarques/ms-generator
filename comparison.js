@@ -141,6 +141,14 @@ var SpectrumComparison = (() => {
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     });
   }
-  return { buildRows, formatIntensity, matrix, serialize, init, refresh };
+  function exportState() {
+    if (!active) return null;
+    return { spectra: syncSources(), mode: el('comparisonMode').value,
+      tolerance: Number(el('comparisonTolerance').value), unit: el('comparisonUnit').value,
+      minimumIntensity: Number(el('comparisonMinimumIntensity').value), intensityUnit: el('comparisonIntensityUnit').value };
+  }
+  function exportSelection() { return [...selection]; }
+  function restoreSelection(saved) { selection = new Map(Array.isArray(saved) ? saved.filter(item => Array.isArray(item) && typeof item[0] === 'string' && typeof item[1] === 'boolean') : []); refresh(); }
+  return { buildRows, formatIntensity, matrix, serialize, init, refresh, exportState, exportSelection, restoreSelection };
 })();
 if (typeof module !== 'undefined') module.exports = SpectrumComparison;

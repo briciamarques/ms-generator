@@ -2793,7 +2793,7 @@
       const decimals = getMzDecimals();
       const threshold = Number($("threshold").value) || 0;
       const data = spectra.flatMap((spectrum, index) => makePeakTrace(spectrum, index, spectra.length, decimals, threshold));
-      const preservedRanges = options.preserveRanges ? captureCurrentAxisRanges() : null;
+      const preservedRanges = options.axisRanges || (options.preserveRanges ? captureCurrentAxisRanges() : null);
       const layout = buildLayout(spectra, threshold, decimals);
       applyAxisRanges(layout, preservedRanges);
       updateCalculatedOutput();
@@ -4412,6 +4412,8 @@
       refreshProjectList();
     }
 
+    let catalogExchangeContext = null;
+
     function projectFromForm(name, id = "") {
       const fields = {};
       const checks = {};
@@ -4427,6 +4429,8 @@
         name,
         fields,
         checks,
+        catalogComparisonSelection: SpectrumComparison.exportSelection?.() || null,
+        catalogExchange: catalogExchangeContext ? JSON.parse(JSON.stringify(catalogExchangeContext)) : null,
         spectrumSchemaVersion: 2,
         spectra: spectrumSlots.map(slot => ({ ...slot })),
         activeSpectrumId,
@@ -4438,11 +4442,13 @@
     }
 
     function applyProject(project, statusMessage) {
+      catalogExchangeContext = project.catalogExchange ? JSON.parse(JSON.stringify(project.catalogExchange)) : null;
       // Older projects retain their original axis ticks.
       $("yTickStep").value = "";
       $("yTickMax").value = "";
       $("mzLabelDistance").value = "3";
       loadProjectSpectra(project);
+      SpectrumComparison.restoreSelection?.(project.catalogComparisonSelection);
       Object.entries(project.fields || {}).forEach(([id, value]) => {
         const element = $(id);
         if (!element || element.type === "file" || id === "previewExport") return;
@@ -4484,7 +4490,7 @@
       updateProjectButtons();
       // Unit and spectrum migrations remain in memory until the user saves.
       clearComplianceResults();
-      renderPlot(statusMessage || t("projectLoaded")(project.name || t("newProject")));
+      renderPlot(statusMessage || t("projectLoaded")(project.name || t("newProject")), { axisRanges: project.catalogAxisRanges || null });
     }
 
     function projectWithCopiedSettings(current, source, settingIds) {
@@ -5043,6 +5049,29 @@
     updateCalculatedOutput();
     updateStyleSpecsText();
     SpectrumComparison.init();
+    window.MSGeneratorCatalogNative = {
+      capture: () => ({ ...projectFromForm($("projectName").value || "My spectrum figure"), catalogAxisRanges: captureCurrentAxisRanges() }),
+      open: project => { applyProject(project, "Catalog package opened locally"); SpectrumComparison.restoreSelection?.(project.catalogComparisonSelection); },
+      slot: defaultSpectrumSlot,
+      parse: parseSpectrum,
+      allowedFields: () => [...document.querySelectorAll("input, textarea, select")].filter(e => e.id && !e.closest(".project-panel") && e.type !== "file").map(e => e.id),
+      setContext: context => { catalogExchangeContext = JSON.parse(JSON.stringify(context)); },
+      comparison: () => SpectrumComparison.exportState(),
+      figure: async () => {
+        clearTimeout(plotInputTimer);
+        const started = Date.now();
+        while (plotRenderBusy || pendingPlotRender) {
+          if (Date.now() - started > 20000) throw new Error("Figure is still rendering. Try again.");
+          await new Promise(resolve => setTimeout(resolve, 25));
+        }
+        if (!getSpectra().length) throw new Error("Show at least one spectrum to export a figure.");
+        await renderPlotNow(undefined, { preserveRanges: true });
+        const size = getPublicationSize();
+        if (size.outputWidth * size.outputHeight > 40000000) throw new Error("Reduce export dimensions below 40 megapixels for a Catalog package.");
+        const url = await Plotly.toImage("plot", { format: "png", width: size.baseWidth, height: size.baseHeight, scale: size.scale });
+        return Uint8Array.from(atob(url.split(",")[1]), c => c.charCodeAt(0));
+      }
+    };
     window.MSCloudAdapter = {
       getCurrentProject: () => projectFromForm($("projectName").value || "My spectrum figure"),
       loadProject: project => {
@@ -5060,5 +5089,7 @@
   <script defer src="/vendor/supabase-2.117.3.js"></script>
   <script defer src="/cloud-presets.js" data-cloud-site="ms-generator"></script>
   <script defer src="/cloud-workspace.js" data-cloud-site="ms-generator"></script>
+  <script defer src="catalog-exchange.js"></script>
+  <script defer src="catalog-integration.js"></script>
 </body>
 </html>
