@@ -1,6 +1,13 @@
 const {chromium}=require('playwright');
 const fs=require('fs'),path=require('path'),http=require('http'),assert=require('assert/strict');
-const server=http.createServer((q,r)=>{const js=q.url==='/comparison.js';r.setHeader('Content-Type',js?'application/javascript':'text/html');r.end(fs.readFileSync(path.join(__dirname,js?'../comparison.js':'../index.html')));});
+const root=path.resolve(__dirname,'..');
+const server=http.createServer((q,r)=>{
+ const pathname=new URL(q.url,'http://localhost').pathname;
+ if(pathname==='/cloud-config.json'){r.setHeader('Content-Type','application/json');r.end('{}');return;}
+ const file=path.resolve(root,'.'+(pathname==='/'?'/index.html':pathname));
+ if(!file.startsWith(root+path.sep)||!fs.existsSync(file)||!fs.statSync(file).isFile()){r.writeHead(404);r.end();return;}
+ r.setHeader('Content-Type',file.endsWith('.js')?'application/javascript':'text/html; charset=utf-8');r.end(fs.readFileSync(file));
+});
 (async()=>{await new Promise(r=>server.listen(0,'127.0.0.1',r));const b=await chromium.launch({channel:'msedge',headless:true});try{
 const p=await b.newPage({viewport:{width:1440,height:900}});const errors=[];p.on('pageerror',e=>errors.push(e.message));
 await p.goto('http://127.0.0.1:'+server.address().port);await p.waitForFunction(()=>document.getElementById('plot')._fullLayout);

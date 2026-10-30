@@ -56,6 +56,7 @@ var SpectrumComparison = (() => {
   let active = false, selection = new Map(), data = [], page = 0;
   const pageSize = 200;
   const el = id => document.getElementById(id);
+  const numericInput = id => el(id).value.trim() === '' ? NaN : Number(el(id).value);
   function sources() { return spectrumSlots.map(slot => ({ ...slot, ...parseSpectrum(slot.data) })); }
   function syncSources() {
     const spectra = sources();
@@ -78,8 +79,8 @@ var SpectrumComparison = (() => {
     const spectra = syncSources();
     const table = el('comparisonTable'); table.replaceChildren();
     data = [];
-    const tolerance = el('comparisonTolerance').value.trim() === '' ? NaN : Number(el('comparisonTolerance').value);
-    const minimumIntensity = el('comparisonMinimumIntensity').value.trim() === '' ? NaN : Number(el('comparisonMinimumIntensity').value);
+    const tolerance = numericInput('comparisonTolerance');
+    const minimumIntensity = numericInput('comparisonMinimumIntensity');
     const intensityUnit = el('comparisonIntensityUnit').value;
     el('comparisonMinimumIntensity').max = intensityUnit === 'relative' ? '100' : '';
     let rows;
@@ -144,8 +145,8 @@ var SpectrumComparison = (() => {
   function exportState() {
     if (!active) return null;
     return { spectra: syncSources(), mode: el('comparisonMode').value,
-      tolerance: Number(el('comparisonTolerance').value), unit: el('comparisonUnit').value,
-      minimumIntensity: Number(el('comparisonMinimumIntensity').value), intensityUnit: el('comparisonIntensityUnit').value };
+      tolerance: numericInput('comparisonTolerance'), unit: el('comparisonUnit').value,
+      minimumIntensity: numericInput('comparisonMinimumIntensity'), intensityUnit: el('comparisonIntensityUnit').value };
   }
   function exportSelection() { return [...selection]; }
   function restoreSelection(saved) { selection = new Map(Array.isArray(saved) ? saved.filter(item => Array.isArray(item) && typeof item[0] === 'string' && typeof item[1] === 'boolean') : []); refresh(); }

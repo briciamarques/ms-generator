@@ -1,13 +1,17 @@
 const {chromium}=require('playwright');const fs=require('fs'),path=require('path'),http=require('http'),assert=require('assert/strict');
 const root=path.resolve(__dirname,'..');const server=http.createServer((q,r)=>{const pathname=decodeURIComponent(new URL(q.url,'http://local').pathname),file=path.join(root,pathname==='/'?'index.html':pathname);if(!file.startsWith(root)||!fs.existsSync(file)||fs.statSync(file).isDirectory()){r.statusCode=404;r.end();return;}r.setHeader('Content-Type',file.endsWith('.js')?'text/javascript':file.endsWith('.json')?'application/json':'text/html');r.end(fs.readFileSync(file));});
 (async()=>{await new Promise(r=>server.listen(0,'127.0.0.1',r));const browser=await chromium.launch({channel:'msedge',headless:true});try{const page=await browser.newPage({viewport:{width:1440,height:1000}});const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());await page.goto('http://127.0.0.1:'+server.address().port);await page.waitForFunction(()=>window.MSCatalogIntegration&&document.getElementById('plot')._fullLayout);
+await page.locator('#fileInput').setInputFiles({name:'synthetic.txt',mimeType:'text/plain',buffer:Buffer.from('200 10\n286.1 20\n377.1 50\n')});
+await page.waitForFunction(()=>activeSpectrum().data==='200 10\n286.1 20\n377.1 50\n');
 const outcome=await page.evaluate(async()=>{
  const X=MSCatalogExchange,uuid=()=>crypto.randomUUID(),snap=name=>({id:uuid(),revision:1,name,metadata:{}}),exp=snap('Same RAW experiment'),mol=snap('Molecule'),files=new Map(),inputs=[],descriptors=[];
  for(let i=0;i<2;i++){const spectrum=snap('same-name.txt'),bytes=X.enc.encode('200\t10\r\n286.1\t'+(i?35:20)+'\r\n377.1\t50\r\n'),id=uuid(),hash=await X.sha(bytes),f={id,path:'inputs/'+spectrum.id+'.txt',name:'same-name.txt',role:'input-txt',mime:'text/plain',size:bytes.length,sha256:hash};files.set(f.path,bytes);descriptors.push(f);inputs.push({inputId:spectrum.id,spectrum,experiment:exp,molecule:mol,txtFileId:id,storedTxt:{sha256:hash,size:bytes.length,mime:'text/plain'},columns:['mz','intensity'],rawSource:{name:'same.raw',sha256:null,size:null},processing:{origin:'imported',recipe:null,evidence:'Synthetic test'},intensity:{state:'unknown',unit:null,normalizationAppliedOnImport:'none',priorNormalization:null,scale:null,evidence:'Synthetic test; earlier processing unknown'},scanStatistics:null,replication:{status:'unreviewed',experimentalUnit:null,replicateGroupId:null,review:null},assignments:[],extensions:{test:'preserved'}});}
  const m={format:'ms-analysis-exchange',schemaVersion:'1.0.0',kind:'selection',packageId:uuid(),createdAt:new Date().toISOString(),producer:{app:'ms-catalog',version:'1.0.0'},catalog:{instanceId:X.INSTANCE,study:snap('Test study')},requiredFeatures:[],inputs,files:descriptors,extensions:{test:'opaque preserved'},selection:{intendedEditor:'ms-generator',orderedInputIds:inputs.map(i=>i.inputId).reverse(),reviewedAt:new Date().toISOString(),notes:'two averages; not replicates'}};files.set('manifest.json',X.enc.encode(JSON.stringify(m)));await X.validate(files);
+ document.getElementById("minMz").value="900";document.getElementById("maxMz").value="1000";
  window.testSelection=m;window.testSelectionFiles=files;const imported=await MSCatalogIntegration.prepare(X.zip(files));MSGeneratorCatalogNative.open(imported.project);
- await new Promise(r=>setTimeout(r,400));const first=await MSCatalogIntegration.createResult('First result','spectrum-figure');window.testFirst=first;
- const reopened=await MSCatalogIntegration.prepare(first.blob);MSGeneratorCatalogNative.open(reopened.project);await new Promise(r=>setTimeout(r,300));const second=await MSCatalogIntegration.createResult('Second result','spectrum-figure');window.testSecond=second;
+ if(document.getElementById("minMz").value!==""||document.getElementById("maxMz").value!=="")throw Error("New selection inherited unrelated m/z limits");
+ await new Promise(r=>setTimeout(r,400));document.getElementById("minMz").value="190";document.getElementById("maxMz").value="400";await renderPlotNow();const first=await MSCatalogIntegration.createResult('First result','spectrum-figure');window.testFirst=first;
+ const reopened=await MSCatalogIntegration.prepare(first.blob);MSGeneratorCatalogNative.open(reopened.project);if(document.getElementById("minMz").value!=="190"||document.getElementById("maxMz").value!=="400")throw Error("Result lost saved axis limits");await new Promise(r=>setTimeout(r,300));const second=await MSCatalogIntegration.createResult('Second result','spectrum-figure');window.testSecond=second;
  const core=await import('/vendor/catalog/exchange-core.js');core.verifyReceipt(first.manifest,m);core.verifyReceipt(second.manifest,m);
  const reopenedFiles=await X.unzip(second.blob);const original=inputs.map(i=>[i.inputId,descriptors.find(d=>d.id===i.txtFileId).sha256]);
  const mutated=new Map(files);mutated.set(descriptors[0].path,X.enc.encode('200 999'));let rejects=false;try{await X.validate(mutated);}catch{rejects=true;}
@@ -31,5 +35,12 @@ const deflated=fs.readFileSync(path.join(__dirname,'fixtures/catalog/generator-s
 assert.equal(await page.evaluate(async b64=>(await MSCatalogIntegration.prepare(new Blob([Uint8Array.from(atob(b64),c=>c.charCodeAt(0))]))).project.spectra.length,deflated),2);
 if(process.env.CATALOG_SCREENSHOT)await page.screenshot({path:process.env.CATALOG_SCREENSHOT,fullPage:true});
 await page.locator('#toggleComparison').click();const comparison=await page.evaluate(async()=>{const result=await MSCatalogIntegration.createResult('Compare','spectrum-comparison');return result.manifest.result;});assert.equal(comparison.artifacts.tables.length,2);
+for(const control of ['comparisonTolerance','comparisonMinimumIntensity']){
+ await page.locator('#'+control).fill('');
+ const rejected=await page.evaluate(async()=>{try{await MSCatalogIntegration.createResult('Invalid comparison','spectrum-comparison');return false;}catch(e){return /non-negative/.test(e.message);}});
+ assert(rejected,'Catalog export must reject a blank '+control+' just like the comparison table');
+ await page.locator('#'+control).fill('0');
+}
+assert.deepEqual(errors,[]);
 console.log('PASS: official v1 selection with identical filenames/same RAW; original bytes/hash/provenance; native open/export/reopen; immutable version lineage; PNG and traceable CSV; comparison; corrupted input rejection; no browser errors.');
 }finally{await browser.close();server.close();}})().catch(e=>{console.error(e);server.close();process.exitCode=1;});
